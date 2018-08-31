@@ -4,10 +4,24 @@ An API for managing rich, versioned, multilingual content.
 
 ## Setup
 
-* Add & enable the bundle. This isn't (yet?) available on packagist, so you'll have to add our satis repo:
+* Add & enable the bundle. This isn't (yet?) available on packagist, so you'll have to add our satis repository to your `composer.json`:
+
+```json
+{
+    "type": "project",
+    "repositories": [{
+      "type": "composer",
+      "url": "https://useful.tuimedia.com:8082"
+    }],
+    "require": {
+      "…": "etc"
+    }
+}
+```
+
+Then:
 
 ```sh
-composer config repositories.tui composer https://useful.tuimedia.com:8082
 composer require tuimedia/page-bundle@dev-develop # Obviously don't get develop once stable releases are ready
 ```
 

@@ -5,6 +5,7 @@ namespace Tui\PageBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass="Tui\PageBundle\Repository\PageDataRepository")
@@ -16,6 +17,7 @@ class PageData
      * @ORM\Id()
      * @ORM\GeneratedValue(strategy="UUID")
      * @ORM\Column(type="guid")
+     * @Groups({"pageList"})
      */
     private $revision;
 

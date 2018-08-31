@@ -3,6 +3,7 @@
 namespace Tui\PageBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass="Tui\PageBundle\Repository\PageRepository")
@@ -16,22 +17,26 @@ class Page
      * @ORM\Id()
      * @ORM\GeneratedValue(strategy="UUID")
      * @ORM\Column(type="guid")
+     * @Groups({"pageList"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=128)
+     * @Groups({"pageList"})
      */
     private $slug;
 
     /**
      * @ORM\Column(type="string", length=32)
+     * @Groups({"pageList"})
      */
     private $state;
 
     /**
      * @ORM\ManyToOne(targetEntity="Tui\PageBundle\Entity\PageData", inversedBy="pages")
      * @ORM\JoinColumn(nullable=false, referencedColumnName="revision")
+     * @Groups({"pageList"})
      */
     private $pageData;
 
