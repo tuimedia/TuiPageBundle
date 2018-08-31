@@ -6,7 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="Tui\PageBundle\Repository\PageRepository")
- * @ORM\Table(name="page",
+ * @ORM\Table(name="tuipagebundle_page",
  *   uniqueConstraints={@ORM\UniqueConstraint(name="state_slug_unique",columns={"state","slug"})}
  * )
  */

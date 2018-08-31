@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="Tui\PageBundle\Repository\PageDataRepository")
- * @ORM\Table(name="page_data")
+ * @ORM\Table(name="tuipagebundle_page_data")
  */
 class PageData
 {

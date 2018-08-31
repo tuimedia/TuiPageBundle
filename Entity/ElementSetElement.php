@@ -6,7 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="Tui\PageBundle\Repository\ElementSetElementRepository")
- * @ORM\Table(name="element_set_element")
+ * @ORM\Table(name="tuipagebundle_element_set_element")
  */
 class ElementSetElement
 {

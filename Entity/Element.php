@@ -6,7 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="Tui\PageBundle\Repository\ElementRepository")
- * @ORM\Table(name="element")
+ * @ORM\Table(name="tuipagebundle_element")
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="type", type="string")
  */
