@@ -5,7 +5,9 @@ namespace Tui\PageBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 use Tui\PageBundle\Repository\PageRepository;
+use Tui\PageBundle\Entity;
 
 class PageController extends AbstractController
 {
@@ -21,6 +23,20 @@ class PageController extends AbstractController
         ]);
 
         return $this->json($pages, 200, [], [
+            'groups' => ['pageList'],
+        ]);
+    }
+
+    /**
+     * @Route("/pages", methods={"POST"}, name="tui_page_create")
+     */
+    public function create(Request $request, SerializerInterface $serializer, PageRepository $pageRepository)
+    {
+        $page = $serializer->deserialize($request->getContent(), Entity\Page::class, 'json', [
+            'groups' => ['pageCreate'],
+        ]);
+
+        return $this->json($page, 200, [], [
             'groups' => ['pageList'],
         ]);
     }

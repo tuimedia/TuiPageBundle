@@ -23,20 +23,20 @@ class Page
 
     /**
      * @ORM\Column(type="string", length=128)
-     * @Groups({"pageList"})
+     * @Groups({"pageList", "pageCreate"})
      */
     private $slug;
 
     /**
      * @ORM\Column(type="string", length=32)
-     * @Groups({"pageList"})
+     * @Groups({"pageList", "pageCreate"})
      */
     private $state;
 
     /**
      * @ORM\ManyToOne(targetEntity="Tui\PageBundle\Entity\PageData", inversedBy="pages")
      * @ORM\JoinColumn(nullable=false, referencedColumnName="revision")
-     * @Groups({"pageList"})
+     * @Groups({"pageList", "pageCreate"})
      */
     private $pageData;
 

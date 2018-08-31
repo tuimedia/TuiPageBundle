@@ -23,6 +23,7 @@ class PageData
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"pageCreate"})
      */
     private $pageRef;
 
@@ -38,17 +39,20 @@ class PageData
 
     /**
      * @ORM\Column(type="json_array")
+     * @Groups({"pageCreate"})
      */
     private $content = [];
 
     /**
      * @ORM\Column(type="json_array")
+     * @Groups({"pageCreate"})
      */
     private $metadata;
 
     /**
      * @ORM\ManyToOne(targetEntity="Tui\PageBundle\Entity\ElementSet")
      * @ORM\JoinColumn(onDelete="SET NULL")
+     * @Groups({"pageCreate"})
      */
     private $elementSet;
 
@@ -61,6 +65,7 @@ class PageData
     public function __construct()
     {
         $this->pages = new ArrayCollection();
+        $this->created = date_create_immutable();
     }
 
     public function getPageRef(): ?string
