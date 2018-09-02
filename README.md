@@ -34,6 +34,15 @@ page_controllers:
     prefix: api
 ```
 
+* Enable the property-info component in `config\packages\framework.yaml`:
+
+```yaml
+framework:
+    #…
+    property_info:
+        enabled: true
+```
+
 * Run migrations to add the required tables:
 
 ```sh
