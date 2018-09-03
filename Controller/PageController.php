@@ -36,8 +36,10 @@ class PageController extends AbstractController
             'groups' => ['pageCreate'],
         ]);
 
+        $pageRepository->save($page);
+
         return $this->json($page, 200, [], [
-            'groups' => ['pageList'],
+            'groups' => ['pageList', 'pageCreate'],
         ]);
     }
 }

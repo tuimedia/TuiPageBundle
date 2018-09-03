@@ -22,6 +22,12 @@ class PageData
     private $revision;
 
     /**
+     * @ORM\Column(type="guid", nullable=true)
+     * @Groups({"pageList"})
+     */
+    private $previousRevision;
+
+    /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"pageCreate"})
      */
@@ -29,13 +35,9 @@ class PageData
 
     /**
      * @ORM\Column(type="datetime_immutable")
+     * @Groups({"pageList"})
      */
     private $created;
-
-    /**
-     * @ORM\Column(type="guid", nullable=true)
-     */
-    private $previousRevision;
 
     /**
      * @ORM\Column(type="json_array")
