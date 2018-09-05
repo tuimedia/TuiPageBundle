@@ -38,4 +38,21 @@ class ElementController extends AbstractController
             'groups' => ['elementGet'],
         ]);
     }
+
+    /**
+     * @Route("/elements/{id}", methods={"PUT"}, name="tui_page_element_edit")
+     */
+    public function edit(Request $request, SerializerInterface $serializer, ElementRepository $elementRepository, Entity\Element $element)
+    {
+        $element = $serializer->deserialize($request->getContent(), Entity\Element::class, 'json', [
+            'groups' => ['elementCreate'],
+            'object_to_populate' => $element,
+        ]);
+
+        $elementRepository->save($element);
+
+        return $this->json($element, 200, [], [
+            'groups' => ['elementGet'],
+        ]);
+    }
 }
