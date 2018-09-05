@@ -25,7 +25,6 @@ class ElementSet
      * @ORM\OneToMany(targetEntity="Tui\PageBundle\Entity\ElementSetElement", mappedBy="elementSet", cascade={"persist"})
      * @ORM\JoinColumn(onDelete="CASCADE")
      * @ORM\OrderBy({"displayOrder" = "ASC"})
-     * @Groups({"pageCreate", "pageGet"})
      * @Assert\Valid
      */
     private $elementSetElements;
