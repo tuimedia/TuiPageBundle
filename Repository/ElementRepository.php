@@ -26,6 +26,13 @@ class ElementRepository extends ServiceEntityRepository
         $em->flush();
     }
 
+    public function delete(Element $element)
+    {
+        $em = $this->getEntityManager();
+        $em->remove($element);
+        $em->flush();
+    }
+
 //    /**
 //     * @return Element[] Returns an array of Element objects
 //     */

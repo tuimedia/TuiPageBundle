@@ -4,6 +4,7 @@ namespace Tui\PageBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Tui\PageBundle\Repository\ElementRepository;
@@ -54,5 +55,15 @@ class ElementController extends AbstractController
         return $this->json($element, 200, [], [
             'groups' => ['elementGet'],
         ]);
+    }
+
+    /**
+     * @Route("/elements/{id}", methods={"DELETE"}, name="tui_page_element_delete")
+     */
+    public function delete(ElementRepository $elementRepository, Entity\Element $element)
+    {
+        $elementRepository->delete($element);
+
+        return new Response(null, 204);
     }
 }
