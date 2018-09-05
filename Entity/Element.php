@@ -18,14 +18,14 @@ class Element
      * @ORM\Id()
      * @ORM\GeneratedValue(strategy="UUID")
      * @ORM\Column(type="guid")
-     * @Groups({"pageGet", "pageCreate", "elementList", "elementGet", "elementCreate"})
+     * @Groups({"pageGet", "pageCreate", "pageList", "elementList", "elementGet", "elementCreate"})
      * @Assert\Uuid
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"pageGet", "pageCreate", "elementList", "elementCreate", "elementGet"})
+     * @Groups({"pageGet", "pageCreate", "pageList", "elementList", "elementCreate", "elementGet"})
      * @Assert\Type(type="string")
      * @Assert\Length(max=255, maxMessage="Title cannot be longer than {{ limit }} characters")
      * @Assert\NotBlank
@@ -34,7 +34,7 @@ class Element
 
     /**
      * @ORM\Column(type="string", length=128, unique=true)
-     * @Groups({"pageGet", "pageCreate", "elementList", "elementCreate", "elementGet"})
+     * @Groups({"pageGet", "pageCreate", "pageList", "elementList", "elementCreate", "elementGet"})
      * @Assert\Type(type="string")
      * @Assert\Length(max=128, maxMessage="Slug cannot be longer than {{ limit }} characters")
      * @Assert\Regex(pattern="/^[\w-]+$/", message="URL path (slug) can only contain lower case letters, numbers and dashes.")
@@ -44,7 +44,7 @@ class Element
 
     /**
      * @ORM\Column(type="boolean")
-     * @Groups({"pageGet", "pageCreate", "elementList", "elementCreate", "elementGet"})
+     * @Groups({"pageGet", "pageCreate", "pageList", "elementList", "elementCreate", "elementGet"})
      * @Assert\Type(type="bool")
      * @Assert\NotNull
      */
@@ -52,7 +52,7 @@ class Element
 
     /**
      * @ORM\Column(type="string", length=128)
-     * @Groups({"pageGet", "pageCreate", "elementList", "elementCreate", "elementGet"})
+     * @Groups({"pageGet", "pageCreate", "pageList", "elementList", "elementCreate", "elementGet"})
      * @Assert\Type(type="string")
      * @Assert\Length(max=128, maxMessage="Element type cannot be longer than {{ limit }} characters")
      */

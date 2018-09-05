@@ -50,7 +50,7 @@ class PageData
 
     /**
      * @ORM\Column(type="json_array")
-     * @Groups({"pageCreate", "pageGet"})
+     * @Groups({"pageList", "pageCreate", "pageGet"})
      */
     private $metadata;
 
@@ -62,7 +62,7 @@ class PageData
     private $elementSet;
 
     /**
-     * @Groups({"pageCreate", "pageGet"})
+     * @Groups({"pageList", "pageCreate", "pageGet"})
      * @var Element[] Array of Elements
      */
     private $elements;
