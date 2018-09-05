@@ -5,6 +5,7 @@ namespace Tui\PageBundle\Repository;
 use Tui\PageBundle\Entity\Element;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * @method Element|null find($id, $lockMode = null, $lockVersion = null)
@@ -14,8 +15,11 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  */
 class ElementRepository extends ServiceEntityRepository
 {
-    public function __construct(RegistryInterface $registry)
+    protected $validator;
+
+    public function __construct(RegistryInterface $registry, ValidatorInterface $validator)
     {
+        $this->validator = $validator;
         parent::__construct($registry, Element::class);
     }
 
@@ -31,6 +35,11 @@ class ElementRepository extends ServiceEntityRepository
         $em = $this->getEntityManager();
         $em->remove($element);
         $em->flush();
+    }
+
+    public function validate(Element $element)
+    {
+        return $this->validator->validate($element);
     }
 
 //    /**

@@ -44,6 +44,11 @@ class PageController extends AbstractController
         $elements = $elementRepository->findById($elementIds);
         $page->getPageData()->setElements($elements);
 
+        $errors = $pageRepository->validate($page);
+        if (count($errors) > 0) {
+            return $this->json($errors, 422);
+        }
+
         $pageRepository->save($page);
 
         return $this->json($page, 200, [], [
@@ -121,6 +126,12 @@ class PageController extends AbstractController
             $page->getPageData()->setElements($elements);
         } else {
             $page->getPageData()->setElementSet($previousElementSet);
+        }
+
+        // Validation…
+        $errors = $pageRepository->validate($page);
+        if (count($errors) > 0) {
+            return $this->json($errors, 422);
         }
 
         // Done - save and return

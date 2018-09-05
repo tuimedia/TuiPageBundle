@@ -3,11 +3,14 @@
 namespace Tui\PageBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass="Tui\PageBundle\Repository\ElementRepository")
  * @ORM\Table(name="tuipagebundle_element")
+ * @UniqueEntity("slug")
  */
 class Element
 {
@@ -16,30 +19,42 @@ class Element
      * @ORM\GeneratedValue(strategy="UUID")
      * @ORM\Column(type="guid")
      * @Groups({"pageGet", "pageCreate", "elementList", "elementGet", "elementCreate"})
+     * @Assert\Uuid
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"pageGet", "pageCreate", "elementList", "elementCreate", "elementGet"})
+     * @Assert\Type(type="string")
+     * @Assert\Length(max=255, maxMessage="Title cannot be longer than {{ limit }} characters")
+     * @Assert\NotBlank
      */
     private $title;
 
     /**
      * @ORM\Column(type="string", length=128, unique=true)
      * @Groups({"pageGet", "pageCreate", "elementList", "elementCreate", "elementGet"})
+     * @Assert\Type(type="string")
+     * @Assert\Length(max=128, maxMessage="Slug cannot be longer than {{ limit }} characters")
+     * @Assert\Regex(pattern="/^[\w-]+$/", message="URL path (slug) can only contain lower case letters, numbers and dashes.")
+     * @Assert\NotBlank
      */
     private $slug;
 
     /**
      * @ORM\Column(type="boolean")
      * @Groups({"pageGet", "pageCreate", "elementList", "elementCreate", "elementGet"})
+     * @Assert\Type(type="bool")
+     * @Assert\NotNull
      */
     private $hidden = false;
 
     /**
      * @ORM\Column(type="string", length=128)
      * @Groups({"pageGet", "pageCreate", "elementList", "elementCreate", "elementGet"})
+     * @Assert\Type(type="string")
+     * @Assert\Length(max=128, maxMessage="Element type cannot be longer than {{ limit }} characters")
      */
     protected $type = 'element';
 

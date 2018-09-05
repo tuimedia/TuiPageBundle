@@ -50,7 +50,10 @@ bin/console make:migration
 bin/console doctrine:migrations:migrate
 ```
 
+* Set up access control on your `security.yml`. You can dump the available routes with `bin/console debug:router | grep tui_page`. This is not done by the bundle because roles and permissions may vary between apps.
+
 ## Notes
 
 * adding/removing elements from a page is versioned, but renaming/deleting elements is not
 * slugs are globally unique
+* For the pageData `pageRef` property to be useful, it should be unique for all versions of a single document. You can use a UUID or the page slug, it doesn't matter.
