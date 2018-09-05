@@ -6,9 +6,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
-use Tui\PageBundle\Repository\PageRepository;
-use Tui\PageBundle\Repository\ElementRepository;
 use Tui\PageBundle\Entity;
+use Tui\PageBundle\Repository\ElementRepository;
+use Tui\PageBundle\Repository\PageDataRepository;
+use Tui\PageBundle\Repository\PageRepository;
 
 class PageController extends AbstractController
 {
@@ -73,6 +74,34 @@ class PageController extends AbstractController
         }
 
         return $this->json($page, 200, [], [
+            'groups' => ['pageGet'],
+        ]);
+    }
+
+    /**
+     * @Route("/pages/{slug}/history", methods={"GET"}, name="tui_page_history")
+     */
+    public function history(Request $request, SerializerInterface $serializer, PageRepository $pageRepository, PageDataRepository $pageDataRepository, $slug)
+    {
+        $state = $request->query->get('state', 'live');
+
+        $page = $pageRepository->findOneBy([
+            'slug' => $slug,
+            'state' => $state,
+        ]);
+
+        if (!$page) {
+            throw $this->createNotFoundException('No such page in state ' . $state);
+        }
+
+        $pageRef = $page->getPageData()->getPageRef();
+        $refs = $pageDataRepository->findBy([
+            'pageRef' => $pageRef,
+        ], [
+            'created' => 'DESC',
+        ]);
+
+        return $this->json($refs, 200, [], [
             'groups' => ['pageGet'],
         ]);
     }
