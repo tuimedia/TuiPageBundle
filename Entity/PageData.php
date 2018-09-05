@@ -37,6 +37,14 @@ class PageData
     private $pageRef;
 
     /**
+     * @ORM\Column(type="string", length=32)
+     * @Groups({"pageCreate", "pageGet"})
+     * @Assert\Type(type="string")
+     * @Assert\Length(max=32)
+     */
+    private $defaultLanguage = 'en';
+
+    /**
      * @ORM\Column(type="datetime_immutable")
      * @Groups({"pageList", "pageGet"})
      */
@@ -44,12 +52,14 @@ class PageData
 
     /**
      * @ORM\Column(type="json_array")
+     * @Assert\Type(type="array")
      * @Groups({"pageCreate", "pageGet"})
      */
     private $content = [];
 
     /**
      * @ORM\Column(type="json_array")
+     * @Assert\Type(type="array")
      * @Groups({"pageList", "pageCreate", "pageGet"})
      */
     private $metadata;
@@ -87,6 +97,18 @@ class PageData
     public function setPageRef(string $pageRef): self
     {
         $this->pageRef = $pageRef;
+
+        return $this;
+    }
+
+    public function getDefaultLanguage(): ?string
+    {
+        return $this->defaultLanguage;
+    }
+
+    public function setDefaultLanguage(string $defaultLanguage): self
+    {
+        $this->defaultLanguage = $defaultLanguage;
 
         return $this;
     }
