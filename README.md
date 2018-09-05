@@ -50,26 +50,6 @@ bin/console make:migration
 bin/console doctrine:migrations:migrate
 ```
 
-* If you want your pages to have tags, create an entity that extends `Tui\PageBundle\Entity\Element`, for example:
-
-```php
-<?php
-
-namespace App\Entity;
-
-use Tui\PageBundle\Entity\Element;
-
-/**
- * @ORM\Entity()
- */
-class Keyword extends Element
-{
-    protected $type = 'keyword';
-}
-```
-
-**Note:** beware of adding non-nullable properties, because the inheritance type is single-table and so *all* your element types will require that property.
-
 ## Notes
 
 * adding/removing elements from a page is versioned, but renaming/deleting elements is not

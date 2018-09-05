@@ -17,46 +17,51 @@ class PageData
      * @ORM\Id()
      * @ORM\GeneratedValue(strategy="UUID")
      * @ORM\Column(type="guid")
-     * @Groups({"pageList"})
+     * @Groups({"pageList", "pageGet"})
      */
     private $revision;
 
     /**
      * @ORM\Column(type="guid", nullable=true)
-     * @Groups({"pageList"})
+     * @Groups({"pageList", "pageGet"})
      */
     private $previousRevision;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"pageCreate"})
+     * @Groups({"pageCreate", "pageGet"})
      */
     private $pageRef;
 
     /**
      * @ORM\Column(type="datetime_immutable")
-     * @Groups({"pageList"})
+     * @Groups({"pageList", "pageGet"})
      */
     private $created;
 
     /**
      * @ORM\Column(type="json_array")
-     * @Groups({"pageCreate"})
+     * @Groups({"pageCreate", "pageGet"})
      */
     private $content = [];
 
     /**
      * @ORM\Column(type="json_array")
-     * @Groups({"pageCreate"})
+     * @Groups({"pageCreate", "pageGet"})
      */
     private $metadata;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Tui\PageBundle\Entity\ElementSet")
+     * @ORM\ManyToOne(targetEntity="Tui\PageBundle\Entity\ElementSet", cascade={"persist"})
      * @ORM\JoinColumn(onDelete="SET NULL")
-     * @Groups({"pageCreate"})
      */
     private $elementSet;
+
+    /**
+     * @Groups({"pageCreate", "pageGet"})
+     * @var Element[] Array of Elements
+     */
+    private $elements;
 
     /**
      * @ORM\OneToMany(targetEntity="Tui\PageBundle\Entity\Page", mappedBy="pageData")
@@ -149,9 +154,43 @@ class PageData
 
     public function setElementSet(?ElementSet $elementSet): self
     {
+        // Make elementsets immutable by duplicating them on set
         $this->elementSet = $elementSet;
 
         return $this;
+    }
+
+    public function setElements(?array $elements): self
+    {
+        if (!count($elements)) {
+            $this->setElementSet(null);
+            return $this;
+        }
+
+        $elementSet = new ElementSet();
+        foreach ($elements as $element) {
+            $elementSetElement = new ElementSetElement();
+            $elementSetElement->setElement($element);
+            $elementSet->addElementSetElement($elementSetElement);
+        }
+
+        $this->setElementSet($elementSet);
+        $this->getElements(); // Refresh internal list
+
+        return $this;
+    }
+    
+    public function getElements(): array
+    {
+        if (!$this->elementSet) {
+            return [];
+        }
+
+        $this->elements = array_map(function ($elementSetElement) {
+            return $elementSetElement->getElement();
+        }, $this->elementSet->getElementSetElements()->toArray());
+
+        return $this->elements;
     }
 
     /**

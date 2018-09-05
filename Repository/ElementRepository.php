@@ -19,6 +19,13 @@ class ElementRepository extends ServiceEntityRepository
         parent::__construct($registry, Element::class);
     }
 
+    public function save(Element $element)
+    {
+        $em = $this->getEntityManager();
+        $em->persist($element);
+        $em->flush();
+    }
+
 //    /**
 //     * @return Element[] Returns an array of Element objects
 //     */

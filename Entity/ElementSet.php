@@ -5,6 +5,7 @@ namespace Tui\PageBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass="Tui\PageBundle\Repository\ElementSetRepository")
@@ -20,15 +21,16 @@ class ElementSet
     private $id;
 
     /**
-     * @ORM\OneToMany(targetEntity="Tui\PageBundle\Entity\ElementSetElement", mappedBy="elementSet")
+     * @ORM\OneToMany(targetEntity="Tui\PageBundle\Entity\ElementSetElement", mappedBy="elementSet", cascade={"persist"})
      * @ORM\JoinColumn(onDelete="CASCADE")
      * @ORM\OrderBy({"displayOrder" = "ASC"})
+     * @Groups({"pageCreate", "pageGet"})
      */
     private $elementSetElements;
 
-    public function __construct()
+    public function __construct(?ArrayCollection $elementSetElements = null)
     {
-        $this->elementSetElements = new ArrayCollection();
+        $this->elementSetElements = $elementSetElements ?: new ArrayCollection();
     }
 
     public function getId(): ?string

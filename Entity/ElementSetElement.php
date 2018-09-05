@@ -3,6 +3,7 @@
 namespace Tui\PageBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass="Tui\PageBundle\Repository\ElementSetElementRepository")
@@ -24,8 +25,9 @@ class ElementSetElement
     private $elementSet;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Tui\PageBundle\Entity\Element")
+     * @ORM\ManyToOne(targetEntity="Tui\PageBundle\Entity\Element", cascade={"persist"})
      * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
+     * @Groups({"pageCreate", "pageGet"})
      */
     private $element;
 

@@ -17,26 +17,26 @@ class Page
      * @ORM\Id()
      * @ORM\GeneratedValue(strategy="UUID")
      * @ORM\Column(type="guid")
-     * @Groups({"pageList"})
+     * @Groups({"pageList", "pageGet"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=128)
-     * @Groups({"pageList", "pageCreate"})
+     * @Groups({"pageList", "pageCreate", "pageGet"})
      */
     private $slug;
 
     /**
      * @ORM\Column(type="string", length=32)
-     * @Groups({"pageList", "pageCreate"})
+     * @Groups({"pageList", "pageCreate", "pageGet"})
      */
     private $state;
 
     /**
      * @ORM\ManyToOne(targetEntity="Tui\PageBundle\Entity\PageData", inversedBy="pages", cascade={"persist"})
      * @ORM\JoinColumn(nullable=false, referencedColumnName="revision")
-     * @Groups({"pageList", "pageCreate"})
+     * @Groups({"pageList", "pageCreate", "pageGet"})
      */
     private $pageData;
 
