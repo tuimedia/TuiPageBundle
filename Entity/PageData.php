@@ -45,6 +45,13 @@ class PageData
     private $defaultLanguage = 'en';
 
     /**
+     * @ORM\Column(type="array")
+     * @Groups({"pageCreate", "pageGet"})
+     * @Assert\Type(type="array")
+     */
+    private $availableLanguages = ['en'];
+
+    /**
      * @ORM\Column(type="datetime_immutable")
      * @Groups({"pageList", "pageGet"})
      */
@@ -113,6 +120,18 @@ class PageData
         return $this;
     }
 
+    public function getAvailableLanguages()
+    {
+        return $this->availableLanguages;
+    }
+
+    public function setAvailableLanguages(array $availableLanguages): self
+    {
+        $this->availableLanguages = $availableLanguages;
+
+        return $this;
+    }
+
     public function getCreated(): ?\DateTimeImmutable
     {
         return $this->created;
@@ -154,7 +173,7 @@ class PageData
         return $this->content;
     }
 
-    public function setContent($content): self
+    public function setContent(array $content): self
     {
         $this->content = $content;
 

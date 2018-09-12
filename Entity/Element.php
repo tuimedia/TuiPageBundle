@@ -24,13 +24,12 @@ class Element
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="json_array")
      * @Groups({"pageGet", "pageCreate", "pageList", "elementList", "elementCreate", "elementGet"})
-     * @Assert\Type(type="string")
-     * @Assert\Length(max=255, maxMessage="Title cannot be longer than {{ limit }} characters")
+     * @Assert\Type(type="array")
      * @Assert\NotBlank
      */
-    private $title;
+    private $title = [];
 
     /**
      * @ORM\Column(type="string", length=128, unique=true)
@@ -70,12 +69,12 @@ class Element
         return $this;
     }
 
-    public function getTitle(): ?string
+    public function getTitle(): array
     {
         return $this->title;
     }
 
-    public function setTitle(string $title): self
+    public function setTitle(array $title): self
     {
         $this->title = $title;
 
