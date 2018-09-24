@@ -6,6 +6,9 @@ use Tui\PageBundle\Entity\Page;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Opis\JsonSchema\{
+    Validator, ValidationResult, ValidationError, Schema
+};
 
 /**
  * @method Page|null find($id, $lockMode = null, $lockVersion = null)
@@ -35,6 +38,42 @@ class PageRepository extends ServiceEntityRepository
         $em = $this->getEntityManager();
         $em->remove($page);
         $em->flush();
+    }
+
+    public function schemaValidate($data)
+    {
+        $data = json_decode($data);
+        $schema = Schema::fromJsonString(file_get_contents(__DIR__.'/../Resources/schema/tui-page.schema.json'));
+
+        $validator = new Validator();
+
+        /** @var ValidationResult $result */
+        $result = $validator->schemaValidation($data, $schema);
+
+        if ($result->isValid()) {
+            return false;
+        }
+
+        $error = [
+            'type' => 'https://tuimedia.com/tui-page/errors/validation',
+            'title' => 'Validation failed',
+            'detail' => '',
+            'errors' => [],
+        ];
+
+        $error['errors'] = array_map(function ($error) {
+            return [
+                'path' => implode('.', $error->dataPointer()),
+                'keyword' => $error->keyword(),
+                'keywordArgs' => $error->keywordArgs(),
+            ];
+        }, $result->getErrors());
+
+        $error['detail'] = implode('. ', array_map(function ($error) {
+            return sprintf('[%s]: invalid %s.', $error['path'], $error['keyword']);
+        }, $error['errors']));
+
+        return $error;
     }
 
     public function validate(Page $page)

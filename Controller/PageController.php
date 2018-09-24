@@ -34,6 +34,12 @@ class PageController extends AbstractController
      */
     public function create(Request $request, SerializerInterface $serializer, PageRepository $pageRepository, ElementRepository $elementRepository)
     {
+        // Validate input
+        $errors = $pageRepository->schemaValidate($request->getContent());
+        if ($errors) {
+            return $this->json($errors);
+        }
+
         $page = $serializer->deserialize($request->getContent(), Entity\Page::class, 'json', [
             'groups' => ['pageCreate'],
         ]);
@@ -123,6 +129,12 @@ class PageController extends AbstractController
 
         if (!$page) {
             throw $this->createNotFoundException('No such page in state ' . $state);
+        }
+
+        // Validate input
+        $errors = $pageRepository->schemaValidate($request->getContent());
+        if ($errors) {
+            return $this->json($errors);
         }
 
         // Get previous elements

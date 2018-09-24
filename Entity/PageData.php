@@ -29,10 +29,10 @@ class PageData
     private $previousRevision;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=128)
      * @Groups({"pageCreate", "pageGet"})
      * @Assert\Type(type="string")
-     * @Assert\Length(max=255)
+     * @Assert\Length(max=128)
      */
     private $pageRef;
 

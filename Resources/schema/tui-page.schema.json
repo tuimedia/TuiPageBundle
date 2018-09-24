@@ -1,0 +1,212 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://api.example.com/tui-page.schema.json#",
+  "type": "object",
+  "properties": {
+    "id": {
+      "title": "Unique page UUID",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "minLength": 36,
+      "maxLength": 36
+    },
+    "slug": {
+      "title": "Unique URL component identifying this page. Lowercase word characters and hyphens only",
+      "type": "string",
+      "pattern": "^[\\w-]+$",
+      "maxLength": 128,
+      "minLength": 1
+    },
+    "state": {
+      "title": "Page namespace name (e.g. 'live')",
+      "type": "string",
+      "pattern": "^[\\w-]+$",
+      "maxLength": 32,
+      "minLength": 1
+    },
+    "pageData": {
+      "$ref": "#/definitions/pageData"
+    }
+  },
+  "required": [
+    "id",
+    "slug",
+    "state",
+    "pageData"
+  ],
+  "additionalProperties": false,
+  "definitions": {
+    "block": {
+      "title": "Content block",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Block id",
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 36
+        },
+        "component": {
+          "title": "Block component name",
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 128
+        },
+        "languages": {
+          "title": "Languages this block is available in",
+          "type": "array",
+          "items": { "$ref": "#/definitions/languageList" }
+        },
+        "styles": {
+          "title": "Custom styles for this block",
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "id",
+        "component",
+        "languages"
+      ],
+      "additionalProperties": true
+    },
+    "blocks": {
+      "title": "Block definitions",
+      "type": "object",
+      "minProperties": 1,
+      "patternProperties": {
+        ".*": { "$ref": "#/definitions/block" }
+      }
+    },
+    "content": {
+      "title": "Content block",
+      "type": "object",
+      "properties": {
+        "blocks": {
+          "$ref": "#/definitions/blocks"
+        },
+        "layout": {
+          "$ref": "#/definitions/layout"
+        },
+        "langData": {
+          "$ref": "#/definitions/langData"
+        }
+      },
+      "additionalProperties": false
+    },
+    "element": {
+      "title": "Element",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Unique element UUID",
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "maxLength": 36,
+          "minLength": 36
+        }
+      },
+      "additionalProperties": false
+    },
+    "langData": {
+      "title": "Language data",
+      "type": "object"
+    },
+    "languageList": {
+      "title": "Language code",
+      "type": "string",
+      "maxLength": 32,
+      "minLength": 2
+    },
+    "layout": {
+      "title": "Layout rows",
+      "type": "array",
+      "minItems": 1,
+      "contains": {
+        "$ref": "#/definitions/layoutRow"
+      }
+    },
+    "layoutRow": {
+      "title": "Layout row",
+      "type": "object",
+      "properties": {
+        "blocks": {
+          "title": "Block ids",
+          "type": "array"
+        },
+        "component": {
+          "title": "Row component",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "pageData": {
+      "properties": {
+        "pageRef": {
+          "title": "String unique to all versions of this document (usually the same as slug)",
+          "type": "string",
+          "maxLength": 128,
+          "minLength": 1
+        },
+        "revision": {
+          "title": "Unique UUID for this object",
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "maxLength": 36,
+          "minLength": 36
+        },
+        "previousRevision": {
+          "title": "UUID of previous revision",
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "maxLength": 36,
+          "minLength": 36
+        },
+        "defaultLanguage": {
+          "title": "Language code for the default/fallback language",
+          "type": "string",
+          "maxLength": 32,
+          "minLength": 2
+        },
+        "availableLanguages": {
+          "title": "Array of language codes present in the page",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/languageList"
+          }
+        },
+        "metadata": {
+          "title": "Language-independent page metadata (may be overwritten by content.langData)",
+          "type": "object",
+          "additionalProperties": true
+        },
+        "elements": {
+          "title": "Related elements (e.g. tags)",
+          "type": "array",
+          "inclusiveMinimum": 0,
+          "items": {
+            "$ref": "#/definitions/element"
+          }
+        },
+        "created": {
+          "type": "string",
+          "format": "datetime"
+        },
+        "content": {
+          "$ref": "#/definitions/content"
+        }
+      },
+      "required": [
+        "pageRef",
+        "defaultLanguage",
+        "availableLanguages",
+        "content",
+        "metadata",
+        "elements"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
