@@ -192,7 +192,7 @@
         },
         "created": {
           "type": "string",
-          "format": "datetime"
+          "format": "date-time"
         },
         "content": {
           "$ref": "#/definitions/content"
