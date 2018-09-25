@@ -19,10 +19,12 @@ use Opis\JsonSchema\{
 class PageRepository extends ServiceEntityRepository
 {
     protected $validator;
+    protected $schemas;
 
-    public function __construct(RegistryInterface $registry, ValidatorInterface $validator)
+    public function __construct(RegistryInterface $registry, ValidatorInterface $validator, $componentSchemas)
     {
         $this->validator = $validator;
+        $this->schemas = $componentSchemas;
         parent::__construct($registry, Page::class);
     }
 
@@ -50,10 +52,56 @@ class PageRepository extends ServiceEntityRepository
         /** @var ValidationResult $result */
         $result = $validator->schemaValidation($data, $schema);
 
-        if ($result->isValid()) {
-            return false;
+        if ($result->hasErrors()) {
+            return $this->formatSchemaErrors($result->getErrors());
         }
 
+        // Validate components against their schemas
+        foreach ($data->pageData->content->blocks as $block) {
+            if (!array_key_exists($block->component, $this->schemas)) {
+                throw new \Exception(sprintf('No schema configured for component "%s"', $block->component));
+            }
+
+            foreach ($block->languages as $language) {
+                // Build the block by overlaying default language data and this language data
+                $resolvedBlock = $this->resolveBlockForLanguage($data, $block->id, $language);
+
+                // Check resulting object against the component schema
+                $schema = Schema::fromJsonString(file_get_contents($this->schemas[$resolvedBlock->component]));
+                $result = $validator->schemaValidation($resolvedBlock, $schema);
+                if ($result->hasErrors()) {
+                    return $this->formatSchemaErrors($result->getErrors(), $resolvedBlock, $language);
+                }
+            }
+        }
+    }
+
+    private function resolveBlockForLanguage($data, $id, $language)
+    {
+        $resolvedBlock = new \stdClass;
+        $defaultLang = $data->pageData->defaultLanguage;
+
+        foreach ($data->pageData->content->blocks->$id as $prop => $value) {
+            $resolvedBlock->$prop = $value;
+        }
+
+        foreach ($data->pageData->content->langData->$defaultLang->$id as $prop => $value) {
+            $resolvedBlock->$prop = $value;
+        }
+
+        if ($language === $defaultLang) {
+            return $resolvedBlock;
+        }
+
+        foreach ($data->pageData->content->langData->$language->$id as $prop => $value) {
+            $resolvedBlock->$prop = $value;
+        }
+
+        return $resolvedBlock;
+    }
+
+    private function formatSchemaErrors($errors, $block = null, $language = null)
+    {
         $error = [
             'type' => 'https://tuimedia.com/tui-page/errors/validation',
             'title' => 'Validation failed',
@@ -61,13 +109,18 @@ class PageRepository extends ServiceEntityRepository
             'errors' => [],
         ];
 
+        if ($block) {
+            $error['detail'] = sprintf('Component %s in language %s: ', $block->id, $language);
+            $error['component'] = $block;
+        }
+
         $error['errors'] = array_map(function ($error) {
             return [
                 'path' => implode('.', $error->dataPointer()),
                 'keyword' => $error->keyword(),
                 'keywordArgs' => $error->keywordArgs(),
             ];
-        }, $result->getErrors());
+        }, $errors);
 
         $error['detail'] = implode('. ', array_map(function ($error) {
             return sprintf('[%s]: invalid %s.', $error['path'], $error['keyword']);
