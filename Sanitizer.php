@@ -53,7 +53,7 @@ class Sanitizer
             }
         }
 
-        return $rawContent;
+        return json_encode($data);
     }
 
     /**
