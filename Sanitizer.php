@@ -76,13 +76,25 @@ class Sanitizer
                 $data->$prop = $this->stringCleanRecursive($value);
             }
         }
+
+        return $data;
     }
 
     private function cleanBySchemaRecursive($data, $schema)
     {
         foreach ($data as $prop => $value) {
-            // TODO: implement patternProperties support
             $propSchema = $schema->properties->{$prop} ?? null;
+
+            // Look for a matching patternProperty schema
+            if (!$propSchema && isset($schema->patternProperties)) {
+                foreach ($schema->patternProperties as $pattern => $schema) {
+                    $pattern = sprintf('!%s!', str_replace('!', '\!', $pattern));
+                    if (preg_match($pattern, $prop)) {
+                        $propSchema = $schema;
+                        break;
+                    }
+                }
+            }
 
             // Don't touch undescribed props (e.g. custom component props)
             if (!$propSchema) {
