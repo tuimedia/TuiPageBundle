@@ -44,7 +44,7 @@ class PageSchema
                 $resolvedBlock = $this->resolveBlockForLanguage($data, $block->id, $language);
 
                 // Check resulting object against the component schema
-                $schema = Schema::fromJsonString(file_get_contents($this->schemas[$resolvedBlock->component]));
+                $schema = $this->getSchemaObjectForBlock($resolvedBlock);
                 $result = $validator->schemaValidation($resolvedBlock, $schema);
                 if ($result->hasErrors()) {
                     return $this->formatSchemaErrors($result->getErrors(), $resolvedBlock, $language);
@@ -53,7 +53,7 @@ class PageSchema
         }
     }
 
-    public function getSchemaForBlock(\stdClass $block)
+    public function getSchemaObjectForBlock(\stdClass $block)
     {
         if (!array_key_exists($block->component, $this->schemas)) {
             return $this->formatSchemaErrors([
@@ -61,7 +61,18 @@ class PageSchema
             ]);
         }
 
-        $schema = Schema::fromJsonString(file_get_contents($this->schemas[$block->component]));
+        if (!file_exists($this->schemas[$block->component])) {
+            throw new \Exception(vsprintf('%s Component schema not found', [
+                $block->component,
+            ]));
+        }
+
+        return Schema::fromJsonString(file_get_contents($this->schemas[$block->component]));
+    }
+
+    public function getSchemaForBlock(\stdClass $block)
+    {
+        $schema = $this->getSchemaObjectForBlock($block);
 
         return $this->deepResolveSchema($schema->resolve());
     }

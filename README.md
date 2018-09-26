@@ -68,9 +68,11 @@ tui_page:
 * For the pageData `pageRef` property to be useful, it should be unique for all versions of a single document. You can use a UUID or the page slug, it doesn't matter.
 * Theoretically you can reuse a block in multiple rows, but don't - the frontend renders the block id as the DOM ID attribute so that browsers can scroll to a piece of content, so you'll end up with invalid HTML and that functionality will break.
 
-## Schema
+## Filtering & Validation
 
 Page input (add/edit) is validated through a JSON Schema defined in `Resources/schema/tui-page.schema.json`. There are *also* Symfony validation rules applied as `@Assert/…` annotations on the `Element`, `Page` and `PageData` entities.
 
-Filtering and sanitising of content will be applied to input. You'll need to configure a schema for each of your custom blocks - but this isn't done yet. Metadata cannot contain any HTML - it will be filtered out.
+Validation and sanitising of your content blocks is applied using the JSON Schema files from your configuration. Make sure you define all the properties on your content components EXCEPT for those already checked by the overall page schema: `id`, `component`, `languages` and `styles`.
+
+The default string filter removes all HTML (it uses `filter_var()` under the hood, so it might also remove HTML characters like < entirely). If you need HTML, set a `"contentMediaType": "text/html"` property in the schema for the desired field and an anti-xss filter will be applied instead.
 

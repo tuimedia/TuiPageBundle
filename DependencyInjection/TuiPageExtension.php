@@ -18,12 +18,6 @@ class TuiPageExtension extends ConfigurableExtension
 
         $schemas = [];
         foreach ($mergedConfig['components'] as $component => $componentConfig) {
-            if (!file_exists($componentConfig['schema'])) {
-                throw new \Exception(vsprintf('%s Component schema not found: %s', [
-                    $component,
-                    $componentConfig['schema'],
-                ]));
-            }
             $schemas[$component] = $componentConfig['schema'];
         }
 
