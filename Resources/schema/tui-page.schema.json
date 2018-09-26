@@ -142,6 +142,7 @@
       }
     },
     "pageData": {
+      "type": "object",
       "properties": {
         "pageRef": {
           "title": "String unique to all versions of this document (usually the same as slug)",

@@ -7,6 +7,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Tui\PageBundle\Entity;
+use Tui\PageBundle\Sanitizer;
+use Tui\PageBundle\PageSchema;
 use Tui\PageBundle\Repository\ElementRepository;
 use Tui\PageBundle\Repository\PageDataRepository;
 use Tui\PageBundle\Repository\PageRepository;
@@ -32,15 +34,18 @@ class PageController extends AbstractController
     /**
      * @Route("/pages", methods={"POST"}, name="tui_page_create")
      */
-    public function create(Request $request, SerializerInterface $serializer, PageRepository $pageRepository, ElementRepository $elementRepository)
+    public function create(Request $request, SerializerInterface $serializer, PageRepository $pageRepository, ElementRepository $elementRepository, Sanitizer $sanitizer, PageSchema $pageSchema)
     {
         // Validate input
-        $errors = $pageRepository->schemaValidate($request->getContent());
+        $errors = $pageSchema->validate($request->getContent());
         if ($errors) {
             return $this->json($errors);
         }
 
-        $page = $serializer->deserialize($request->getContent(), Entity\Page::class, 'json', [
+        // Filter input
+        $filteredContent = $sanitizer->cleanPage($request->getContent());
+
+        $page = $serializer->deserialize($filteredContent, Entity\Page::class, 'json', [
             'groups' => ['pageCreate'],
         ]);
 
@@ -115,7 +120,7 @@ class PageController extends AbstractController
     /**
      * @Route("/pages/{slug}", methods={"PUT"}, name="tui_page_edit")
      */
-    public function edit(Request $request, SerializerInterface $serializer, PageRepository $pageRepository, ElementRepository $elementRepository, $slug)
+    public function edit(Request $request, SerializerInterface $serializer, PageRepository $pageRepository, ElementRepository $elementRepository, Sanitizer $sanitizer, PageSchema $pageSchema, $slug)
     {
         $state = $request->query->get('state');
         if (!$state) {
@@ -132,10 +137,13 @@ class PageController extends AbstractController
         }
 
         // Validate input
-        $errors = $pageRepository->schemaValidate($request->getContent());
+        $errors = $pageSchema->validate($request->getContent());
         if ($errors) {
             return $this->json($errors);
         }
+
+        // Filter input
+        $filteredContent = $sanitizer->cleanPage($request->getContent());
 
         // Get previous elements
         $previousElementIds = array_map(function ($element) {
@@ -150,7 +158,7 @@ class PageController extends AbstractController
         $page->setPageData($pageData);
 
         // Apply the request data
-        $serializer->deserialize($request->getContent(), Entity\Page::class, 'json', [
+        $serializer->deserialize($filteredContent, Entity\Page::class, 'json', [
             'groups' => ['pageCreate'],
             'object_to_populate' => $page,
         ]);
