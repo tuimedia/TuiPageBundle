@@ -43,7 +43,7 @@ class Page
     private $state;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Tui\PageBundle\Entity\PageData", inversedBy="pages", cascade={"persist"})
+     * @ORM\ManyToOne(targetEntity="Tui\PageBundle\Entity\PageData", inversedBy="pages", cascade={"persist"}, fetch="EAGER")
      * @ORM\JoinColumn(nullable=false, referencedColumnName="revision")
      * @Groups({"pageList", "pageCreate", "pageGet"})
      * @Assert\Valid
