@@ -40,7 +40,7 @@ class AbstractPage implements PageInterface
     protected $state;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Tui\PageBundle\Entity\AbstractPageData", cascade={"persist"}, fetch="EAGER")
+     * @ORM\ManyToOne(targetEntity="Tui\PageBundle\Entity\PageDataInterface", cascade={"persist"}, fetch="EAGER")
      * @ORM\JoinColumn(nullable=false, referencedColumnName="revision")
      * @Groups({"pageList", "pageCreate", "pageGet"})
      * @Assert\Valid

@@ -49,7 +49,12 @@ framework:
 namespace App\Entity;
 
 use Tui\PageBundle\Entity\AbstractPage;
+use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * @ORM\Entity(repositoryClass="Tui\PageBundle\Repository\PageRepository")
+ * @ORM\Table(name="page")
+ */
 class Page extends AbstractPage {}
 ```
 
@@ -75,7 +80,7 @@ doctrine:
     orm:
         # ...
         resolve_target_entities:
-            Tui\PageBundle\Entity\AbstractPageData: App\Entity\PageData
+            Tui\PageBundle\Entity\PageDataInterface: App\Entity\PageData
 ```
 
 * Run migrations to add the required tables:
