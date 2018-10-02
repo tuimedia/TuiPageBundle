@@ -94,20 +94,6 @@
       },
       "additionalProperties": false
     },
-    "element": {
-      "title": "Element",
-      "type": "object",
-      "properties": {
-        "id": {
-          "title": "Unique element UUID",
-          "type": "string",
-          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
-          "maxLength": 36,
-          "minLength": 36
-        }
-      },
-      "additionalProperties": false
-    },
     "langData": {
       "title": "Language data",
       "type": "object"
@@ -183,14 +169,6 @@
           "type": "object",
           "additionalProperties": true
         },
-        "elements": {
-          "title": "Related elements (e.g. tags)",
-          "type": "array",
-          "inclusiveMinimum": 0,
-          "items": {
-            "$ref": "#/definitions/element"
-          }
-        },
         "created": {
           "type": "string",
           "format": "date-time"
@@ -204,8 +182,7 @@
         "defaultLanguage",
         "availableLanguages",
         "content",
-        "metadata",
-        "elements"
+        "metadata"
       ],
       "additionalProperties": false
     }

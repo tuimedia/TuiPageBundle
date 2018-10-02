@@ -43,6 +43,41 @@ framework:
         enabled: true
 ```
 
+* Create an entity that extends `Tui\PageBundle\Entity\AbstractPage`:
+
+```php
+namespace App\Entity;
+
+use Tui\PageBundle\Entity\AbstractPage;
+
+class Page extends AbstractPage {}
+```
+
+* Create an entity that extends `Tui\PageBundle\Entity\AbstractPageData`:
+
+```php
+namespace App\Entity;
+
+use Tui\PageBundle\Entity\AbstractPageData;
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * @ORM\Entity(repositoryClass="Tui\PageBundle\Repository\PageDataRepository")
+ * @ORM\Table(name="page_data")
+ */
+class PageData extends AbstractPageData {}
+```
+
+* Configure the Page/PageData relation override:
+
+```yaml
+doctrine:
+    orm:
+        # ...
+        resolve_target_entities:
+            Tui\PageBundle\Entity\AbstractPageData: App\Entity\PageData
+```
+
 * Run migrations to add the required tables:
 
 ```sh
@@ -50,10 +85,12 @@ bin/console make:migration
 bin/console doctrine:migrations:migrate
 ```
 
-* Define your component JSON schemas in `config\packages\tui_page.yaml`. These are used for validation and filtering:
+* Configure the repositories to your page & pageData classes, and define your component JSON schemas in `config\packages\tui_page.yaml`. These are used for validation and filtering:
 
 ```yaml
 tui_page:
+  page_class: App\Entity\Page
+  page_data_class: App\Entity\PageData
   components:
     PageImage: '%kernel.project_root%/public/schemas/PageImage.schema.json'
     PageText: '%kernel.project_root%/public/schemas/PageText.schema.json'
@@ -63,14 +100,13 @@ tui_page:
 
 ## Notes
 
-* adding/removing elements from a page is versioned, but renaming/deleting elements is not
 * slugs are globally unique
 * For the pageData `pageRef` property to be useful, it should be unique for all versions of a single document. You can use a UUID or the page slug, it doesn't matter.
 * Theoretically you can reuse a block in multiple rows, but don't - the frontend renders the block id as the DOM ID attribute so that browsers can scroll to a piece of content, so you'll end up with invalid HTML and that functionality will break.
 
 ## Filtering & Validation
 
-Page input (add/edit) is validated through a JSON Schema defined in `Resources/schema/tui-page.schema.json`. There are *also* Symfony validation rules applied as `@Assert/…` annotations on the `Element`, `Page` and `PageData` entities.
+Page input (add/edit) is validated through a JSON Schema defined in `Resources/schema/tui-page.schema.json`. There are *also* Symfony validation rules applied as `@Assert/…` annotations on the `Page` and `PageData` entities.
 
 Validation and sanitising of your content blocks is applied using the JSON Schema files from your configuration. Make sure you define all the properties on your content components EXCEPT for those already checked by the overall page schema: `id`, `component`, `languages` and `styles`.
 

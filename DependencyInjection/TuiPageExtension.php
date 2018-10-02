@@ -22,5 +22,7 @@ class TuiPageExtension extends ConfigurableExtension
         }
 
         $container->setParameter('tui_page.schemas', $schemas);
+        $container->setParameter('tui_page.page_class', $mergedConfig['page_class']);
+        $container->setParameter('tui_page.page_data_class', $mergedConfig['page_data_class']);
     }
 }

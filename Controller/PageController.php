@@ -9,12 +9,17 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Tui\PageBundle\Entity;
 use Tui\PageBundle\Sanitizer;
 use Tui\PageBundle\PageSchema;
-use Tui\PageBundle\Repository\ElementRepository;
 use Tui\PageBundle\Repository\PageDataRepository;
 use Tui\PageBundle\Repository\PageRepository;
 
 class PageController extends AbstractController
 {
+    protected $pageClass;
+
+    function __construct(string $pageClass) {
+        $this->pageClass = $pageClass;
+    }
+
     /**
      * @Route("/pages", methods={"GET"}, name="tui_page_index")
      */
@@ -34,7 +39,7 @@ class PageController extends AbstractController
     /**
      * @Route("/pages", methods={"POST"}, name="tui_page_create")
      */
-    public function create(Request $request, SerializerInterface $serializer, PageRepository $pageRepository, ElementRepository $elementRepository, Sanitizer $sanitizer, PageSchema $pageSchema)
+    public function create(Request $request, SerializerInterface $serializer, PageRepository $pageRepository, Sanitizer $sanitizer, PageSchema $pageSchema)
     {
         // Validate input
         $errors = $pageSchema->validate($request->getContent());
@@ -45,16 +50,9 @@ class PageController extends AbstractController
         // Filter input
         $filteredContent = $sanitizer->cleanPage($request->getContent());
 
-        $page = $serializer->deserialize($filteredContent, Entity\Page::class, 'json', [
+        $page = $serializer->deserialize($filteredContent, $this->pageClass, 'json', [
             'groups' => ['pageCreate'],
         ]);
-
-        $elementIds = array_map(function ($element) {
-            return $element->getId();
-        }, $page->getPageData()->getElements());
-
-        $elements = $elementRepository->findById($elementIds);
-        $page->getPageData()->setElements($elements);
 
         $errors = $pageRepository->validate($page);
         if (count($errors) > 0) {
@@ -120,7 +118,7 @@ class PageController extends AbstractController
     /**
      * @Route("/pages/{slug}", methods={"PUT"}, name="tui_page_edit")
      */
-    public function edit(Request $request, SerializerInterface $serializer, PageRepository $pageRepository, ElementRepository $elementRepository, Sanitizer $sanitizer, PageSchema $pageSchema, $slug)
+    public function edit(Request $request, SerializerInterface $serializer, PageRepository $pageRepository, Sanitizer $sanitizer, PageSchema $pageSchema, $slug)
     {
         $state = $request->query->get('state');
         if (!$state) {
@@ -145,12 +143,6 @@ class PageController extends AbstractController
         // Filter input
         $filteredContent = $sanitizer->cleanPage($request->getContent());
 
-        // Get previous elements
-        $previousElementIds = array_map(function ($element) {
-            return $element->getId();
-        }, $page->getPageData()->getElements());
-        sort($previousElementIds);
-        $previousElementSet = $page->getPageData()->getElementSet();
         $previousRevision = $page->getPageData()->getRevision();
 
         // Create a new revision
@@ -158,24 +150,11 @@ class PageController extends AbstractController
         $page->setPageData($pageData);
 
         // Apply the request data
-        $serializer->deserialize($filteredContent, Entity\Page::class, 'json', [
+        $serializer->deserialize($filteredContent, $this->pageClass, 'json', [
             'groups' => ['pageCreate'],
             'object_to_populate' => $page,
         ]);
         $page->getPageData()->setPreviousRevision($previousRevision);
-
-        // Compare elements and create a new set if there are differences
-        $elementIds = array_map(function ($element) {
-            return $element->getId();
-        }, $page->getPageData()->getElements());
-        sort($elementIds);
-
-        if ($previousElementIds !== $elementIds) {
-            $elements = count($elementIds) ? $elementRepository->findById($elementIds) : [];
-            $page->getPageData()->setElements($elements);
-        } else {
-            $page->getPageData()->setElementSet($previousElementSet);
-        }
 
         // Validation…
         $errors = $pageRepository->validate($page);

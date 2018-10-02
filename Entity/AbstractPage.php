@@ -8,13 +8,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @ORM\Entity(repositoryClass="Tui\PageBundle\Repository\PageRepository")
- * @ORM\Table(name="tuipagebundle_page",
- *   uniqueConstraints={@ORM\UniqueConstraint(name="state_slug_unique",columns={"state","slug"})}
- * )
  * @UniqueEntity(fields={"state", "slug"}, message="A page already exists with that URL path (the combination of state and slug must be unique)")
+ * @ORM\MappedSuperclass
  */
-class Page
+class AbstractPage implements PageInterface
 {
     /**
      * @ORM\Id()
@@ -22,7 +19,7 @@ class Page
      * @ORM\Column(type="guid")
      * @Groups({"pageList", "pageGet"})
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\Column(type="string", length=128)
@@ -32,7 +29,7 @@ class Page
      * @Assert\Regex(pattern="/^[\w-]+$/", message="URL path (slug) can only contain lower case letters, numbers and dashes.")
      * @Assert\NotBlank
      */
-    private $slug;
+    protected $slug;
 
     /**
      * @ORM\Column(type="string", length=32)
@@ -40,15 +37,15 @@ class Page
      * @Assert\Type("string")
      * @Assert\Length(max=32, maxMessage="State must not be longer than {{ limit }} characters")
      */
-    private $state;
+    protected $state;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Tui\PageBundle\Entity\PageData", inversedBy="pages", cascade={"persist"}, fetch="EAGER")
+     * @ORM\ManyToOne(targetEntity="Tui\PageBundle\Entity\AbstractPageData", cascade={"persist"}, fetch="EAGER")
      * @ORM\JoinColumn(nullable=false, referencedColumnName="revision")
      * @Groups({"pageList", "pageCreate", "pageGet"})
      * @Assert\Valid
      */
-    private $pageData;
+    protected $pageData;
 
     public function getId(): ?string
     {
@@ -60,7 +57,7 @@ class Page
         return $this->slug;
     }
 
-    public function setSlug(string $slug): self
+    public function setSlug(string $slug): PageInterface
     {
         $this->slug = $slug;
 
@@ -72,19 +69,19 @@ class Page
         return $this->state;
     }
 
-    public function setState(string $state): self
+    public function setState(string $state): PageInterface
     {
         $this->state = $state;
 
         return $this;
     }
 
-    public function getPageData(): ?PageData
+    public function getPageData(): ?AbstractPageData
     {
         return $this->pageData;
     }
 
-    public function setPageData(?PageData $pageData): self
+    public function setPageData(?AbstractPageData $pageData): PageInterface
     {
         $this->pageData = $pageData;
 
