@@ -17,11 +17,16 @@ class TuiPageExtension extends ConfigurableExtension
         $loader->load('services.yaml');
 
         $schemas = [];
+        $transformers = [];
         foreach ($mergedConfig['components'] as $component => $componentConfig) {
             $schemas[$component] = $componentConfig['schema'];
+            $transformers[$component] = $componentConfig['transformer'];
         }
 
+        $container->setParameter('tui_page.search_hosts', $mergedConfig['search_hosts']);
+        $container->setParameter('tui_page.search_index', $mergedConfig['search_index']);
         $container->setParameter('tui_page.schemas', $schemas);
+        $container->setParameter('tui_page.transformers', $transformers);
         $container->setParameter('tui_page.page_class', $mergedConfig['page_class']);
         $container->setParameter('tui_page.page_data_class', $mergedConfig['page_data_class']);
     }

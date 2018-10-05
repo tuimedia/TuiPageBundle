@@ -2,7 +2,13 @@
 
 An API for managing rich, versioned, multilingual content.
 
-## Setup
+## Requirements
+
+* Symfony 4.1
+* Doctrine ORM
+* ElasticSearch 5 (optional as long as you don't want search)
+
+## Installation
 
 * Add & enable the bundle. This isn't (yet?) available on packagist, so you'll have to add our satis repository to your `composer.json`:
 
@@ -43,6 +49,12 @@ framework:
         enabled: true
 ```
 
+* Set up access control on your `security.yml`. You can dump the available routes with `bin/console debug:router | grep tui_page`. This is not done by the bundle because roles and permissions may vary between apps.
+
+## Setting up the entities
+
+TuiPageBundle uses two Doctrine ORM entities to represent your pages. A `PageData` entity that describes the content of a revision of a page, and a `Page` entity that maps a URL and namespace to a `PageData` revision. The bundle provides two interfaces and abstract versions of these classes. To use them, create concrete representations of the abstract classes in your app, then add them to the bundle configuration. You can use your classes to add extra fields and relations (for instance tags).
+
 * Create an entity that extends `Tui\PageBundle\Entity\AbstractPage`:
 
 ```php
@@ -73,7 +85,7 @@ use Doctrine\ORM\Mapping as ORM;
 class PageData extends AbstractPageData {}
 ```
 
-* Configure the Page/PageData relation override:
+* Configure the Page -> PageData relation override:
 
 ```yaml
 doctrine:
@@ -83,6 +95,14 @@ doctrine:
             Tui\PageBundle\Entity\PageDataInterface: App\Entity\PageData
 ```
 
+* If you name your entities anything other than `App\Entity\Page` and `App\Entity\PageData`, then name them in the configuration:
+
+```yaml
+tui_page:
+  page_class: App\Entity\Page
+  page_data_class: App\Entity\PageData
+```
+
 * Run migrations to add the required tables:
 
 ```sh
@@ -90,18 +110,38 @@ bin/console make:migration
 bin/console doctrine:migrations:migrate
 ```
 
-* Configure the repositories to your page & pageData classes, and define your component JSON schemas in `config\packages\tui_page.yaml`. These are used for validation and filtering:
+
+## Exposing your custom properties in API calls
+
+The advantage of extending the `AbstractPage` and `AbstractPageData` is that you can add your own properties and methods. If you want these to appear in the serialized output of the bundle API calls, annotate the properties or methods you want to serialize with the `@Groups()` annotation. Each kind of view has its own serializer group so you can decide what to show and when.
+
+Available serializer groups:
+
+* `pageList`
+* `pageGet`
+* `pageCreate`
+
+API calls and their serializer groups:
+
+* `GET /pages` - `pageList`
+* `POST /pages` - `pageCreate` (for deserializing), `pageGet` (for the response)
+* `GET /pages/{slug}` - `pageGet`
+* `GET /pages/{slug}/history` - `pageGet`
+* `PUT /pages/{slug}` - `pageCreate` (for deserializing), `pageGet` (for the response)
+
+## Content components
+
+Every content component you create for the frontend should have a JSON Schema file describing its contents. The schema is used by TuiPageBundle to validate and sanitise its content. If you don't define a schema, that component will not be validated or sanitised beyond the required fields, so… define a schema!
 
 ```yaml
 tui_page:
-  page_class: App\Entity\Page
-  page_data_class: App\Entity\PageData
   components:
-    PageImage: '%kernel.project_root%/public/schemas/PageImage.schema.json'
-    PageText: '%kernel.project_root%/public/schemas/PageText.schema.json'
+    PageImage:
+      schema: '%kernel.project_root%/public/schemas/PageImage.schema.json'
+    PageText:
+      schema: '%kernel.project_root%/public/schemas/PageText.schema.json'
 ```
 
-* Set up access control on your `security.yml`. You can dump the available routes with `bin/console debug:router | grep tui_page`. This is not done by the bundle because roles and permissions may vary between apps.
 
 ## Notes
 
