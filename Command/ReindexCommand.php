@@ -11,14 +11,15 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Serializer\SerializerInterface;
 use Tui\PageBundle\Repository\PageRepository;
+use Tui\PageBundle\Search\TranslatedPageFactory;
 use Tui\PageBundle\Search\TranslatedPageIndexFactory;
-use Tui\PageBundle\Search\TranslatedPage;
 
 class ReindexCommand extends Command
 {
     protected static $defaultName = 'pages:reindex';
     private $indexFactory;
     private $logger;
+    private $pageFactory;
     private $pageRepository;
     private $searcher;
     private $serializer;
@@ -29,10 +30,12 @@ class ReindexCommand extends Command
         LoggerInterface $logger,
         ElasticSearcher $searcher,
         PageRepository $pageRepository,
+        TranslatedPageFactory $pageFactory,
         TranslatedPageIndexFactory $indexFactory
     ) {
         $this->indexFactory = $indexFactory;
         $this->logger = $logger;
+        $this->pageFactory = $pageFactory;
         $this->pageRepository = $pageRepository;
         $this->searcher = $searcher;
         $this->serializer = $serializer;
@@ -98,7 +101,7 @@ class ReindexCommand extends Command
                 $page->getSlug(),
             ]));
             foreach ($page->getPageData()->getAvailableLanguages() as $language) {
-                $translatedPage = $this->serializer->normalize(TranslatedPage::fromPage($page, $language));
+                $translatedPage = $this->serializer->normalize($this->pageFactory->createFromPage($page, $language));
                 $this->logger->debug('Translated page: ' . $this->serializer->encode($translatedPage, 'json'));
                 $documentManager->updateOrIndex($this->languageIndex[$language], 'pages', $page->getId(), $translatedPage);
             }

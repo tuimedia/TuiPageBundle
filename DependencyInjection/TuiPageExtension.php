@@ -20,7 +20,6 @@ class TuiPageExtension extends ConfigurableExtension
         $transformers = [];
         foreach ($mergedConfig['components'] as $component => $componentConfig) {
             $schemas[$component] = $componentConfig['schema'];
-            $transformers[$component] = $componentConfig['transformer'];
             $mappings[$component] = $componentConfig['mapping'];
         }
 

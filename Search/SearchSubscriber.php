@@ -8,7 +8,7 @@ use ElasticSearcher\ElasticSearcher;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Tui\PageBundle\Entity\PageInterface;
-use Tui\PageBundle\Search\TranslatedPage;
+use Tui\PageBundle\Search\TranslatedPageFactory;
 use Tui\PageBundle\Search\TranslatedPageIndexFactory;
 
 class SearchSubscriber implements EventSubscriber
@@ -20,11 +20,13 @@ class SearchSubscriber implements EventSubscriber
     private $languageIndex = [];
     private $indexManager;
     private $documentManager;
+    private $pageFactory;
 
     public function __construct(
         ElasticSearcher $searcher,
         SerializerInterface $serializer,
         LoggerInterface $logger,
+        TranslatedPageFactory $pageFactory,
         TranslatedPageIndexFactory $indexFactory
     )
     {
@@ -32,6 +34,7 @@ class SearchSubscriber implements EventSubscriber
         $this->serializer = $serializer;
         $this->logger = $logger;
         $this->indexFactory = $indexFactory;
+        $this->pageFactory = $pageFactory;
 
         $this->indexManager = $this->searcher->indicesManager();
         $this->documentManager = $this->searcher->documentsManager();
@@ -118,7 +121,7 @@ class SearchSubscriber implements EventSubscriber
     private function upsertToIndex(PageInterface $page, string $lang)
     {
         $this->logger->info(sprintf('Indexing document %s (%s)', $page->getId(), $lang));
-        $translatedPage = $this->serializer->normalize(TranslatedPage::fromPage($page, $lang));
+        $translatedPage = $this->serializer->normalize($this->pageFactory->createFromPage($page, $lang));
 
         $this->documentManager->updateOrIndex(
             $this->getIndexForLanguage($lang)->getName(),

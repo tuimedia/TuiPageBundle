@@ -133,22 +133,56 @@ API calls and their serializer groups:
 
 Every content component you create for the frontend should have a JSON Schema file describing its contents. The schema is used by TuiPageBundle to validate and sanitise its content. If you don't define a schema, that component will not be validated or sanitised beyond the required fields, so… define a schema!
 
-You can also optionally supply [ElasticSearch mapping configuration](https://www.elastic.co/guide/en/elasticsearch/reference/5.6/mapping.html) for your component, and a transformer classname to modify content before it's indexed (useful for example for injecting video/audio transcripts into the document). Transformers must implement `Tui\PageBundle\Search\TransformerInterface` (TL;DR: a `transform()` method that accepts and returns an array).
+You can also optionally supply [ElasticSearch mapping configuration](https://www.elastic.co/guide/en/elasticsearch/reference/5.6/mapping.html) for your component.
 
 ```yaml
 tui_page:
   components:
     PageText:
       schema: '%kernel.project_root%/public/schemas/PageText.schema.json'
-    PageVideo:
-      schema: '%kernel.project_root%/public/schemas/PageVideo.schema.json'
-      transformer: App\SearchTransformer\PageVideo
     PageImage:
       schema: '%kernel.project_root%/public/schemas/PageImage.schema.json'
       mapping:
         type: object
         properties:
           url: { enabled: false }
+```
+
+### Transforming content for search
+
+During indexing, pages are transformed into an intermediate format that's better suited for search indexing. A `Tui\PageBundle\Search\TranslatedPage` instance is created for each language version of a page. You can define a transformer to hook into this process to modify the translated content before it's indexed, for instance to inject video transcripts, or to remove HTML formatting.
+
+Transformers must implement `Tui\PageBundle\Search\TransformerInterface` (TL;DR: a `transform()` method that accepts and returns an array), and be tagged with the `tui_page.transformer` tag, which you can do automatically in your `services.yml`:
+
+```yaml
+services:
+    # this config only applies to the services created by this file
+    _instanceof:
+        Tui\PageBundle\Search\TransformerInterface:
+            tags: ['tui_page.transformer']
+```
+
+```php
+namespace App\SearchTransformer;
+
+use Tui\PageBundle\Search\TransformerInterface;
+
+class HtmlBlockTransformer implements TransformerInterface
+{
+  public function transform(TranslatedPage $page)
+  {
+    if (!isset($page->types['HtmlBlock'])) {
+      return;
+    }
+
+    foreach ($page->types['HtmlBlock'] as $idx => $block) {
+      $block['html'] = strip_tags($block['html']);
+      $page->types['HtmlBlock'][$idx] = $block;
+    }
+
+    return $page;
+  }
+}
 ```
 
 
