@@ -56,6 +56,20 @@ class Sanitizer
         return json_encode($data);
     }
 
+    public function cleanQuery(string $terms): string
+    {
+        // Count double-quotes and remove them all if they aren't paired
+        if (substr_count($terms, '"') % 2) {
+            $terms = str_replace('"', '', $terms);
+        }
+
+        // Sanitize query string
+        $terms = preg_replace('/[^\w \'\"\-\:\(\)&]/', '', $terms);
+        $terms = preg_replace('/[\:\(\)&-]+/', ' ', $terms);
+
+        return $this->stringClean($terms);
+    }
+
     /**
      * Simple recursive string cleaner - recurses through arrays & objects, applies filtering to strings only
      * Only good for, say, metadata
@@ -64,11 +78,7 @@ class Sanitizer
     {
         foreach ($data as $prop => $value) {
             if (is_string($value)) {
-                $data->$prop = html_entity_decode(
-                    filter_var($value, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES),
-                    ENT_QUOTES,
-                    'UTF-8'
-                );
+                $data->$prop = $this->stringClean($value);
                 continue;
             }
 
@@ -78,6 +88,15 @@ class Sanitizer
         }
 
         return $data;
+    }
+
+    private function stringClean($value)
+    {
+        return html_entity_decode(
+            filter_var($value, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES),
+            ENT_QUOTES,
+            'UTF-8'
+        );
     }
 
     private function cleanBySchemaRecursive($data, $schema)

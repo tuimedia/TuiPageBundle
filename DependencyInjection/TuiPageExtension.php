@@ -21,12 +21,14 @@ class TuiPageExtension extends ConfigurableExtension
         foreach ($mergedConfig['components'] as $component => $componentConfig) {
             $schemas[$component] = $componentConfig['schema'];
             $transformers[$component] = $componentConfig['transformer'];
+            $mappings[$component] = $componentConfig['mapping'];
         }
 
         $container->setParameter('tui_page.search_hosts', $mergedConfig['search_hosts']);
         $container->setParameter('tui_page.search_index', $mergedConfig['search_index']);
         $container->setParameter('tui_page.schemas', $schemas);
         $container->setParameter('tui_page.transformers', $transformers);
+        $container->setParameter('tui_page.mappings', $mappings);
         $container->setParameter('tui_page.page_class', $mergedConfig['page_class']);
         $container->setParameter('tui_page.page_data_class', $mergedConfig['page_data_class']);
     }

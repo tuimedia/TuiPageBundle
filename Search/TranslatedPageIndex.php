@@ -5,11 +5,13 @@ class TranslatedPageIndex extends \ElasticSearcher\Abstracts\AbstractIndex
 {
     private $indexName;
     private $language;
+    private $componentMappings;
 
-    public function __construct($indexName, $language)
+    public function __construct(string $indexName, string $language, array $componentMappings)
     {
         $this->indexName = $indexName;
         $this->language = $language;
+        $this->componentMappings = $componentMappings;
         parent::__construct();
     }
 
@@ -30,12 +32,10 @@ class TranslatedPageIndex extends \ElasticSearcher\Abstracts\AbstractIndex
                     'state' => ['type' => 'keyword'],
                     'types' => [
                         'type' => 'nested',
-                        'properties' => [
-                            // from registered components
-                            // TODO: provide a listener based extension mechanism for custom component mapping?
-                            // TODO: maybe use the registered JSON Schemas here too!? That'd be neat
-                            // That means making a factory that returns these, so it can inject the component schemas
-                        ]
+                        // Custom mappings from registered components
+                        'properties' => array_filter($this->componentMappings, function ($mapping) {
+                            return !!count($mapping);
+                        }),
                     ],
                 ],
             ],

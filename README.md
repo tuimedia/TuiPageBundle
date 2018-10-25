@@ -133,13 +133,22 @@ API calls and their serializer groups:
 
 Every content component you create for the frontend should have a JSON Schema file describing its contents. The schema is used by TuiPageBundle to validate and sanitise its content. If you don't define a schema, that component will not be validated or sanitised beyond the required fields, so… define a schema!
 
+You can also optionally supply [ElasticSearch mapping configuration](https://www.elastic.co/guide/en/elasticsearch/reference/5.6/mapping.html) for your component, and a transformer classname to modify content before it's indexed (useful for example for injecting video/audio transcripts into the document). Transformers must implement `Tui\PageBundle\Search\TransformerInterface` (TL;DR: a `transform()` method that accepts and returns an array).
+
 ```yaml
 tui_page:
   components:
-    PageImage:
-      schema: '%kernel.project_root%/public/schemas/PageImage.schema.json'
     PageText:
       schema: '%kernel.project_root%/public/schemas/PageText.schema.json'
+    PageVideo:
+      schema: '%kernel.project_root%/public/schemas/PageVideo.schema.json'
+      transformer: App\SearchTransformer\PageVideo
+    PageImage:
+      schema: '%kernel.project_root%/public/schemas/PageImage.schema.json'
+      mapping:
+        type: object
+        properties:
+          url: { enabled: false }
 ```
 
 

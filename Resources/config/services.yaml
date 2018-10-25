@@ -18,6 +18,7 @@ services:
           $pageClass: '%tui_page.page_class%'
           $pageDataClass: '%tui_page.page_data_class%'
           $indexName: '%tui_page.search_index%'
+          $componentMappings: '%tui_page.mappings%'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
@@ -48,3 +49,8 @@ services:
         class: ElasticSearcher\ElasticSearcher
         arguments:
           - '@ElasticSearcher\Environment'
+
+    Tui\PageBundle\Search\SearchSubscriber:
+        class: Tui\PageBundle\Search\SearchSubscriber
+        tags:
+          - { name: doctrine.event_subscriber, connection: default }

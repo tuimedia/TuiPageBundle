@@ -4,6 +4,7 @@ namespace Tui\PageBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Tui\PageBundle\Entity;
@@ -168,5 +169,29 @@ class PageController extends AbstractController
         return $this->json($page, 200, [], [
             'groups' => ['pageGet'],
         ]);
+    }
+
+    /**
+     * @Route("/pages/{slug}", methods={"DELETE"}, name="tui_page_delete")
+     */
+    public function delete(Request $request, PageRepository $pageRepository, $slug)
+    {
+        $state = $request->query->get('state');
+        if (!$state) {
+            throw new \InvalidArgumentException('Must specify state in query string');
+        }
+
+        $page = $pageRepository->findOneBy([
+            'slug' => $slug,
+            'state' => $state,
+        ]);
+
+        if (!$page) {
+            throw $this->createNotFoundException('No such page in state ' . $state);
+        }
+
+        $pageRepository->delete($page);
+
+        return new Response(null, 204);
     }
 }

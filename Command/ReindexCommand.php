@@ -11,22 +11,27 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Serializer\SerializerInterface;
 use Tui\PageBundle\Repository\PageRepository;
-use Tui\PageBundle\Search\TranslatedPageIndex;
+use Tui\PageBundle\Search\TranslatedPageIndexFactory;
 use Tui\PageBundle\Search\TranslatedPage;
 
 class ReindexCommand extends Command
 {
     protected static $defaultName = 'pages:reindex';
-    private $indexName;
+    private $indexFactory;
     private $logger;
     private $pageRepository;
     private $searcher;
     private $serializer;
     private $languageIndex = [];
 
-    public function __construct(SerializerInterface $serializer, LoggerInterface $logger, ElasticSearcher $searcher, PageRepository $pageRepository, $indexName)
-    {
-        $this->indexName = $indexName;
+    public function __construct(
+        SerializerInterface $serializer,
+        LoggerInterface $logger,
+        ElasticSearcher $searcher,
+        PageRepository $pageRepository,
+        TranslatedPageIndexFactory $indexFactory
+    ) {
+        $this->indexFactory = $indexFactory;
         $this->logger = $logger;
         $this->pageRepository = $pageRepository;
         $this->searcher = $searcher;
@@ -60,7 +65,7 @@ class ReindexCommand extends Command
         // Prepare (reset or update) each language index
         foreach ($languages as $language) {
             // Create and register an index manager
-            $index = new TranslatedPageIndex($this->indexName, $language);
+            $index = $this->indexFactory->createTranslatedPageIndex($language);
             $this->languageIndex[$language] = $index->getName();
             $this->logger->info(sprintf('Preparing index %s', $index->getName()));
             $indexManager->register($index);
@@ -113,7 +118,7 @@ class ReindexCommand extends Command
                 array_push($accumulator, ...$extraLanguages);
             }
 
-            return $extraLanguages;
+            return $accumulator;
         }, []);
     }
 }
