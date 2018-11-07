@@ -159,6 +159,28 @@ abstract class AbstractPageData implements PageDataInterface
         return $this;
     }
 
+    /**
+     * @Groups({"pageList"})
+     */
+    public function getTranslatedMetadata(): array
+    {
+        $global = $this->metadata;
+        $allMetadata = [];
+        foreach ($this->availableLanguages as $lang) {
+            $allMetadata[$lang] = array_replace_recursive(
+                $global,
+                isset($this->content['langData'][$this->defaultLanguage]) && isset($this->content['langData'][$this->defaultLanguage]['metadata'])
+                ? $this->content['langData'][$this->defaultLanguage]['metadata']
+                : [],
+                isset($this->content['langData'][$lang]) && isset($this->content['langData'][$lang]['metadata'])
+                ? $this->content['langData'][$lang]['metadata']
+                : []
+            );
+        }
+
+        return $allMetadata;
+    }
+
     public function getMetadata(): array
     {
         return $this->metadata;
