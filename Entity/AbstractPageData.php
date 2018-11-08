@@ -160,7 +160,7 @@ abstract class AbstractPageData implements PageDataInterface
     }
 
     /**
-     * @Groups({"pageList"})
+     * @Groups({"pageList", "pageGet"})
      */
     public function getTranslatedMetadata(): array
     {
