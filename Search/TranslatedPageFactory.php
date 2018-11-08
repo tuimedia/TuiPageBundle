@@ -17,6 +17,7 @@ class TranslatedPageFactory
         $translatedPage = new TranslatedPage;
         $translatedPage->id = $page->getId();
         $translatedPage->state = $page->getState();
+        $translatedPage->slug = $page->getSlug();
 
         // Build translated metadata
         $content = $page->getPageData()->getContent();

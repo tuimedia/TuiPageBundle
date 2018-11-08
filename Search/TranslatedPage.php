@@ -1,11 +1,10 @@
 <?php
 namespace Tui\PageBundle\Search;
 
-use Tui\PageBundle\Entity\PageInterface;
-
 class TranslatedPage
 {
     public $id;
+    public $slug;
     public $state;
     public $metadata;
     public $types;
