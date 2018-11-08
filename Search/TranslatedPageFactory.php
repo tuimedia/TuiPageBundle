@@ -5,9 +5,16 @@ use Tui\PageBundle\Entity\PageInterface;
 
 class TranslatedPageFactory
 {
-    private $transformers;
+    private $transformers = [];
 
-    public function __construct(array $componentTransformers)
+    public function __construct(array $componentTransformers = null)
+    {
+        if ($componentTransformers) {
+            $this->transformers = $componentTransformers;
+        }
+    }
+
+    public function setTransformers(array $componentTransformers)
     {
         $this->transformers = $componentTransformers;
     }

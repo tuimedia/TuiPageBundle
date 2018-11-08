@@ -9,13 +9,15 @@ class TransformerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        $factoryDef = $container->getDefinition('Tui\PageBundle\Search\TranslatedPageFactory');
         $transformers = [];
 
         foreach ($container->findTaggedServiceIds('tui_page.transformer') as $id => $tags) {
             $transformers[] = new Reference($id);
         }
 
-        $factoryDef->replaceArgument(0, $transformers);
+        foreach ($container->findTaggedServiceIds('tui_page.transformer_consumer') as $id => $tags) {
+            $factoryDef = $container->getDefinition($id);
+            $factoryDef->addMethodCall('setTransformers', [$transformers]);
+        }
     }
 }
