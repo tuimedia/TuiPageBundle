@@ -150,9 +150,9 @@ tui_page:
 
 ### Transforming content for search
 
-During indexing, pages are transformed into an intermediate format that's better suited for search indexing. A `Tui\PageBundle\Search\TranslatedPage` instance is created for each language version of a page. You can define a transformer to hook into this process to modify the translated content before it's indexed, for instance to inject video transcripts, or to remove HTML formatting.
+During indexing, pages are transformed into an intermediate format that's better suited for search indexing. A `Tui\PageBundle\Search\TranslatedPage` instance is created for each language version of a page. You can define a transformer to hook into this process to modify the translated content before it's indexed, for instance to inject video transcripts, or to remove HTML formatting. The original page object is also included so that you can, for instance, add extra properties from your page object (like tags).
 
-Transformers must implement `Tui\PageBundle\Search\TransformerInterface` (TL;DR: a `transform()` method that accepts and returns an array), and be tagged with the `tui_page.transformer` tag, which you can do automatically in your `services.yml`:
+Transformers must implement `Tui\PageBundle\Search\TransformerInterface`, and be tagged with the `tui_page.transformer` tag, which you can do automatically in your `services.yml`:
 
 ```yaml
 services:
@@ -166,21 +166,22 @@ services:
 namespace App\SearchTransformer;
 
 use Tui\PageBundle\Search\TransformerInterface;
+use Tui\PageBundle\Entity\PageInterface;
 
 class HtmlBlockTransformer implements TransformerInterface
 {
-  public function transform(TranslatedPage $page)
+  public function transform(TranslatedPage $translatedPage, ?PageInterface $page)
   {
-    if (!isset($page->types['HtmlBlock'])) {
+    if (!isset($translatedPage->types['HtmlBlock'])) {
       return;
     }
 
-    foreach ($page->types['HtmlBlock'] as $idx => $block) {
+    foreach ($translatedPage->types['HtmlBlock'] as $idx => $block) {
       $block['html'] = strip_tags($block['html']);
-      $page->types['HtmlBlock'][$idx] = $block;
+      $translatedPage->types['HtmlBlock'][$idx] = $block;
     }
 
-    return $page;
+    return $translatedPage;
   }
 }
 ```

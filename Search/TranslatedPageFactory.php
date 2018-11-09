@@ -57,7 +57,7 @@ class TranslatedPageFactory
         }
 
         foreach ($this->transformers as $transformer) {
-            $translatedPage = $transformer->transform($translatedPage);
+            $translatedPage = $transformer->transform($translatedPage, $page);
         }
 
         return $translatedPage;
