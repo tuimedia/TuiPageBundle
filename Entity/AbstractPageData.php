@@ -41,14 +41,14 @@ abstract class AbstractPageData implements PageDataInterface
      * @Assert\Type(type="string")
      * @Assert\Length(max=32)
      */
-    private $defaultLanguage = 'en';
+    private $defaultLanguage = 'en_GB';
 
     /**
      * @ORM\Column(type="array")
      * @Groups({"pageCreate", "pageGet"})
      * @Assert\Type(type="array")
      */
-    private $availableLanguages = ['en'];
+    private $availableLanguages = ['en_GB'];
 
     /**
      * @ORM\Column(type="datetime_immutable")
@@ -68,7 +68,7 @@ abstract class AbstractPageData implements PageDataInterface
      * @Assert\Type(type="array")
      * @Groups({"pageList", "pageCreate", "pageGet"})
      */
-    private $metadata;
+    private $metadata = [];
 
     public function __construct()
     {
