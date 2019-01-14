@@ -23,7 +23,7 @@
       "symfony/property-info": "^4.2",
       "symfony/serializer": "^4.2",
       "symfony/validator": "^4.2",
-      "voku/anti-xss": "^4.2",
+      "voku/anti-xss": "^4.1",
       "madewithlove/elasticsearcher": "^0.5.2"
     }
 }
