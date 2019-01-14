@@ -73,7 +73,7 @@
     "blocks": {
       "title": "Block definitions",
       "type": "object",
-      "minProperties": 1,
+      "minProperties": 0,
       "patternProperties": {
         ".*": { "$ref": "#/definitions/block" }
       }
@@ -107,7 +107,7 @@
     "layout": {
       "title": "Layout rows",
       "type": "array",
-      "minItems": 1,
+      "minItems": 0,
       "contains": {
         "$ref": "#/definitions/layoutRow"
       }
