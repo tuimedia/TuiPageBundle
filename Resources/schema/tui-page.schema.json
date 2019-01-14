@@ -107,8 +107,8 @@
     "layout": {
       "title": "Layout rows",
       "type": "array",
-      "minItems": 0,
-      "contains": {
+      "items": {
+        "minimum": 0,
         "$ref": "#/definitions/layoutRow"
       }
     },
