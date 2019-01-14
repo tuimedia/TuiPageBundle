@@ -9,10 +9,9 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder('tui_page');
-        // For BC with Symfony 4.1
-        $rootNode = $treeBuilder->root('tui_page');
 
-        $rootNode
+        $treeBuilder
+            ->getRootNode()
             ->fixXmlConfig('component')
             ->fixXmlConfig('search_host')
             ->children()

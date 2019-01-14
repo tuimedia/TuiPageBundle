@@ -17,13 +17,13 @@
     "require": {
       "doctrine/orm": "^2.6",
       "opis/json-schema": "^1.0",
-      "symfony/framework-bundle": "^4.1",
-      "symfony/http-foundation": "^4.1",
-      "symfony/property-access": "^4.1",
-      "symfony/property-info": "^4.1",
-      "symfony/serializer": "^4.1",
-      "symfony/validator": "^4.1",
-      "voku/anti-xss": "^4.1",
+      "symfony/framework-bundle": "^4.2",
+      "symfony/http-foundation": "^4.2",
+      "symfony/property-access": "^4.2",
+      "symfony/property-info": "^4.2",
+      "symfony/serializer": "^4.2",
+      "symfony/validator": "^4.2",
+      "voku/anti-xss": "^4.2",
       "madewithlove/elasticsearcher": "^0.5.2"
     }
 }
