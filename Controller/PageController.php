@@ -45,7 +45,7 @@ class PageController extends AbstractController
         // Validate input
         $errors = $pageSchema->validate($request->getContent());
         if ($errors) {
-            return $this->json($errors);
+            return $this->json($errors, 422);
         }
 
         // Filter input
@@ -138,7 +138,7 @@ class PageController extends AbstractController
         // Validate input
         $errors = $pageSchema->validate($request->getContent());
         if ($errors) {
-            return $this->json($errors);
+            return $this->json($errors, 422);
         }
 
         // Filter input
