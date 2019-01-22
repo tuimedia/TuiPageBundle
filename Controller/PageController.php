@@ -146,10 +146,6 @@ class PageController extends AbstractController
         $previousRevision = $page->getPageData()->getRevision();
         $pageRef = $page->getPageData()->getPageRef();
 
-        // Create a new revision
-        $pageData = clone $page->getPageData();
-        $page->setPageData($pageData);
-
         // Apply the request data
         $serializer->deserialize($filteredContent, $this->pageClass, 'json', [
             'groups' => ['pageCreate'],
