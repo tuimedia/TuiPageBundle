@@ -130,25 +130,15 @@
     "pageData": {
       "type": "object",
       "properties": {
-        "pageRef": {
-          "title": "String unique to all versions of this document (usually the same as slug)",
-          "type": "string",
-          "maxLength": 128,
-          "minLength": 1
-        },
         "revision": {
-          "title": "Unique UUID for this object",
+          "title": "Unique UUID for this object (not editable)",
           "type": "string",
           "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
           "maxLength": 36,
           "minLength": 36
         },
         "previousRevision": {
-          "title": "UUID of previous revision",
-          "type": "string",
-          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
-          "maxLength": 36,
-          "minLength": 36
+          "title": "UUID of previous revision (not editable)"
         },
         "defaultLanguage": {
           "title": "Language code for the default/fallback language",
@@ -178,7 +168,6 @@
         }
       },
       "required": [
-        "pageRef",
         "defaultLanguage",
         "availableLanguages",
         "content",

@@ -56,6 +56,7 @@ class PageController extends AbstractController
         $page = $serializer->deserialize($filteredContent, $this->pageClass, 'json', [
             'groups' => ['pageCreate'],
         ]);
+        $page->getPageData()->setPageRef(rtrim(strtr(base64_encode(random_bytes(24)), '+/', '-_'), '='));
 
         $errors = $pageRepository->validate($page);
         if (count($errors) > 0) {
@@ -143,6 +144,7 @@ class PageController extends AbstractController
         $filteredContent = $sanitizer->cleanPage($request->getContent());
 
         $previousRevision = $page->getPageData()->getRevision();
+        $pageRef = $page->getPageData()->getPageRef();
 
         // Create a new revision
         $pageData = clone $page->getPageData();
@@ -153,7 +155,9 @@ class PageController extends AbstractController
             'groups' => ['pageCreate'],
             'object_to_populate' => $page,
         ]);
-        $page->getPageData()->setPreviousRevision($previousRevision);
+        $page->getPageData()
+            ->setPageRef($pageRef)
+            ->setPreviousRevision($previousRevision);
 
         // Validation…
         $errors = $pageRepository->validate($page);

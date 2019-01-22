@@ -29,7 +29,6 @@ abstract class AbstractPageData implements PageDataInterface
 
     /**
      * @ORM\Column(type="string", length=128)
-     * @Groups({"pageCreate", "pageGet"})
      * @Assert\Type(type="string")
      * @Assert\Length(max=128)
      */

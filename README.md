@@ -190,7 +190,6 @@ class HtmlBlockTransformer implements TransformerInterface
 ## Notes
 
 * slugs are globally unique
-* For the pageData `pageRef` property to be useful, it should be unique for all versions of a single document. You can use a UUID or the page slug, it doesn't matter.
 * Theoretically you can reuse a block in multiple rows, but don't - the frontend renders the block id as the DOM ID attribute so that browsers can scroll to a piece of content, so you'll end up with invalid HTML and that functionality will break.
 
 ## Filtering & Validation
