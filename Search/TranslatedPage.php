@@ -7,5 +7,5 @@ class TranslatedPage
     public $slug;
     public $state;
     public $metadata;
-    public $types;
+    public $types = [];
 }
