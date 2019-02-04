@@ -28,7 +28,7 @@ class PageController extends AbstractController
      */
     public function index(Request $request, PageRepository $pageRepository)
     {
-        $status = $request->query->get('state', 'live');
+        $status = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
 
         $pages = $pageRepository->findBy([
             'state' => $status,
@@ -73,7 +73,7 @@ class PageController extends AbstractController
      */
     public function retrieve(Request $request, SerializerInterface $serializer, PageRepository $pageRepository, $slug)
     {
-        $state = $request->query->get('state', 'live');
+        $state = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
 
         $page = $pageRepository->findOneBy([
             'slug' => $slug,
@@ -92,7 +92,7 @@ class PageController extends AbstractController
      */
     public function history(Request $request, SerializerInterface $serializer, PageRepository $pageRepository, PageDataRepository $pageDataRepository, $slug)
     {
-        $state = $request->query->get('state', 'live');
+        $state = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
 
         $page = $pageRepository->findOneBy([
             'slug' => $slug,
@@ -120,7 +120,7 @@ class PageController extends AbstractController
      */
     public function edit(Request $request, SerializerInterface $serializer, PageRepository $pageRepository, Sanitizer $sanitizer, PageSchema $pageSchema, $slug)
     {
-        $state = $request->query->get('state');
+        $state = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
         if (!$state) {
             throw new \InvalidArgumentException('Must specify state in query string');
         }
@@ -172,7 +172,7 @@ class PageController extends AbstractController
      */
     public function delete(Request $request, PageRepository $pageRepository, $slug)
     {
-        $state = $request->query->get('state');
+        $state = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
         if (!$state) {
             throw new \InvalidArgumentException('Must specify state in query string');
         }
@@ -201,6 +201,7 @@ class PageController extends AbstractController
         // Hackish fixen
         $pageJson = strtr($pageJson, [
             '"blocks":[]' => '"blocks":{}',
+            '"langData":[]' => '"langData":{}',
             '"styles":[]' => '"styles":{}',
         ]);
 

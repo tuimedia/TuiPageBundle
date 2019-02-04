@@ -28,8 +28,9 @@ class SearchController extends AbstractController
      */
     public function search(Request $request, PageRepository $pageRepository, ElasticSearcher $searcher, PageQuery $query, TranslatedPageIndexFactory $indexFactory)
     {
-        $terms = $request->query->get('q', '');
-        $language = $request->query->get('language', 'en_GB');
+        $terms = filter_var($request->query->get('q', ''), FILTER_SANITIZE_STRING);
+        $language = filter_var($request->query->get('language', ''), FILTER_SANITIZE_STRING);
+        $state = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
         $index = $indexFactory->createTranslatedPageIndex($language);
         $searcher->indicesManager()->register($index);
         $size = $request->query->getInt('size', 50) || 1;
@@ -37,7 +38,7 @@ class SearchController extends AbstractController
 
         $query->addData([
             'index' => $index->getName(),
-            'state' => $request->query->get('state', 'live'),
+            'state' => $state,
             'q' => $terms,
             'page' => $request->query->getInt('page', 1),
             'size' => $request->query->getInt('size', 50),
