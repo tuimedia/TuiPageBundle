@@ -17,6 +17,7 @@ class TuiPageExtension extends ConfigurableExtension
         $loader->load('services.yaml');
 
         $schemas = [];
+        $mappings = [];
         $transformers = [];
         foreach ($mergedConfig['components'] as $component => $componentConfig) {
             $schemas[$component] = $componentConfig['schema'];
