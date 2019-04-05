@@ -18,7 +18,7 @@ class PageSchema
     public function validate($data)
     {
         $data = json_decode($data);
-        $schema = Schema::fromJsonString(file_get_contents($this->schemaPath));
+        $schema = Schema::fromJsonString((string) file_get_contents($this->schemaPath));
 
         $validator = new Validator();
         // omg hax, just use the existing plain text type for html
@@ -67,7 +67,7 @@ class PageSchema
             ]));
         }
 
-        return Schema::fromJsonString(file_get_contents($this->schemas[$block->component]));
+        return Schema::fromJsonString((string) file_get_contents($this->schemas[$block->component]));
     }
 
     public function getSchemaForBlock(\stdClass $block)
@@ -139,19 +139,19 @@ class PageSchema
 
     public function getResolvedPageSchema()
     {
-        $schema = Schema::fromJsonString(file_get_contents($this->schemaPath));
+        $schema = Schema::fromJsonString((string) file_get_contents($this->schemaPath));
         $resolvedSchema = $this->deepResolveSchema($schema->resolve());
 
         return $resolvedSchema;
     }
 
-    protected function deepResolveSchema(\stdClass $schema, $rootSchema = null)
+    protected function deepResolveSchema(object $schema, $rootSchema = null)
     {
         if (!$rootSchema) {
             $rootSchema = $schema;
         }
 
-        foreach ($schema as $prop => $value) {
+        foreach ((array) $schema as $prop => $value) {
             if (is_object($value) && isset($value->{'$ref'})) {
                 $schema->$prop = JsonPointer::getDataByPointer($rootSchema, substr($value->{'$ref'}, 1));
             } elseif (is_object($value)) {

@@ -19,6 +19,7 @@ class SearchSubscriber implements EventSubscriber
     private $checkedIndexes = [];
     private $languageIndex = [];
     private $indexManager;
+    private $indexFactory;
     private $documentManager;
     private $pageFactory;
 
@@ -70,7 +71,11 @@ class SearchSubscriber implements EventSubscriber
             return;
         }
 
-        foreach ($entity->getPageData()->getAvailableLanguages() as $lang) {
+        $pageData = $entity->getPageData();
+        if (!$pageData) {
+            throw new \RuntimeException('Unexpected value for pageData');
+        }
+        foreach ($pageData->getAvailableLanguages() as $lang) {
             $this->upsertToIndex($entity, $lang);
         }
     }
@@ -82,7 +87,11 @@ class SearchSubscriber implements EventSubscriber
             return;
         }
 
-        foreach ($entity->getPageData()->getAvailableLanguages() as $lang) {
+        $pageData = $entity->getPageData();
+        if (!$pageData) {
+            throw new \RuntimeException('Unexpected value for pageData');
+        }
+        foreach ($pageData->getAvailableLanguages() as $lang) {
             $this->deleteFromIndex($entity, $lang);
         }
     }
@@ -90,6 +99,10 @@ class SearchSubscriber implements EventSubscriber
     private function updateDocumentIndexes(PreUpdateEventArgs $args)
     {
         $entity = $args->getObject();
+        if (!$entity instanceof PageInterface) {
+            return;
+        }
+
         // oh balls this doesn't work because availablelanguages is on the pagedata entity and those are always new
         if ($args->hasChangedField('pageData')) {
             $langsToRemove = array_diff(
@@ -102,7 +115,12 @@ class SearchSubscriber implements EventSubscriber
             }
         }
 
-        foreach ($entity->getPageData()->getAvailableLanguages() as $lang) {
+        $pageData = $entity->getPageData();
+        if (!$pageData) {
+            throw new \RuntimeException('Unexpected value for pageData');
+        }
+
+        foreach ($pageData->getAvailableLanguages() as $lang) {
             $index = $this->getIndexForLanguage($lang);
             $this->upsertToIndex($entity, $lang);
         }
@@ -151,7 +169,7 @@ class SearchSubscriber implements EventSubscriber
         }
 
         $this->languageIndex[$language] = $index;
- 
+
         return $index;
     }
 }

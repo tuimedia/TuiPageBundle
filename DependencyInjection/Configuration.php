@@ -10,10 +10,9 @@ class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder('tui_page');
 
-        $treeBuilder
-            ->getRootNode()
-            ->fixXmlConfig('component')
+        $treeBuilder->getRootNode()
             ->fixXmlConfig('search_host')
+            ->fixXmlConfig('component')
             ->children()
                 ->arrayNode('search_hosts')
                     ->info('ElasticSearch host(s) (if unset, search will be disabled)')
@@ -35,10 +34,10 @@ class Configuration implements ConfigurationInterface
                     ->defaultValue('App\Entity\PageData')
                 ->end()
                 ->arrayNode('components')
-                    ->info('Frontend components')
-                    ->isRequired()
-                    ->useAttributeAsKey('name')
-                    ->arrayPrototype()
+                ->info('Frontend components')
+                ->isRequired()
+                ->useAttributeAsKey('name')
+                ->arrayPrototype()
                         ->children()
                             ->scalarNode('schema')
                                 ->info('Path to JSON schema for this component')

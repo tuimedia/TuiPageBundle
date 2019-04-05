@@ -1,7 +1,7 @@
 <?php
 namespace Tui\PageBundle;
 
-use Voku\Helper\AntiXSS;
+use voku\helper\AntiXSS;
 
 class Sanitizer
 {
@@ -16,7 +16,7 @@ class Sanitizer
 
     /**
      * Recursively clean a TuiPage JSON document according to both the TuiPage JSON Schema
-     * and the custom schemas created for each content component. We rely on the schema 
+     * and the custom schemas created for each content component. We rely on the schema
      * validation to assert content types, so there's no explicit casting, but string values
      * are filtered according to their content type (defaulting to text/plain, but allowing
      * some HTML when the content type is set to text/html).
@@ -53,7 +53,11 @@ class Sanitizer
             }
         }
 
-        return json_encode($data);
+        $json = json_encode($data);
+        if (!$json) {
+            throw new \RuntimeException('Unable to encode JSON output');
+        }
+        return $json;
     }
 
     public function cleanQuery(string $terms): string
@@ -64,8 +68,8 @@ class Sanitizer
         }
 
         // Sanitize query string
-        $terms = preg_replace('/[^\w \'\"\-\:\(\)&]/', '', $terms);
-        $terms = preg_replace('/[\:\(\)&-]+/', ' ', $terms);
+        $terms = (string) preg_replace('/[^\w \'\"\-\:\(\)&]/', '', $terms);
+        $terms = (string) preg_replace('/[\:\(\)&-]+/', ' ', $terms);
 
         return $this->stringClean($terms);
     }
@@ -93,7 +97,7 @@ class Sanitizer
     private function stringClean($value)
     {
         return html_entity_decode(
-            filter_var($value, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES),
+            (string) filter_var($value, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES),
             ENT_QUOTES,
             'UTF-8'
         );
@@ -139,7 +143,7 @@ class Sanitizer
             }
 
             return html_entity_decode(
-                filter_var($value, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES),
+                (string) filter_var($value, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES),
                 ENT_QUOTES,
                 'UTF-8'
             );

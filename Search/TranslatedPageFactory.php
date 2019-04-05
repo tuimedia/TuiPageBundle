@@ -27,10 +27,14 @@ class TranslatedPageFactory
         $translatedPage->slug = $page->getSlug();
 
         // Build translated metadata
-        $content = $page->getPageData()->getContent();
-        $defaultLanguage = $page->getPageData()->getDefaultLanguage();
+        $pageData = $page->getPageData();
+        if (!$pageData) {
+            throw new \RuntimeException('Unexpected value for pageData');
+        }
+        $content = $pageData->getContent();
+        $defaultLanguage = $pageData->getDefaultLanguage();
 
-        $metadata = $page->getPageData()->getMetadata();
+        $metadata = $pageData->getMetadata();
         if (isset($content['langData'][$defaultLanguage]['metadata'])) {
             $metadata = array_replace_recursive($metadata, $content['langData'][$defaultLanguage]['metadata']);
         }

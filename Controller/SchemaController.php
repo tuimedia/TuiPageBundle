@@ -16,7 +16,7 @@ class SchemaController extends AbstractController
      */
     public function page(RouterInterface $router)
     {
-        $schema = file_get_contents(__DIR__.'/../Resources/schema/tui-page.schema.json');
+        $schema = (string) file_get_contents(__DIR__.'/../Resources/schema/tui-page.schema.json');
         $correctId = $router->generate('tui_page_schema_page', [], UrlGeneratorInterface::ABSOLUTE_URL);
 
         $schema = str_replace(
@@ -37,11 +37,11 @@ class SchemaController extends AbstractController
     public function component(RouterInterface $router, $componentSchemas, string $component)
     {
         if (!isset($componentSchemas[$component])) {
-            throw $this->generateNotFoundException();
+            throw $this->createNotFoundException();
         }
 
         // Load the component file and replace the $id URL with a pointer to this location
-        $schema = file_get_contents($componentSchemas[$component]);
+        $schema = (string) file_get_contents($componentSchemas[$component]);
         $correctId = $router->generate('tui_page_schema_component', ['component' => $component], UrlGeneratorInterface::ABSOLUTE_URL);
         $jsonId = json_encode($correctId, JSON_UNESCAPED_SLASHES);
 
