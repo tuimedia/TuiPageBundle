@@ -12,6 +12,7 @@ interface PageDataInterface
 
     public function setDefaultLanguage(string $defaultLanguage): self;
 
+    /** @return string[] */
     public function getAvailableLanguages(): array;
 
     public function setAvailableLanguages(array $availableLanguages): self;

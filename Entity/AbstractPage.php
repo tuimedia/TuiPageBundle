@@ -44,6 +44,7 @@ class AbstractPage implements PageInterface
      * @ORM\JoinColumn(nullable=false, referencedColumnName="revision")
      * @Groups({"pageList", "pageCreate", "pageGet"})
      * @Assert\Valid
+     * @var AbstractPageData
      */
     protected $pageData;
 
@@ -76,12 +77,12 @@ class AbstractPage implements PageInterface
         return $this;
     }
 
-    public function getPageData(): ?AbstractPageData
+    public function getPageData(): PageDataInterface
     {
         return $this->pageData;
     }
 
-    public function setPageData(?AbstractPageData $pageData): PageInterface
+    public function setPageData(PageDataInterface $pageData): PageInterface
     {
         $this->pageData = $pageData;
 

@@ -18,12 +18,14 @@ abstract class AbstractPageData implements PageDataInterface
      * @ORM\GeneratedValue(strategy="UUID")
      * @ORM\Column(type="guid")
      * @Groups({"pageList", "pageGet"})
+     * @var string
      */
     private $revision;
 
     /**
      * @ORM\Column(type="guid", nullable=true)
      * @Groups({"pageList", "pageGet"})
+     * @var string|null
      */
     private $previousRevision;
 
@@ -31,6 +33,7 @@ abstract class AbstractPageData implements PageDataInterface
      * @ORM\Column(type="string", length=128)
      * @Assert\Type(type="string")
      * @Assert\Length(max=128)
+     * @var string
      */
     private $pageRef;
 
@@ -39,6 +42,7 @@ abstract class AbstractPageData implements PageDataInterface
      * @Groups({"pageCreate", "pageGet"})
      * @Assert\Type(type="string")
      * @Assert\Length(max=32)
+     * @var string
      */
     private $defaultLanguage = 'en_GB';
 
@@ -46,12 +50,14 @@ abstract class AbstractPageData implements PageDataInterface
      * @ORM\Column(type="array")
      * @Groups({"pageCreate", "pageGet"})
      * @Assert\Type(type="array")
+     * @var string[]
      */
     private $availableLanguages = ['en_GB'];
 
     /**
      * @ORM\Column(type="datetime_immutable")
      * @Groups({"pageList", "pageGet"})
+     * @var \DateTimeImmutable
      */
     private $created;
 
@@ -71,7 +77,11 @@ abstract class AbstractPageData implements PageDataInterface
 
     public function __construct()
     {
-        $this->created = date_create_immutable();
+        $time = date_create_immutable();
+        if (!$time) {
+            throw new \LogicException('Unable to retrieve system time');
+        }
+        $this->created = $time;
     }
 
     public function getPageRef(): ?string

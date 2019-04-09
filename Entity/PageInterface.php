@@ -14,7 +14,7 @@ interface PageInterface
 
     public function setState(string $state): PageInterface;
 
-    public function getPageData(): ?AbstractPageData;
+    public function getPageData(): PageDataInterface;
 
-    public function setPageData(?AbstractPageData $pageData): PageInterface;
+    public function setPageData(PageDataInterface $pageData): PageInterface;
 }

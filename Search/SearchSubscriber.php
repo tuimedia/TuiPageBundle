@@ -72,9 +72,6 @@ class SearchSubscriber implements EventSubscriber
         }
 
         $pageData = $entity->getPageData();
-        if (!$pageData) {
-            throw new \RuntimeException('Unexpected value for pageData');
-        }
         foreach ($pageData->getAvailableLanguages() as $lang) {
             $this->upsertToIndex($entity, $lang);
         }
@@ -88,9 +85,6 @@ class SearchSubscriber implements EventSubscriber
         }
 
         $pageData = $entity->getPageData();
-        if (!$pageData) {
-            throw new \RuntimeException('Unexpected value for pageData');
-        }
         foreach ($pageData->getAvailableLanguages() as $lang) {
             $this->deleteFromIndex($entity, $lang);
         }
@@ -116,9 +110,6 @@ class SearchSubscriber implements EventSubscriber
         }
 
         $pageData = $entity->getPageData();
-        if (!$pageData) {
-            throw new \RuntimeException('Unexpected value for pageData');
-        }
 
         foreach ($pageData->getAvailableLanguages() as $lang) {
             $index = $this->getIndexForLanguage($lang);

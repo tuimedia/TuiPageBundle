@@ -28,9 +28,6 @@ class TranslatedPageFactory
 
         // Build translated metadata
         $pageData = $page->getPageData();
-        if (!$pageData) {
-            throw new \RuntimeException('Unexpected value for pageData');
-        }
         $content = $pageData->getContent();
         $defaultLanguage = $pageData->getDefaultLanguage();
 
