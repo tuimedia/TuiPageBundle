@@ -22,9 +22,9 @@ class TranslatedPageFactory
     public function createFromPage(PageInterface $page, string $language): TranslatedPage
     {
         $translatedPage = new TranslatedPage;
-        $translatedPage->id = $page->getId();
-        $translatedPage->state = $page->getState();
-        $translatedPage->slug = $page->getSlug();
+        $translatedPage->id = (string) $page->getId();
+        $translatedPage->state = (string) $page->getState();
+        $translatedPage->slug = (string) $page->getSlug();
 
         // Build translated metadata
         $pageData = $page->getPageData();

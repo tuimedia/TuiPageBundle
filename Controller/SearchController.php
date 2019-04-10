@@ -2,6 +2,7 @@
 
 namespace Tui\PageBundle\Controller;
 
+use Swagger\Annotations as SWG;
 use ElasticSearcher\ElasticSearcher;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,19 +18,57 @@ use Tui\PageBundle\Search\TranslatedPageIndexFactory;
 
 class SearchController extends AbstractController
 {
-    // protected $pageClass;
-    //
-    // function __construct(string $pageClass) {
-    //     $this->pageClass = $pageClass;
-    // }
-
     /**
+     * Search pages
      * @Route("/search", methods={"GET"}, name="tui_page_search")
+     * @SWG\Response(
+     *   response=200,
+     *   description="Returns a list of pages"
+     * )
+     * @SWG\Parameter(
+     *   in="query",
+     *   required=false,
+     *   name="q",
+     *   type="string",
+     *   description="Search terms (can be empty, but that will return no results)"
+     * )
+     * @SWG\Parameter(
+     *   in="query",
+     *   required=false,
+     *   name="language",
+     *   default="en_GB",
+     *   type="string",
+     *   description="Language to search"
+     * )
+     * @SWG\Parameter(
+     *   in="query",
+     *   required=false,
+     *   default="live",
+     *   name="state",
+     *   type="string",
+     *   description="Page namespace to search"
+     * )
+     * @SWG\Parameter(
+     *   in="query",
+     *   required=false,
+     *   default=50,
+     *   name="size",
+     *   type="integer",
+     *   description="Maximum number of results per page"
+     * )
+     * @SWG\Parameter(
+     *   in="query",
+     *   required=false,
+     *   default=1,
+     *   name="page",
+     *   type="integer",
+     *   description="Page of results to return"
+     * )
      */
     public function search(Request $request, PageRepository $pageRepository, ElasticSearcher $searcher, PageQuery $query, TranslatedPageIndexFactory $indexFactory)
     {
         $terms = substr((string) filter_var($request->query->get('q', ''), FILTER_SANITIZE_STRING), 0, 128);
-        $language = substr((string) filter_var($request->query->get('language', ''), FILTER_SANITIZE_STRING), 0, 32);
+        $language = substr((string) filter_var($request->query->get('language', 'en_GB'), FILTER_SANITIZE_STRING), 0, 32);
         $state = substr((string) filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING), 0, 32);
         $index = $indexFactory->createTranslatedPageIndex($language);
         $searcher->indicesManager()->register($index);

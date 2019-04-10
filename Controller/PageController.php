@@ -2,6 +2,7 @@
 
 namespace Tui\PageBundle\Controller;
 
+use Swagger\Annotations as SWG;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -9,6 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Tui\PageBundle\Entity;
+use Tui\PageBundle\Entity\AbstractPage;
 use Tui\PageBundle\Entity\PageInterface;
 use Tui\PageBundle\Sanitizer;
 use Tui\PageBundle\PageSchema;
@@ -24,7 +26,21 @@ class PageController extends AbstractController
     }
 
     /**
+     * List pages
+     *
      * @Route("/pages", methods={"GET"}, name="tui_page_index")
+     * @SWG\Response(
+     *   response=200,
+     *   description="Returns a list of pages"
+     * )
+     * @SWG\Parameter(
+     *   in="query",
+     *   required=false,
+     *   default="live",
+     *   name="state",
+     *   type="string",
+     *   description="Page namespace to use"
+     * )
      */
     public function index(Request $request, PageRepository $pageRepository)
     {
@@ -40,7 +56,24 @@ class PageController extends AbstractController
     }
 
     /**
+     * Create a new page
+     *
      * @Route("/pages", methods={"POST"}, name="tui_page_create")
+     * @SWG\Response(
+     *   response=201,
+     *   description="Returns the created page"
+     * )
+     * @SWG\Response(
+     *   response=422,
+     *   description="Validation error(s) in application/problem+json format"
+     * )
+     * @SWG\Parameter(
+     *   in="body",
+     *   required=true,
+     *   name="request",
+     *   description="Page content",
+     *   @SWG\Schema(type="object")
+     * )
      */
     public function create(Request $request, SerializerInterface $serializer, PageRepository $pageRepository, Sanitizer $sanitizer, PageSchema $pageSchema)
     {
@@ -65,11 +98,29 @@ class PageController extends AbstractController
 
         $pageRepository->save($page);
 
-        return $this->generatePageResponse($page, $serializer, ['pageGet']);
+        return $this->generatePageResponse($page, $serializer, ['pageGet'], 201);
     }
 
     /**
+     * Get page
+     *
      * @Route("/pages/{slug}", methods={"GET"}, name="tui_page_get")
+     * @SWG\Response(
+     *   response=200,
+     *   description="Success"
+     * )
+     * @SWG\Response(
+     *   response=404,
+     *   description="Page not found in the given state"
+     * )
+     * @SWG\Parameter(
+     *   in="query",
+     *   required=false,
+     *   type="string",
+     *   default="live",
+     *   name="state",
+     *   description="Page namespace"
+     * )
      */
     public function retrieve(Request $request, SerializerInterface $serializer, PageRepository $pageRepository, $slug)
     {
@@ -88,7 +139,20 @@ class PageController extends AbstractController
     }
 
     /**
+     * Returns a list of pagedata objects containing the previous versions of the requested page
      * @Route("/pages/{slug}/history", methods={"GET"}, name="tui_page_history")
+     * @SWG\Response(
+     *   response=200,
+     *   description="Success"
+     * )
+     * @SWG\Parameter(
+     *   in="query",
+     *   required=false,
+     *   type="string",
+     *   default="live",
+     *   name="state",
+     *   description="Page namespace"
+     * )
      */
     public function history(Request $request, SerializerInterface $serializer, PageRepository $pageRepository, PageDataRepository $pageDataRepository, $slug)
     {
@@ -116,7 +180,23 @@ class PageController extends AbstractController
     }
 
     /**
+     * Edit a page
      * @Route("/pages/{slug}", methods={"PUT"}, name="tui_page_edit")
+     * @SWG\Response(
+     *   response=200,
+     *   description="Returns the updated page"
+     * )
+     * @SWG\Response(
+     *   response=422,
+     *   description="Validation error(s) in application/problem+json format"
+     * )
+     * @SWG\Parameter(
+     *   in="body",
+     *   required=true,
+     *   name="request",
+     *   description="Page content",
+     *   @SWG\Schema(type="object")
+     * )
      */
     public function edit(Request $request, SerializerInterface $serializer, PageRepository $pageRepository, Sanitizer $sanitizer, PageSchema $pageSchema, $slug)
     {
@@ -168,7 +248,21 @@ class PageController extends AbstractController
     }
 
     /**
+     * Delete a page from the given namespace
+     *
      * @Route("/pages/{slug}", methods={"DELETE"}, name="tui_page_delete")
+     * @SWG\Response(
+     *   response=204,
+     *   description="Returns an empty response"
+     * )
+     * @SWG\Parameter(
+     *   in="query",
+     *   required=false,
+     *   type="string",
+     *   default="live",
+     *   name="state",
+     *   description="Page namespace"
+     * )
      */
     public function delete(Request $request, PageRepository $pageRepository, $slug)
     {
@@ -191,7 +285,7 @@ class PageController extends AbstractController
         return new Response(null, 204);
     }
 
-    private function generatePageResponse(PageInterface $page, SerializerInterface $serializer, array $groups = []): JsonResponse
+    private function generatePageResponse(PageInterface $page, SerializerInterface $serializer, array $groups = [], int $status = 200): JsonResponse
     {
         $pageJson = $serializer->serialize($page, 'json', [
             'json_encode_options' => JsonResponse::DEFAULT_ENCODING_OPTIONS,
@@ -205,6 +299,6 @@ class PageController extends AbstractController
             '"styles":[]' => '"styles":{}',
         ]);
 
-        return new JsonResponse($pageJson, 200, [], true);
+        return new JsonResponse($pageJson, $status, [], true);
     }
 }

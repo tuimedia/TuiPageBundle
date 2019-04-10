@@ -2,6 +2,7 @@
 
 namespace Tui\PageBundle\Controller;
 
+use Swagger\Annotations as SWG;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,7 +13,13 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 class SchemaController extends AbstractController
 {
     /**
+     * Get the TuiPage JSON Schema
+     *
      * @Route("/pages/schema/tui-page.json", methods={"GET"}, name="tui_page_schema_page")
+     * @SWG\Response(
+     *   response=200,
+     *   description="Success"
+     * )
      */
     public function page(RouterInterface $router)
     {
@@ -32,7 +39,22 @@ class SchemaController extends AbstractController
     }
 
     /**
+     * Get the JSON schema for the given content component
+     *
+     * Content component schemas describe the distinct fields for that component. Bear in mind that all components have common fields that are not included in this schema file, but are also validated (e.g. `id`, `component`, `languages` and `styles`). See the TuiPage schema for details.
+     *
      * @Route("/pages/schema/{component}.schema.json", methods={"GET"}, name="tui_page_schema_component")
+     * @SWG\Parameter(
+     *   in="path",
+     *   required=true,
+     *   name="component",
+     *   type="string",
+     *   description="Component name, e.g. `PageText`"
+     * )
+     * @SWG\Response(
+     *   response=200,
+     *   description="Success"
+     * )
      */
     public function component(RouterInterface $router, $componentSchemas, string $component)
     {

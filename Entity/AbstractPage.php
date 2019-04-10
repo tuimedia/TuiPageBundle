@@ -44,7 +44,7 @@ class AbstractPage implements PageInterface
      * @ORM\JoinColumn(nullable=false, referencedColumnName="revision")
      * @Groups({"pageList", "pageCreate", "pageGet"})
      * @Assert\Valid
-     * @var AbstractPageData
+     * @var AbstractPageData|PageDataInterface
      */
     protected $pageData;
 
