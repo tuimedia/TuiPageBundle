@@ -187,10 +187,11 @@ class HtmlBlockTransformer implements TransformerInterface
 ```
 
 
-## Notes
+## Notes and known issues
 
 * slugs are globally unique
 * Theoretically you can reuse a block in multiple rows, but don't - the frontend renders the block id as the DOM ID attribute so that browsers can scroll to a piece of content, so you'll end up with invalid HTML and that functionality will break.
+* JSON Schema allows `type` to be an array of acceptable types, but the sanitizer only supports single values, or an array of one value plus `null` (e.g. `["string", "null"]`). Rather than allow potentially dangerous input through, or mangling input, the sanitizer throws an exception when it finds a type array that it can't handle.
 
 ## Filtering & Validation
 

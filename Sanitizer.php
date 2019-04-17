@@ -130,11 +130,37 @@ class Sanitizer
         return $data;
     }
 
+    // TODO: this assumes type is a single value, but arrays of valid types are also allowed in JSON Schema
+    // There is a special case we do handle: where type is an array of (any type or null)
     private function cleanValue($value, $propSchema)
     {
         // If type isn't set but there's a `properties` prop, assume object, else assume string
         // Should really set a type though - might be smarter to throw an exception
         $type = $propSchema->type ?? (isset($propSchema->properties) || isset($propSchema->patternProperties) ? 'object' : 'string');
+
+        // If the type is an array of (any type OR null), figure out which it is and handle it, else explode
+        if (is_array($type) && count($type) === 2 && in_array('null', $type)) {
+            $otherType = $type[0] === 'null' ? $type[1] : $type[0];
+            $type = is_null($value) ? 'null' : $otherType;
+        } elseif (is_array($type)) {
+            throw new \RuntimeException('Schema defines multiple types, but the sanitizer does not support this yet.');
+        }
+
+        if ($type === 'null') {
+            return null;
+        }
+
+        if ($type === 'number') {
+            return filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+        }
+
+        if ($type === 'integer') {
+            return intval($value);
+        }
+
+        if ($type === 'boolean') {
+            return !!$value;
+        }
 
         if ($type === 'string') {
             // Look for a content type - run HTML fields through antiXSS and everything else through filter_var
