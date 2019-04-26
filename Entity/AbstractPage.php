@@ -9,6 +9,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @UniqueEntity(fields={"state", "slug"}, message="A page already exists with that URL path (the combination of state and slug must be unique)")
+ * @ORM\Table(name="tui_page",
+ *   uniqueConstraints={@ORM\UniqueConstraint(name="state_slug_unique",columns={"state","slug"})}
+ * )
  * @ORM\MappedSuperclass
  */
 class AbstractPage implements PageInterface

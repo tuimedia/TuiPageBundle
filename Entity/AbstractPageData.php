@@ -10,7 +10,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\MappedSuperclass
- */
+ * @ORM\Table(name="tui_page_data")
+*/
 abstract class AbstractPageData implements PageDataInterface
 {
     /**
