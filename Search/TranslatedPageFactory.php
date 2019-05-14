@@ -32,12 +32,19 @@ class TranslatedPageFactory
         $defaultLanguage = $pageData->getDefaultLanguage();
 
         $metadata = $pageData->getMetadata();
-        if (isset($content['langData'][$defaultLanguage]['metadata'])) {
+        if (isset($content['langData'][$defaultLanguage]['metadata']) && is_array($content['langData'][$defaultLanguage]['metadata'])) {
             $metadata = array_replace_recursive($metadata, $content['langData'][$defaultLanguage]['metadata']);
+            if (!is_array($metadata)) {
+                throw new \RuntimeException('Failed to merge metadata');
+            }
         }
-        if (isset($content['langData'][$language]['metadata'])) {
+        if (isset($content['langData'][$language]['metadata']) && is_array($content['langData'][$language]['metadata'])) {
             $metadata = array_replace_recursive($metadata, $content['langData'][$language]['metadata']);
+            if (!is_array($metadata)) {
+                throw new \RuntimeException('Failed to merge metadata');
+            }
         }
+
         $translatedPage->metadata = $metadata;
 
         // Build translated blocks
