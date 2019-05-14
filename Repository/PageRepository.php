@@ -3,6 +3,7 @@
 namespace Tui\PageBundle\Repository;
 
 use Tui\PageBundle\Entity\AbstractPage;
+use Tui\PageBundle\Entity\PageInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -41,5 +42,13 @@ class PageRepository extends ServiceEntityRepository
     public function validate(AbstractPage $page)
     {
         return $this->validator->validate($page);
+    }
+
+    public function getBySlugAndState(string $slug, string $state = 'live'): ?PageInterface
+    {
+        return $this->findOneBy([
+            'slug' => filter_var($slug, FILTER_SANITIZE_STRING),
+            'state' => filter_var($state, FILTER_SANITIZE_STRING),
+        ]);
     }
 }
