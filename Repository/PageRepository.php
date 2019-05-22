@@ -52,7 +52,7 @@ class PageRepository extends ServiceEntityRepository
         ]);
     }
 
-    public function clonePage(Page $page, string $slug): Page
+    public function clonePage(PageInterface $page, string $slug): PageInterface
     {
         return (clone $page)->setSlug($slug);
     }
