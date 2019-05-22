@@ -91,4 +91,13 @@ class AbstractPage implements PageInterface
 
         return $this;
     }
+
+    public function __clone()
+    {
+        if (!$this->id) {
+            return;
+        }
+
+        $this->id = null;
+    }
 }

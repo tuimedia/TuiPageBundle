@@ -51,4 +51,9 @@ class PageRepository extends ServiceEntityRepository
             'state' => filter_var($state, FILTER_SANITIZE_STRING),
         ]);
     }
+
+    public function clonePage(Page $page, string $slug): Page
+    {
+        return (clone $page)->setSlug($slug);
+    }
 }
