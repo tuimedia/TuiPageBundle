@@ -99,5 +99,6 @@ class AbstractPage implements PageInterface
         }
 
         $this->id = null;
+        $this->setPageData(clone $this->getPageData());
     }
 }

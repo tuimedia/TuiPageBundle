@@ -19,7 +19,7 @@ abstract class AbstractPageData implements PageDataInterface
      * @ORM\GeneratedValue(strategy="UUID")
      * @ORM\Column(type="guid")
      * @Groups({"pageList", "pageGet"})
-     * @var string
+     * @var string|null
      */
     private $revision;
 
@@ -34,7 +34,7 @@ abstract class AbstractPageData implements PageDataInterface
      * @ORM\Column(type="string", length=128)
      * @Assert\Type(type="string")
      * @Assert\Length(max=128)
-     * @var string
+     * @var string|null
      */
     private $pageRef;
 
@@ -90,7 +90,7 @@ abstract class AbstractPageData implements PageDataInterface
         return $this->pageRef;
     }
 
-    public function setPageRef(string $pageRef): PageDataInterface
+    public function setPageRef(?string $pageRef): PageDataInterface
     {
         $this->pageRef = $pageRef;
 
@@ -138,7 +138,7 @@ abstract class AbstractPageData implements PageDataInterface
         return $this->revision;
     }
 
-    public function setRevision(string $revision): PageDataInterface
+    public function setRevision(?string $revision): PageDataInterface
     {
         $this->revision = $revision;
 
@@ -201,5 +201,19 @@ abstract class AbstractPageData implements PageDataInterface
         $this->metadata = $metadata;
 
         return $this;
+    }
+
+    public function __clone()
+    {
+        if (!$this->revision) {
+            return;
+        }
+
+        // Set previous revision so we know which page this was forked from
+        $this->previousRevision = $this->revision;
+        $this->revision = null;
+
+        // Create new page reference (to reset history)
+        $this->pageRef = rtrim(strtr(base64_encode(random_bytes(24)), '+/', '-_'), '=');
     }
 }
