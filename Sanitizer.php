@@ -80,8 +80,15 @@ class Sanitizer
      */
     private function stringCleanRecursive($data)
     {
+        $dataIsArray = is_array($data);
+        $dataIsObject = is_object($data);
         foreach ($data as $prop => $value) {
-            if (is_string($value)) {
+            if ($dataIsArray && is_string($value)) {
+                $data[$prop] = $this->stringClean($value);
+                continue;
+            }
+
+            if ($dataIsObject && is_string($value)) {
                 $data->$prop = $this->stringClean($value);
                 continue;
             }
