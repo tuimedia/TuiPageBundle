@@ -51,6 +51,8 @@ framework:
 
 * Set up access control on your `security.yml`. You can dump the available routes with `bin/console debug:router | grep tui_page`. This is not done by the bundle because roles and permissions may vary between apps.
 
+* Edit `config/packages/tui_page.yaml` to configure your component schemas and the search engine. Search is disabled by default; set at least one search host to enable it.
+
 ## Setting up the entities
 
 TuiPageBundle uses two Doctrine ORM entities to represent your pages. A `PageData` entity that describes the content of a revision of a page, and a `Page` entity that maps a URL and namespace to a `PageData` revision. The bundle provides two interfaces and abstract versions of these classes. To use them, create concrete representations of the abstract classes in your app, then add them to the bundle configuration. You can use your classes to add extra fields and relations (for instance tags).

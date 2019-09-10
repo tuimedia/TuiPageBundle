@@ -22,20 +22,27 @@ class SearchSubscriber implements EventSubscriber
     private $indexFactory;
     private $documentManager;
     private $pageFactory;
+    private $enabled;
 
     public function __construct(
         ElasticSearcher $searcher,
         SerializerInterface $serializer,
         LoggerInterface $logger,
         TranslatedPageFactory $pageFactory,
-        TranslatedPageIndexFactory $indexFactory
+        TranslatedPageIndexFactory $indexFactory,
+        bool $searchEnabled
     )
     {
+        if (!$searchEnabled) {
+            return;
+        }
+
         $this->searcher = $searcher;
         $this->serializer = $serializer;
         $this->logger = $logger;
         $this->indexFactory = $indexFactory;
         $this->pageFactory = $pageFactory;
+        $this->enabled = $searchEnabled;
 
         $this->indexManager = $this->searcher->indicesManager();
         $this->documentManager = $this->searcher->documentsManager();
@@ -56,6 +63,10 @@ class SearchSubscriber implements EventSubscriber
 
     public function preUpdate(PreUpdateEventArgs $args)
     {
+        if (!$this->enabled) {
+            return;
+        }
+
         $entity = $args->getObject();
         if (!$entity instanceof PageInterface) {
             return;
@@ -66,6 +77,10 @@ class SearchSubscriber implements EventSubscriber
 
     public function postPersist(LifecycleEventArgs $args)
     {
+        if (!$this->enabled) {
+            return;
+        }
+
         $entity = $args->getObject();
         if (!$entity instanceof PageInterface) {
             return;
@@ -79,6 +94,10 @@ class SearchSubscriber implements EventSubscriber
 
     public function preRemove(LifecycleEventArgs $args)
     {
+        if (!$this->enabled) {
+            return;
+        }
+
         $entity = $args->getObject();
         if (!$entity instanceof PageInterface) {
             return;

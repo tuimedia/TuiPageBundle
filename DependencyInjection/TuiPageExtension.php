@@ -24,6 +24,7 @@ class TuiPageExtension extends ConfigurableExtension
             $mappings[$component] = $componentConfig['mapping'];
         }
 
+        $container->setParameter('tui_page.search_enabled', !!count($mergedConfig['search_hosts']));
         $container->setParameter('tui_page.search_hosts', $mergedConfig['search_hosts']);
         $container->setParameter('tui_page.search_index', $mergedConfig['search_index']);
         $container->setParameter('tui_page.schemas', $schemas);

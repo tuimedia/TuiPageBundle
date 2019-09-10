@@ -65,8 +65,15 @@ class SearchController extends AbstractController
      *   description="Page of results to return"
      * )
      */
-    public function search(Request $request, PageRepository $pageRepository, ElasticSearcher $searcher, PageQuery $query, TranslatedPageIndexFactory $indexFactory)
+    public function search(Request $request, PageRepository $pageRepository, ElasticSearcher $searcher, PageQuery $query, TranslatedPageIndexFactory $indexFactory, bool $searchEnabled)
     {
+        if (!$searchEnabled) {
+            return $this->json([
+                'results' => [],
+                'total' => 0,
+            ]);
+        }
+
         $terms = substr((string) filter_var($request->query->get('q', ''), FILTER_SANITIZE_STRING), 0, 128);
         $language = substr((string) filter_var($request->query->get('language', 'en_GB'), FILTER_SANITIZE_STRING), 0, 32);
         $state = substr((string) filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING), 0, 32);
