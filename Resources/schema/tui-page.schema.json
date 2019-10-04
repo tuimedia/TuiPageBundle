@@ -34,7 +34,7 @@
     "state",
     "pageData"
   ],
-  "additionalProperties": false,
+  "additionalProperties": true,
   "definitions": {
     "block": {
       "title": "Content block",
