@@ -6,7 +6,7 @@ use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use ElasticSearcher\ElasticSearcher;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Tui\PageBundle\Entity\PageInterface;
 use Tui\PageBundle\Search\TranslatedPageFactory;
 use Tui\PageBundle\Search\TranslatedPageIndexFactory;
@@ -15,7 +15,7 @@ class SearchSubscriber implements EventSubscriber
 {
     private $searcher;
     private $logger;
-    private $serializer;
+    private $normalizer;
     private $checkedIndexes = [];
     private $languageIndex = [];
     private $indexManager;
@@ -26,7 +26,7 @@ class SearchSubscriber implements EventSubscriber
 
     public function __construct(
         ElasticSearcher $searcher,
-        SerializerInterface $serializer,
+        NormalizerInterface $normalizer,
         LoggerInterface $logger,
         TranslatedPageFactory $pageFactory,
         TranslatedPageIndexFactory $indexFactory,
@@ -38,7 +38,7 @@ class SearchSubscriber implements EventSubscriber
         }
 
         $this->searcher = $searcher;
-        $this->serializer = $serializer;
+        $this->normalizer = $normalizer;
         $this->logger = $logger;
         $this->indexFactory = $indexFactory;
         $this->pageFactory = $pageFactory;
@@ -116,7 +116,6 @@ class SearchSubscriber implements EventSubscriber
             return;
         }
 
-        // oh balls this doesn't work because availablelanguages is on the pagedata entity and those are always new
         if ($args->hasChangedField('pageData')) {
             $langsToRemove = array_diff(
                 $args->getOldValue('pageData')->getAvailableLanguages(),
@@ -149,7 +148,7 @@ class SearchSubscriber implements EventSubscriber
     private function upsertToIndex(PageInterface $page, string $lang)
     {
         $this->logger->info(sprintf('Indexing document %s (%s)', $page->getId(), $lang));
-        $translatedPage = $this->serializer->normalize($this->pageFactory->createFromPage($page, $lang));
+        $translatedPage = $this->normalizer->normalize($this->pageFactory->createFromPage($page, $lang));
 
         $this->documentManager->updateOrIndex(
             $this->getIndexForLanguage($lang)->getName(),

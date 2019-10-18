@@ -130,6 +130,24 @@ API calls and their serializer groups:
 * `GET /pages/{slug}` - `pageGet`
 * `GET /pages/{slug}/history` - `pageGet`
 * `PUT /pages/{slug}` - `pageCreate` (for deserializing), `pageGet` (for the response)
+* `GET /search` - `pageList`
+
+### Adding custom serializer groups
+
+You can provide additional serializer groups that TuiPageBundle uses for serializing and deserializing in its controllers. Edit `config/packages/tui_page.yaml`:
+
+```yaml
+tui_page:
+    serializer_groups:
+        list_response: ['myPageList']
+        search_response: ['myPageSearch']
+        get_response: ['myPageGet']
+        history_response: ['myPageHistory']
+        create_request: ['myPageCreate']
+        create_response: ['myPageCreateResponse']
+        update_request: ['myPageUpdate']
+        update_response: ['myPageUpdate']
+```
 
 ## Content components
 

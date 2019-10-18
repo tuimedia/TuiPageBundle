@@ -110,8 +110,12 @@ class SearchController extends AbstractController
             'total' => $results->getTotal(),
         ];
 
+        $serializerGroups = array_values(array_unique(array_merge([
+            'pageList',
+        ], (array) $this->getParameter('tui_page.serializer_groups.search_response'))));
+
         return $this->json($response, 200, [], [
-            'groups' => ['pageList'],
+            'groups' => $serializerGroups,
         ]);
     }
 }

@@ -51,7 +51,7 @@ class PageController extends AbstractController
         ]);
 
         return $this->json($pages, 200, [], [
-            'groups' => ['pageList'],
+            'groups' => $this->getSerializerGroups('list_response', ['pageList']),
         ]);
     }
 
@@ -86,8 +86,9 @@ class PageController extends AbstractController
         // Filter input
         $filteredContent = $sanitizer->cleanPage($request->getContent());
 
+        $groups = $this->getSerializerGroups('create_request', ['pageCreate']);
         $page = $serializer->deserialize($filteredContent, $this->pageClass, 'json', [
-            'groups' => ['pageCreate'],
+            'groups' => $groups,
         ]);
         $page->getPageData()->setPageRef(rtrim(strtr(base64_encode(random_bytes(24)), '+/', '-_'), '='));
 
@@ -98,7 +99,8 @@ class PageController extends AbstractController
 
         $pageRepository->save($page);
 
-        return $this->generatePageResponse($page, $serializer, ['pageGet'], 201);
+        $groups = $this->getSerializerGroups('create_response', ['pageGet']);
+        return $this->generatePageResponse($page, $serializer, $groups, 201);
     }
 
     /**
@@ -135,7 +137,8 @@ class PageController extends AbstractController
             throw $this->createNotFoundException('No such page in state ' . $state);
         }
 
-        return $this->generatePageResponse($page, $serializer, ['pageGet']);
+        $groups = $this->getSerializerGroups('get_response', ['pageGet']);
+        return $this->generatePageResponse($page, $serializer, $groups);
     }
 
     /**
@@ -174,8 +177,9 @@ class PageController extends AbstractController
             'created' => 'DESC',
         ]);
 
+        $groups = $this->getSerializerGroups('history_response', ['pageGet']);
         return $this->json($refs, 200, [], [
-            'groups' => ['pageGet'],
+            'groups' => $groups,
         ]);
     }
 
@@ -227,8 +231,9 @@ class PageController extends AbstractController
         $pageRef = $page->getPageData()->getPageRef();
 
         // Apply the request data
+        $groups = $this->getSerializerGroups('update_request', ['pageCreate']);
         $serializer->deserialize($filteredContent, $this->pageClass, 'json', [
-            'groups' => ['pageCreate'],
+            'groups' => $groups,
             'object_to_populate' => $page,
         ]);
         $page->getPageData()
@@ -244,7 +249,8 @@ class PageController extends AbstractController
         // Done - save and return
         $pageRepository->save($page);
 
-        return $this->generatePageResponse($page, $serializer, ['pageGet']);
+        $groups = $this->getSerializerGroups('update_response', ['pageGet']);
+        return $this->generatePageResponse($page, $serializer, $groups);
     }
 
     /**
@@ -300,5 +306,13 @@ class PageController extends AbstractController
         ]);
 
         return new JsonResponse($pageJson, $status, [], true);
+    }
+
+    private function getSerializerGroups(string $action, array $default)
+    {
+        $parameter = 'tui_page.serializer_groups.' . $action;
+        $groups = array_values(array_unique(array_merge($default, (array) $this->getParameter($parameter))));
+
+        return $groups;
     }
 }
