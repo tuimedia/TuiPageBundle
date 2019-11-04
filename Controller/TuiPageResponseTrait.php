@@ -14,33 +14,35 @@ trait TuiPageResponseTrait
             'json_encode_options' => JsonResponse::DEFAULT_ENCODING_OPTIONS,
             'groups' => $groups,
             'callbacks' => [
-                'content' => function ($innerObject, $outerObject, string $attributeName, string $format = null, array $context = []) {
-                    if (!$outerObject instanceof PageDataInterface) {
-                        return $innerObject;
-                    }
-
-                    foreach (($innerObject['blocks'] ?? []) as $idx => $block) {
-                        if (is_array($block['styles'] ?? false) && !count($block['styles'])) {
-                            $innerObject['blocks'][$idx]['styles'] = 'TUI_PAGE_EMPTY_OBJECT';
-                        }
-                    }
-
-                    foreach (['blocks', 'langData'] as $key) {
-                        if (count($innerObject[$key] ?? []) === 0) {
-                            $innerObject[$key] = 'TUI_PAGE_EMPTY_OBJECT';
-                        }
-                    }
-
-                    return $innerObject;
-                },
+                'content' => [$this, 'flagEmptyObjects'],
             ],
         ]);
 
-        // Hackish fixen
+        // Replace markers with empty objects
         $pageJson = strtr($pageJson, [
             '"TUI_PAGE_EMPTY_OBJECT"' => '{}',
         ]);
 
         return new JsonResponse($pageJson, $status, [], true);
+    }
+
+    public function flagEmptyObjects($innerObject, $outerObject) {
+        if (!$outerObject instanceof PageDataInterface) {
+            return $innerObject;
+        }
+
+        foreach (($innerObject['blocks'] ?? []) as $idx => $block) {
+            if (is_array($block['styles'] ?? false) && !count($block['styles'])) {
+                $innerObject['blocks'][$idx]['styles'] = 'TUI_PAGE_EMPTY_OBJECT';
+            }
+        }
+
+        foreach (['blocks', 'langData'] as $key) {
+            if (count($innerObject[$key] ?? []) === 0) {
+                $innerObject[$key] = 'TUI_PAGE_EMPTY_OBJECT';
+            }
+        }
+
+        return $innerObject;
     }
 }
