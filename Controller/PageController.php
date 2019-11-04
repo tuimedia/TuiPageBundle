@@ -19,6 +19,8 @@ use Tui\PageBundle\Repository\PageRepository;
 
 class PageController extends AbstractController
 {
+    use TuiPageResponseTrait;
+
     protected $pageClass;
 
     function __construct(string $pageClass) {
@@ -100,7 +102,7 @@ class PageController extends AbstractController
         $pageRepository->save($page);
 
         $groups = $this->getSerializerGroups('create_response', ['pageGet']);
-        return $this->generatePageResponse($page, $serializer, $groups, 201);
+        return $this->generateTuiPageResponse($page, $serializer, $groups, 201);
     }
 
     /**
@@ -138,7 +140,7 @@ class PageController extends AbstractController
         }
 
         $groups = $this->getSerializerGroups('get_response', ['pageGet']);
-        return $this->generatePageResponse($page, $serializer, $groups);
+        return $this->generateTuiPageResponse($page, $serializer, $groups);
     }
 
     /**
@@ -250,7 +252,7 @@ class PageController extends AbstractController
         $pageRepository->save($page);
 
         $groups = $this->getSerializerGroups('update_response', ['pageGet']);
-        return $this->generatePageResponse($page, $serializer, $groups);
+        return $this->generateTuiPageResponse($page, $serializer, $groups);
     }
 
     /**
@@ -289,23 +291,6 @@ class PageController extends AbstractController
         $pageRepository->delete($page);
 
         return new Response(null, 204);
-    }
-
-    private function generatePageResponse(PageInterface $page, SerializerInterface $serializer, array $groups = [], int $status = 200): JsonResponse
-    {
-        $pageJson = $serializer->serialize($page, 'json', [
-            'json_encode_options' => JsonResponse::DEFAULT_ENCODING_OPTIONS,
-            'groups' => $groups,
-        ]);
-
-        // Hackish fixen
-        $pageJson = strtr($pageJson, [
-            '"blocks":[]' => '"blocks":{}',
-            '"langData":[]' => '"langData":{}',
-            '"styles":[]' => '"styles":{}',
-        ]);
-
-        return new JsonResponse($pageJson, $status, [], true);
     }
 
     private function getSerializerGroups(string $action, array $default)
