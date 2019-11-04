@@ -2,6 +2,7 @@
 namespace Tui\PageBundle\Controller;
 
 use Tui\PageBundle\Entity\PageInterface;
+use Tui\PageBundle\Entity\PageDataInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -14,16 +15,20 @@ trait TuiPageResponseTrait
             'groups' => $groups,
             'callbacks' => [
                 'content' => function ($innerObject, $outerObject, string $attributeName, string $format = null, array $context = []) {
-                    dd($innerObject);
                     if (!$outerObject instanceof PageDataInterface) {
                         return $innerObject;
                     }
 
-                    if (count($innerObject['blocks'] ?? []) === 0) {
-                        $innerObject['blocks'] = new \stdClass;
+                    foreach (($innerObject['blocks'] ?? []) as $idx => $block) {
+                        if (is_array($block['styles'] ?? false) && !count($block['styles'])) {
+                            $innerObject['blocks'][$idx]['styles'] = 'TUI_PAGE_EMPTY_OBJECT';
+                        }
                     }
-                    if (count($innerObject['langData'] ?? []) === 0) {
-                        $innerObject['langData'] = new \stdClass;
+
+                    foreach (['blocks', 'langData'] as $key) {
+                        if (count($innerObject[$key] ?? []) === 0) {
+                            $innerObject[$key] = 'TUI_PAGE_EMPTY_OBJECT';
+                        }
                     }
 
                     return $innerObject;
@@ -33,7 +38,7 @@ trait TuiPageResponseTrait
 
         // Hackish fixen
         $pageJson = strtr($pageJson, [
-            '"styles":[]' => '"styles":{}',
+            '"TUI_PAGE_EMPTY_OBJECT"' => '{}',
         ]);
 
         return new JsonResponse($pageJson, $status, [], true);

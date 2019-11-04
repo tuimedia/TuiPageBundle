@@ -149,6 +149,12 @@ tui_page:
         update_response: ['myPageUpdate']
 ```
 
+### Creating custom controllers
+
+You may find yourself needing to return serialized TuiPage objects from your own controllers. To ensure consistent output, consider using the `Tui\PageBundle\Controller\TuiPageResponseTrait` and calling `$this->generateTuiPageResponse($page, $serializer, $groups = [], $statusCode = 200)` to create your response object.
+
+The most notable thing this method does is to assert the type of certain object properties when they happen to be empty (`$.pageData.content.langData`, `$.pageData.content.blocks` and the `styles` property of any block).
+
 ## Content components
 
 Every content component you create for the frontend should have a JSON Schema file describing its contents. The schema is used by TuiPageBundle to validate and sanitise its content. If you don't define a schema, that component will not be validated or sanitised beyond the required fields, so… define a schema!
