@@ -7,6 +7,8 @@ use Tui\PageBundle\DependencyInjection\TransformerPass;
 
 class TuiPageBundle extends Bundle
 {
+    const VERSION = 1.0;
+
     public function build(ContainerBuilder $container)
     {
         parent::build($container);

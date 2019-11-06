@@ -116,6 +116,12 @@
       "title": "Layout row",
       "type": "object",
       "properties": {
+        "id": {
+          "title": "Block id",
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 36
+        },
         "blocks": {
           "title": "Block ids",
           "type": "array"
@@ -125,7 +131,11 @@
           "type": "string",
           "minLength": 1
         }
-      }
+      },
+      "required": [
+        "blocks",
+        "component"
+      ]
     },
     "pageData": {
       "type": "object",
