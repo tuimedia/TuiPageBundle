@@ -57,7 +57,7 @@ class PageRepository extends ServiceEntityRepository
         return (clone $page)->setSlug($slug);
     }
 
-    public function ensureRowIds(PageInterface $page): PageInterface
+    public function ensureRowIds(AbstractPage $page): AbstractPage
     {
         $modified = false;
         $content = $page->getPageData()->getContent();

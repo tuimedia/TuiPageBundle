@@ -42,7 +42,7 @@ class TranslationHandler
         // Create group for translatable metadata
         $body->appendChild($metadataGroup = $doc->createElement('group'));
         $metadataGroup->setAttribute('resname', 'metadata');
-        $metadataGroup->setAttribute('id', $metadataGroup->getNodePath());
+        $metadataGroup->setAttribute('id', (string) $metadataGroup->getNodePath());
         $this->addArrayRecursive($doc, $metadataGroup, $sourceLangData['metadata'] ?? []);
 
         // Loop through layout rows, create a group for the row and include all row langdata
@@ -51,7 +51,7 @@ class TranslationHandler
 
             // Add row langdata if it exists
             $rowGroup->setAttribute('resname', $row['id']);
-            $rowGroup->setAttribute('id', hash('sha1', $rowGroup->getNodePath()));
+            $rowGroup->setAttribute('id', hash('sha1', (string) $rowGroup->getNodePath()));
             if (array_key_exists($row['id'], $sourceLangData)) {
                 $this->addArrayRecursive($doc, $rowGroup, $sourceLangData[$row['id']]);
             }
@@ -63,7 +63,7 @@ class TranslationHandler
                 }
                 $rowGroup->appendChild($blockGroup = $doc->createElement('group'));
                 $blockGroup->setAttribute('resname', $blockId);
-                $blockGroup->setAttribute('id', hash('sha1', $blockGroup->getNodePath()));
+                $blockGroup->setAttribute('id', hash('sha1', (string) $blockGroup->getNodePath()));
                 $this->addArrayRecursive($doc, $blockGroup, $sourceLangData[$blockId] ?? []);
             }
 
