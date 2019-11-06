@@ -42,7 +42,7 @@ class TranslationHandler
         // Create group for translatable metadata
         $body->appendChild($metadataGroup = $doc->createElement('group'));
         $metadataGroup->setAttribute('resname', 'metadata');
-        $metadataGroup->setAttribute('id', (string) $metadataGroup->getNodePath());
+        $metadataGroup->setAttribute('id', hash('sha1', (string) $metadataGroup->getNodePath()));
         $this->addArrayRecursive($doc, $metadataGroup, $sourceLangData['metadata'] ?? []);
 
         // Loop through layout rows, create a group for the row and include all row langdata
@@ -77,14 +77,14 @@ class TranslationHandler
             if (is_array($value)) {
                 $element->appendChild($subGroup = $doc->createElement('group'));
                 $subGroup->setAttribute('resname', $key);
-                $subGroup->setAttribute('id', $subGroup->getNodePath());
+                $subGroup->setAttribute('id', hash('sha1', (string) $subGroup->getNodePath()));
                 $this->addArrayRecursive($doc, $subGroup, $value);
                 continue;
             }
 
             $element->appendChild($unit = $doc->createElement('trans-unit'));
             $unit->setAttribute('resname', $key);
-            $unit->setAttribute('id', $unit->getNodePath());
+            $unit->setAttribute('id', hash('sha1', (string) $unit->getNodePath()));
             $unit->appendChild($source = $doc->createElement('source'));
             $unit->appendChild($target = $doc->createElement('target'));
             if (preg_match('/[<>&]/', $value)) {
