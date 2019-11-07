@@ -14,11 +14,12 @@ class TranslationHandler
         $this->router = $router;
     }
 
-    public function generateXliff(PageInterface $page)
+    public function generateXliff(PageInterface $page, $targetLanguage)
     {
         $pageData = $page->getPageData();
         $content = $pageData->getContent();
         $sourceLangData = $content['langData'][$pageData->getDefaultLanguage()];
+        $targetLangData = $content['langData'][$targetLanguage] ?? [];
 
         $doc = new \DOMDocument('1.0', 'utf-8');
         $doc->formatOutput = true;
@@ -36,8 +37,8 @@ class TranslationHandler
         $file->setAttribute('date', $date->format('Y-m-d\TH:i:s\Z'));
 
         $file->setAttribute('source-language', $this->convertLangCode($pageData->getDefaultLanguage()));
+        $file->setAttribute('target-language', $this->convertLangCode($targetLanguage));
         $file->setAttribute('datatype', 'plaintext');
-
 
         $file->appendChild($header = $doc->createElement('header'));
         $header->appendChild($tool = $doc->createElement('tool'));
@@ -47,34 +48,21 @@ class TranslationHandler
 
         $file->appendChild($body = $doc->createElement('body'));
 
-        // Create group for translatable metadata
-        $body->appendChild($metadataGroup = $doc->createElement('group'));
-        $metadataGroup->setAttribute('resname', 'metadata');
-        $metadataGroup->setAttribute('id', hash('sha1', (string) $metadataGroup->getNodePath()));
-        $this->addNote($doc, $metadataGroup, 'metadata');
-        $this->addArrayRecursive($doc, $metadataGroup, $sourceLangData['metadata'] ?? []);
+        // Translatable metadata
+        $this->addArrayRecursive($doc, $body, 'metadata', $sourceLangData['metadata'] ?? [], $targetLangData['metadata'] ?? []);
 
-        // Loop through layout rows, create a group for the row and include all row langdata
         foreach ($content['layout'] as $row) {
-            $body->appendChild($rowGroup = $doc->createElement('group'));
-
             // Add row langdata if it exists
-            $rowGroup->setAttribute('resname', $row['id']);
-            $rowGroup->setAttribute('id', hash('sha1', (string) $rowGroup->getNodePath()));
             if (array_key_exists($row['id'], $sourceLangData)) {
-                $this->addArrayRecursive($doc, $rowGroup, $sourceLangData[$row['id']]);
+                $this->addArrayRecursive($doc, $body, $row['id'], $sourceLangData[$row['id']], $targetLangData[$row['id']] ?? []);
             }
 
-            // Loop through row blocks, create a group for each block with its langdata
+            // Add block langdata
             foreach ($row['blocks'] as $blockId) {
                 if (!array_key_exists($blockId, $sourceLangData)) {
                     continue;
                 }
-                $rowGroup->appendChild($blockGroup = $doc->createElement('group'));
-                $this->addNote($doc, $blockGroup, $content['blocks'][$blockId]['component']);
-                $blockGroup->setAttribute('resname', $blockId);
-                $blockGroup->setAttribute('id', hash('sha1', (string) $blockGroup->getNodePath()));
-                $this->addArrayRecursive($doc, $blockGroup, $sourceLangData[$blockId] ?? []);
+                $this->addArrayRecursive($doc, $body, $blockId, $sourceLangData[$blockId] ?? [], $targetLangData[$blockId] ?? []);
             }
 
         }
@@ -82,28 +70,27 @@ class TranslationHandler
         return $doc->saveXML();
     }
 
-    private function addArrayRecursive($doc, $element, $values) {
-        foreach ($values as $key => $value) {
+    private function addArrayRecursive($doc, $element, string $resPrefix, array $sourceValues, array $targetValues) {
+        foreach ($sourceValues as $key => $value) {
             if (is_array($value)) {
-                $element->appendChild($subGroup = $doc->createElement('group'));
-                $this->addNote($doc, $subGroup, $key);
-                $subGroup->setAttribute('resname', $key);
-                $subGroup->setAttribute('id', hash('sha1', (string) $subGroup->getNodePath()));
-                $this->addArrayRecursive($doc, $subGroup, $value);
+                $this->addArrayRecursive($doc, $element, vsprintf('%s.%s', [
+                    $resPrefix,
+                    $key,
+                ]), $value, $targetValues[$key] ?? []);
                 continue;
             }
 
             $element->appendChild($unit = $doc->createElement('trans-unit'));
-            $unit->setAttribute('resname', $key);
+            $unit->setAttribute('resname', vsprintf('%s.%s', [$resPrefix, $key]));
             $unit->setAttribute('id', hash('sha1', (string) $unit->getNodePath()));
             $unit->appendChild($source = $doc->createElement('source'));
             $unit->appendChild($target = $doc->createElement('target'));
             if (preg_match('/[<>&]/', $value)) {
                 $source->appendChild($doc->createCDATASection($value));
-                $target->appendChild($doc->createCDATASection(''));
+                $target->appendChild($doc->createCDATASection($targetValues[$key] ?? ''));
             } else {
                 $source->appendChild($doc->createTextNode($value));
-                $target->appendChild($doc->createTextNode(''));
+                $target->appendChild($doc->createTextNode($targetValues[$key] ?? ''));
                 if (preg_match("/\r\n|\n|\r|\t/", $value)) {
                     $source->setAttribute('xml:space', 'preserve');
                     $target->setAttribute('xml:space', 'preserve');
