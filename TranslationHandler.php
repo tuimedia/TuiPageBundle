@@ -1,12 +1,20 @@
 <?php
 namespace Tui\PageBundle;
 
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Tui\PageBundle\TuiPageBundle;
 use Tui\PageBundle\Entity\PageInterface;
 
 class TranslationHandler
 {
-    public function generateXliff(PageInterface $page, $targetLanguage)
+    private $router;
+
+    public function __construct(UrlGeneratorInterface $router)
+    {
+        $this->router = $router;
+    }
+
+    public function generateXliff(PageInterface $page)
     {
         $pageData = $page->getPageData();
         $content = $pageData->getContent();
@@ -18,18 +26,18 @@ class TranslationHandler
         $root->setAttribute('xmlns', 'urn:oasis:names:tc:xliff:document:1.2');
         $root->setAttribute('version', '1.2');
         $root->appendChild($file = $doc->createElement('file'));
+        $file->setAttribute('original', $this->router->generate('tui_page_get', [
+            'slug' => $page->getSlug(),
+            'state' => $page->getState(),
+            'revision' => $pageData->getRevision(),
+        ], UrlGeneratorInterface::ABSOLUTE_URL));
 
         $date = new \DateTime();
         $file->setAttribute('date', $date->format('Y-m-d\TH:i:s\Z'));
 
         $file->setAttribute('source-language', $this->convertLangCode($pageData->getDefaultLanguage()));
-        $file->setAttribute('target-language', $this->convertLangCode($targetLanguage));
         $file->setAttribute('datatype', 'plaintext');
-        $file->setAttribute('original', vsprintf('%s:%s:%s', [
-            $page->getSlug(),
-            $page->getState(),
-            $pageData->getRevision(),
-        ]));
+
 
         $file->appendChild($header = $doc->createElement('header'));
         $header->appendChild($tool = $doc->createElement('tool'));

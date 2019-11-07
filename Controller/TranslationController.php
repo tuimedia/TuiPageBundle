@@ -23,7 +23,7 @@ class TranslationController extends AbstractController
     /**
      * Get page
      *
-     * @Route("/translations/{slug}/{lang}", methods={"GET"}, name="tui_page_get_translation")
+     * @Route("/translations/{slug}", methods={"GET"}, name="tui_page_get_translation")
      * @SWG\Response(
      *   response=200,
      *   description="Success"
@@ -47,21 +47,13 @@ class TranslationController extends AbstractController
      *   name="slug",
      *   description="Page slug"
      * )
-     * @SWG\Parameter(
-     *   in="path",
-     *   required=true,
-     *   type="string",
-     *   name="lang",
-     *   description="Destination language"
-     * )
      */
     public function retrieve(
         Request $request,
         SerializerInterface $serializer,
         PageRepository $pageRepository,
         TranslationHandler $translationHandler,
-        string $slug,
-        string $lang
+        string $slug
     ) {
         $state = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
 
@@ -75,7 +67,7 @@ class TranslationController extends AbstractController
         }
 
         $page = $pageRepository->ensureRowIds($page);
-        $file = $translationHandler->generateXliff($page, $lang);
+        $file = $translationHandler->generateXliff($page);
 
         return new Response($file, 201, [
             'Content-Type' => 'application/x-xliff+xml',
