@@ -76,7 +76,9 @@ class TranslationController extends AbstractController
             throw $this->createNotFoundException('No such page in state ' . $state);
         }
 
-        $page = $pageRepository->ensureRowIds($page);
+        if ($pageRepository->ensureRowIds($page)) {
+            $pageRepository->save($page);
+        }
         $file = $translationHandler->generateXliff($page, $lang);
 
         return new Response($file, 201, [
@@ -139,17 +141,63 @@ class TranslationController extends AbstractController
             throw $this->createNotFoundException('No such page in state ' . $state);
         }
 
-        $page = $pageRepository->ensureRowIds($page);
-        $file = $translationHandler->importXliff($page, $request->getContent());
+        $destination = filter_var($request->query->get('destination', 'original'), FILTER_SANITIZE_STRING);
+        $destinationState = filter_var($request->query->get('destinationState', 'live'), FILTER_SANITIZE_STRING);
+        $destinationSlug = filter_var($request->query->get('destinationSlug', $page->getSlug()), FILTER_SANITIZE_STRING);
+        if (!in_array($destination, ['new', 'original'])) {
+            return $this->json([
+                'type' => 'https://tuimedia.com/page-bundle/validation',
+                'title' => 'Invalid destination parameter',
+                'detail' => 'Valid destinations are new (to save to a new page), and original (to create a new one)',
+            ], 422);
+        }
 
+        if ($destination === 'new' && !($destinationSlug || $destinationState)) {
+            return $this->json([
+                'type' => 'https://tuimedia.com/page-bundle/validation',
+                'title' => 'Missing or invalid destination slug/state',
+                'detail' => 'When saving to a new page, you must provide a destinationSlug and/or a destinationState',
+            ], 409);
+        }
+
+        $pageRepository->ensureRowIds($page);
+        if ($destination === 'new') {
+            $newPageExists = $pageRepository->findOneBy([
+                'slug' => $destinationSlug,
+                'state' => $destinationState,
+            ]);
+
+            if ($newPageExists) {
+                return $this->json([
+                    'type' => 'https://tuimedia.com/page-bundle/validation',
+                    'title' => 'New destination already exists',
+                    'detail' => 'You requested the data be saved to a new page, but the destination state and slug already exist',
+                ], 422);
+            }
+
+            $page = clone $page;
+            // Set a temporary revision so the page will validate
+            $page->getPageData()->setRevision('c6706289-1347-441c-9e09-4718e80dc56a');
+            if ($destinationSlug) {
+                $page->setSlug(preg_replace('/[^\w]+/', '-', $slug));
+            }
+
+            if ($destinationState) {
+                $page->setState($destinationState);
+            }
+        }
+
+        $file = $translationHandler->importXliff($page, $request->getContent());
         $groups = $this->getTuiPageSerializerGroups('import_response', ['pageGet']);
-        $pageJson =  $this->generateTuiPageJson($page, $serializer, $groups);
+        $pageJson = $this->generateTuiPageJson($page, $serializer, $groups);
 
         // Validate input
         $errors = $pageSchema->validate($pageJson);
         if ($errors) {
             return $this->json($errors, 422);
         }
+        // Remove the temporary revision
+        $page->getPageData()->setRevision(null);
 
         $pageRepository->save($page);
 

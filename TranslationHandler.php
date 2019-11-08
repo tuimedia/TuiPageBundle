@@ -119,7 +119,7 @@ class TranslationHandler
         if (false === $doc = \simplexml_load_string($xliffData)) {
             libxml_use_internal_errors($previous);
             $libxmlError = libxml_get_last_error();
-            throw new RuntimeException(sprintf('Could not read XML source: %s', $libxmlError->message));
+            throw new \RuntimeException(sprintf('Could not read XML source: %s', $libxmlError ? $libxmlError->message : '[no error message]'));
         }
         libxml_use_internal_errors($previous);
 
@@ -128,23 +128,48 @@ class TranslationHandler
 
         // Get the file tag for target language, revision, etc
         $file = $doc->xpath('//xliff:file[1]')[0];
+        if (!$file) {
+            throw new \Exception('No XLIFF file element found');
+        }
         $targetLanguage = (string) $file->attributes()['target-language'];
 
         $pageData = $page->getPageData();
         $content = $pageData->getContent();
+        $blocks = $content['blocks'];
+        $layout = $content['layout'];
         $langData = $content['langData'][$targetLanguage] ?? [];
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
 
-        foreach ($doc->xpath('//xliff:trans-unit') as $unit) {
+        $units = $doc->xpath('//xliff:trans-unit');
+        if ($units === false) {
+            throw new \Exception('No translation units found');
+        }
+
+        foreach ($units as $unit) {
             $resource = (string) $unit->attributes()['resname'];
             if (!preg_match('/^(\[[^\][]+])+$/', $resource)) {
-                throw new \Exception('Invalid resource name ' . $resource);
+                throw new \Exception('Invalid resource name: ' . $resource);
             }
+            preg_match('/^\[([^\][]+)]/', $resource, $matches);
+            $blockId = $matches[1];
+
+            if (
+                $blockId !== 'metadata'
+                && !array_key_exists($blockId, $blocks)
+                && !array_key_exists($blockId, $layout)
+            ) {
+                throw new \Exception('Missing or invalid resource: '. $blockId);
+            }
+
             $target = (string) $unit->target;
             if (!$target) {
                 continue;
             }
             $propertyAccessor->setValue($langData, $resource, $target);
+
+            if (!in_array($targetLanguage, $blocks[$blockId]['languages'] ?? [])) {
+                $blocks[$blockId]['languages'][] = $targetLanguage;
+            }
         }
 
         $content['langData'][$targetLanguage] = $langData;

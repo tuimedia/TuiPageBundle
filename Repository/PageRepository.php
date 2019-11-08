@@ -57,7 +57,7 @@ class PageRepository extends ServiceEntityRepository
         return (clone $page)->setSlug($slug);
     }
 
-    public function ensureRowIds(AbstractPage $page): AbstractPage
+    public function ensureRowIds(AbstractPage $page): bool
     {
         $modified = false;
         $content = $page->getPageData()->getContent();
@@ -70,11 +70,8 @@ class PageRepository extends ServiceEntityRepository
             return $row;
         }, $content['layout']);
 
-        if ($modified) {
-            $page->getPageData()->setContent($content);
-            $this->save($page);
-        }
+        $page->getPageData()->setContent($content);
 
-        return $page;
+        return $modified;
     }
 }
