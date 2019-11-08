@@ -10,6 +10,13 @@ trait TuiPageResponseTrait
 {
     public function generateTuiPageResponse(PageInterface $page, SerializerInterface $serializer, array $groups = [], int $status = 200): JsonResponse
     {
+        $pageJson = $this->generateTuiPageJson($page, $serializer, $groups);
+
+        return new JsonResponse($pageJson, $status, [], true);
+    }
+
+    public function generateTuiPageJson(PageInterface $page, SerializerInterface $serializer, array $groups = []): string
+    {
         $pageJson = $serializer->serialize($page, 'json', [
             'json_encode_options' => JsonResponse::DEFAULT_ENCODING_OPTIONS,
             'groups' => $groups,
@@ -23,7 +30,7 @@ trait TuiPageResponseTrait
             '"TUI_PAGE_EMPTY_OBJECT"' => '{}',
         ]);
 
-        return new JsonResponse($pageJson, $status, [], true);
+        return $pageJson;
     }
 
     public function flagEmptyObjects($innerObject, $outerObject) {
@@ -44,5 +51,13 @@ trait TuiPageResponseTrait
         }
 
         return $innerObject;
+    }
+
+    public function getTuiPageSerializerGroups(string $action, array $default)
+    {
+        $parameter = 'tui_page.serializer_groups.' . $action;
+        $groups = array_values(array_unique(array_merge($default, (array) $this->getParameter($parameter))));
+
+        return $groups;
     }
 }

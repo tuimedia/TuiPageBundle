@@ -9,7 +9,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Tui\PageBundle\Repository\PageRepository;
 use Tui\PageBundle\Search\TranslatedPageFactory;
 use Tui\PageBundle\Search\TranslatedPageIndexFactory;
@@ -22,11 +22,11 @@ class ReindexCommand extends Command
     private $pageFactory;
     private $pageRepository;
     private $searcher;
-    private $serializer;
+    private $normalizer;
     private $languageIndex = [];
 
     public function __construct(
-        SerializerInterface $serializer,
+        NormalizerInterface $normalizer,
         LoggerInterface $logger,
         ElasticSearcher $searcher,
         PageRepository $pageRepository,
@@ -38,7 +38,7 @@ class ReindexCommand extends Command
         $this->pageFactory = $pageFactory;
         $this->pageRepository = $pageRepository;
         $this->searcher = $searcher;
-        $this->serializer = $serializer;
+        $this->normalizer = $normalizer;
         parent::__construct();
     }
 
@@ -101,9 +101,9 @@ class ReindexCommand extends Command
                 $page->getSlug(),
             ]));
             foreach ($page->getPageData()->getAvailableLanguages() as $language) {
-                $translatedPage = $this->serializer->normalize($this->pageFactory->createFromPage($page, $language));
-                $this->logger->debug('Translated page: ' . $this->serializer->encode($translatedPage, 'json'));
-                $documentManager->updateOrIndex($this->languageIndex[$language], 'pages', $page->getId(), $translatedPage);
+                $translatedPage = $this->normalizer->normalize($this->pageFactory->createFromPage($page, $language));
+                $this->logger->debug('Translated page: ' . json_encode($translatedPage));
+                $documentManager->updateOrIndex($this->languageIndex[$language], 'pages', $page->getId(), (array) $translatedPage);
             }
         }
 

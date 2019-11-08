@@ -22,7 +22,10 @@ class PageSchema
 
         $validator = new Validator();
         // omg hax, just use the existing plain text type for html
-        $mediaTypes = $validator->getMediaType()->add('text/html', new Text());
+        $mediaType = $validator->getMediaType();
+        if ($mediaType instanceof \Opis\JsonSchema\MediaTypeContainer) {
+            $mediaTypes = $mediaType->add('text/html', new Text());
+        }
 
         /** @var ValidationResult $result */
         $result = $validator->schemaValidation($data, $schema);
