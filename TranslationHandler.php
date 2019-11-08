@@ -1,6 +1,7 @@
 <?php
 namespace Tui\PageBundle;
 
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Tui\PageBundle\TuiPageBundle;
 use Tui\PageBundle\Entity\PageInterface;
@@ -49,12 +50,12 @@ class TranslationHandler
         $file->appendChild($body = $doc->createElement('body'));
 
         // Translatable metadata
-        $this->addArrayRecursive($doc, $body, 'metadata', $sourceLangData['metadata'] ?? [], $targetLangData['metadata'] ?? []);
+        $this->addArrayRecursive($doc, $body, '[metadata]', $sourceLangData['metadata'] ?? [], $targetLangData['metadata'] ?? []);
 
         foreach ($content['layout'] as $row) {
             // Add row langdata if it exists
             if (array_key_exists($row['id'], $sourceLangData)) {
-                $this->addArrayRecursive($doc, $body, $row['id'], $sourceLangData[$row['id']], $targetLangData[$row['id']] ?? []);
+                $this->addArrayRecursive($doc, $body, "[{$row['id']}]", $sourceLangData[$row['id']], $targetLangData[$row['id']] ?? []);
             }
 
             // Add block langdata
@@ -62,7 +63,7 @@ class TranslationHandler
                 if (!array_key_exists($blockId, $sourceLangData)) {
                     continue;
                 }
-                $this->addArrayRecursive($doc, $body, $blockId, $sourceLangData[$blockId] ?? [], $targetLangData[$blockId] ?? []);
+                $this->addArrayRecursive($doc, $body, "[$blockId]", $sourceLangData[$blockId] ?? [], $targetLangData[$blockId] ?? []);
             }
 
         }
@@ -73,7 +74,7 @@ class TranslationHandler
     private function addArrayRecursive($doc, $element, string $resPrefix, array $sourceValues, array $targetValues) {
         foreach ($sourceValues as $key => $value) {
             if (is_array($value)) {
-                $this->addArrayRecursive($doc, $element, vsprintf('%s.%s', [
+                $this->addArrayRecursive($doc, $element, vsprintf('%s[%s]', [
                     $resPrefix,
                     $key,
                 ]), $value, $targetValues[$key] ?? []);
@@ -81,7 +82,7 @@ class TranslationHandler
             }
 
             $element->appendChild($unit = $doc->createElement('trans-unit'));
-            $unit->setAttribute('resname', vsprintf('%s.%s', [$resPrefix, $key]));
+            $unit->setAttribute('resname', vsprintf('%s[%s]', [$resPrefix, $key]));
             $unit->setAttribute('id', hash('sha1', (string) $unit->getNodePath()));
             $unit->appendChild($source = $doc->createElement('source'));
             $unit->appendChild($target = $doc->createElement('target'));
@@ -109,5 +110,46 @@ class TranslationHandler
     {
         $element->appendChild($note = $doc->createElement('note'));
         $note->appendChild($doc->createTextNode($text));
+    }
+
+    public function importXliff(PageInterface $page, string $xliffData)
+    {
+        // Load & check
+        $previous = libxml_use_internal_errors(true);
+        if (false === $doc = \simplexml_load_string($xliffData)) {
+            libxml_use_internal_errors($previous);
+            $libxmlError = libxml_get_last_error();
+            throw new RuntimeException(sprintf('Could not read XML source: %s', $libxmlError->message));
+        }
+        libxml_use_internal_errors($previous);
+
+        // Register namespace(s)
+        $doc->registerXPathNamespace('xliff', 'urn:oasis:names:tc:xliff:document:1.2');
+
+        // Get the file tag for target language, revision, etc
+        $file = $doc->xpath('//xliff:file[1]')[0];
+        $targetLanguage = (string) $file->attributes()['target-language'];
+
+        $pageData = $page->getPageData();
+        $content = $pageData->getContent();
+        $langData = $content['langData'][$targetLanguage] ?? [];
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+
+        foreach ($doc->xpath('//xliff:trans-unit') as $unit) {
+            $resource = (string) $unit->attributes()['resname'];
+            if (!preg_match('/^(\[[^\][]+])+$/', $resource)) {
+                throw new \Exception('Invalid resource name ' . $resource);
+            }
+            $target = (string) $unit->target;
+            if (!$target) {
+                continue;
+            }
+            $propertyAccessor->setValue($langData, $resource, $target);
+        }
+
+        $content['langData'][$targetLanguage] = $langData;
+        $pageData->setContent($content);
+        $availableLanguages = array_merge($pageData->getAvailableLanguages(), [$targetLanguage]);
+        $pageData->setAvailableLanguages(array_values(array_unique($availableLanguages)));
     }
 }

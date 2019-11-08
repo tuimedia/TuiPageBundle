@@ -34,6 +34,7 @@ class TuiPageExtension extends ConfigurableExtension
         $container->setParameter('tui_page.page_data_class', $mergedConfig['page_data_class']);
         $container->setParameter('tui_page.serializer_groups.get_response', $mergedConfig['serializer_groups']['get_response']);
         $container->setParameter('tui_page.serializer_groups.history_response', $mergedConfig['serializer_groups']['history_response']);
+        $container->setParameter('tui_page.serializer_groups.import_response', $mergedConfig['serializer_groups']['import_response']);
         $container->setParameter('tui_page.serializer_groups.list_response', $mergedConfig['serializer_groups']['list_response']);
         $container->setParameter('tui_page.serializer_groups.search_response', $mergedConfig['serializer_groups']['search_response']);
         $container->setParameter('tui_page.serializer_groups.create_request', $mergedConfig['serializer_groups']['create_request']);
