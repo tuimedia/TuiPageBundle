@@ -151,6 +151,8 @@ class TranslationController extends AbstractController
             return $this->json($errors, 422);
         }
 
+        $pageRepository->save($page);
+
         return new JsonResponse($pageJson, 201, [], true);
     }
 }
