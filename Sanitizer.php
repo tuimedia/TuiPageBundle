@@ -94,6 +94,10 @@ class Sanitizer
             }
 
             if (is_array($value) || is_object($value)) {
+                if ($dataIsArray) {
+                    $data[$prop] = $this->stringCleanRecursive($value);
+                    continue;
+                }
                 $data->$prop = $this->stringCleanRecursive($value);
             }
         }
