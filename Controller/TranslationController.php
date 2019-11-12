@@ -66,6 +66,7 @@ class TranslationController extends AbstractController
         string $lang
     ) {
         $state = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
+        $lang = filter_var($lang, FILTER_SANITIZE_STRING);
 
         $page = $pageRepository->findOneBy([
             'slug' => $slug,
@@ -177,7 +178,7 @@ class TranslationController extends AbstractController
 
             $page = clone $page;
             // Set a temporary revision so the page will validate
-            $page->getPageData()->setRevision('c6706289-1347-441c-9e09-4718e80dc56a');
+            $page->getPageData()->setRevision('ffffffff-ffff-ffff-ffff-ffffffffffff');
             if ($destinationSlug) {
                 $page->setSlug(preg_replace('/[^\w]+/', '-', $slug));
             }
@@ -187,7 +188,7 @@ class TranslationController extends AbstractController
             }
         }
 
-        $file = $translationHandler->importXliff($page, $request->getContent());
+        $translationHandler->importXliff($page, $request->getContent());
         $groups = $this->getTuiPageSerializerGroups('import_response', ['pageGet']);
         $pageJson = $this->generateTuiPageJson($page, $serializer, $groups);
 
@@ -197,7 +198,9 @@ class TranslationController extends AbstractController
             return $this->json($errors, 422);
         }
         // Remove the temporary revision
-        $page->getPageData()->setRevision(null);
+        if ($destination === 'new') {
+            $page->getPageData()->setRevision(null);
+        }
 
         $pageRepository->save($page);
 
