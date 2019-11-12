@@ -166,11 +166,29 @@ class TranslationHandler
                 continue;
             }
             $propertyAccessor->setValue($langData, $resource, $target);
-
-            if (!in_array($targetLanguage, $blocks[$blockId]['languages'] ?? [])) {
-                $blocks[$blockId]['languages'][] = $targetLanguage;
-            }
         }
+
+        // Enable blocks for this language
+        $content['blocks'] = array_map(function ($block) use ($targetLanguage) {
+            if (!array_key_exists('languages', $block)) {
+                return $block;
+            }
+            if (!in_array($targetLanguage, $block['languages'])) {
+                $block['languages'][] = $targetLanguage;
+            }
+            return $block;
+        }, $content['blocks']);
+
+        // Enable rows for this language
+        $content['layout'] = array_map(function ($row) use ($targetLanguage) {
+            if (!array_key_exists('languages', $row)) {
+                return $row;
+            }
+            if (!in_array($targetLanguage, $row['languages'])) {
+                $row['languages'][] = $targetLanguage;
+            }
+            return $row;
+        }, $content['layout']);
 
         $content['langData'][$targetLanguage] = $langData;
         $pageData->setContent($content);
