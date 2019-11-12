@@ -3,6 +3,7 @@ namespace Tui\PageBundle\Controller;
 
 use Tui\PageBundle\Entity\PageInterface;
 use Tui\PageBundle\Entity\PageDataInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -55,6 +56,9 @@ trait TuiPageResponseTrait
 
     public function getTuiPageSerializerGroups(string $action, array $default)
     {
+        if (!$this instanceof AbstractController) {
+            throw new \Exception('This method requires the class to extend Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController');
+        }
         $parameter = 'tui_page.serializer_groups.' . $action;
         $groups = array_values(array_unique(array_merge($default, (array) $this->getParameter($parameter))));
 
