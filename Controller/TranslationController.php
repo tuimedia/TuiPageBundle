@@ -109,6 +109,30 @@ class TranslationController extends AbstractController
      *   description="Page namespace"
      * )
      * @SWG\Parameter(
+     *   in="query",
+     *   required=false,
+     *   type="string",
+     *   default="original",
+     *   name="destination",
+     *   description="Destination - set to 'new' to import as new page"
+     * )
+     * @SWG\Parameter(
+     *   in="query",
+     *   required=false,
+     *   type="string",
+     *   default="live",
+     *   name="destinationState",
+     *   description="Destination state"
+     * )
+     * @SWG\Parameter(
+     *   in="query",
+     *   required=false,
+     *   type="string",
+     *   default="live",
+     *   name="destinationSlug",
+     *   description="Destination slug"
+     * )
+     * @SWG\Parameter(
      *   in="path",
      *   required=true,
      *   type="string",
