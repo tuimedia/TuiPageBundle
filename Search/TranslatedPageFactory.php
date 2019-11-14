@@ -75,7 +75,7 @@ class TranslatedPageFactory
             $translatedBlock = $rowData;
 
             if (isset($content['langData'][$defaultLanguage][$id])) {
-                $translatedBlock = array_replace_recursive($translatedBlock, $content['langData'][$defaultLanguage][$id]);
+                $translatedBlock = (array) array_replace_recursive($translatedBlock, $content['langData'][$defaultLanguage][$id]);
             }
             if (isset($content['langData'][$language][$id])) {
                 $translatedBlock = array_replace_recursive($translatedBlock, $content['langData'][$language][$id]);

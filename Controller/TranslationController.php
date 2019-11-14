@@ -82,10 +82,20 @@ class TranslationController extends AbstractController
         }
         $file = $translationHandler->generateXliff($page, $lang);
 
-        return new Response($file, 201, [
+        $response = new Response($file, 201, [
             'Content-Type' => 'application/x-xliff+xml',
-            // 'Content-Type' => 'application/xml',
         ]);
+        $dispositionHeader = $response->headers->makeDisposition(
+            \Symfony\Component\HttpFoundation\ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            vsprintf('%s.%s.%s.xliff', [
+                $page->getSlug(),
+                $state,
+                $lang,
+            ])
+        );
+        $response->headers->set('Content-Disposition', $dispositionHeader);
+
+        return $response;
     }
 
     /**
