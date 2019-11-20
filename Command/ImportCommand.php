@@ -139,8 +139,8 @@ class ImportCommand extends Command
             if ($errors) {
                 $this->logger->error('Translated page failed validation, skipping', [
                     'slug' => $original['slug'],
-                    'errors' => (array) $errors],
-                );
+                    'errors' => (array) $errors,
+                ]);
                 continue;
             }
             // Remove the temporary revision
