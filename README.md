@@ -165,9 +165,9 @@ You can also optionally supply [ElasticSearch mapping configuration](https://www
 tui_page:
   components:
     PageText:
-      schema: '%kernel.project_root%/public/schemas/PageText.schema.json'
+      schema: '%kernel.project_dir%/public/schemas/PageText.schema.json'
     PageImage:
-      schema: '%kernel.project_root%/public/schemas/PageImage.schema.json'
+      schema: '%kernel.project_dir%/public/schemas/PageImage.schema.json'
       mapping:
         type: object
         properties:
