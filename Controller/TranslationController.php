@@ -222,7 +222,15 @@ class TranslationController extends AbstractController
             }
         }
 
-        $translationHandler->importXliff($page, $request->getContent());
+        try {
+            $translationHandler->importXliff($page, $request->getContent());
+        } catch (\Exception $e) {
+            return $this->json([
+                'type' => 'https://tuimedia.com/page-bundle/validation',
+                'title' => 'Unable to process XLIFF file',
+                'detail' => $e->getMessage(),
+            ], 422);
+        }
         $groups = $this->getTuiPageSerializerGroups('import_response', ['pageGet']);
         $pageJson = $this->generateTuiPageJson($page, $serializer, $groups);
 
