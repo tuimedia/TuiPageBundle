@@ -150,6 +150,8 @@ class ImportCommand extends Command
 
             $this->pageRepository->save($page);
         }
+
+        return 0;
     }
 
     private function getZipErrorMessage($code)

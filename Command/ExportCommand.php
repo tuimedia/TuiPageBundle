@@ -55,7 +55,7 @@ class ExportCommand extends Command
 
         if (!count($pages)) {
             $this->logger->info('No pages found, exiting early');
-            return null;
+            return 0;
         }
 
         $filename = $input->getOption('file');
@@ -91,7 +91,7 @@ class ExportCommand extends Command
         }
         $zip->close();
 
-        // $io->success('You have a new command! Now make it your own! Pass --help to see your options.');
+        return 0;
     }
 
     private function getZipErrorMessage($code)
