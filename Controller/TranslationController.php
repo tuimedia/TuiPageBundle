@@ -214,7 +214,7 @@ class TranslationController extends AbstractController
             // Set a temporary revision so the page will validate
             $page->getPageData()->setRevision('ffffffff-ffff-ffff-ffff-ffffffffffff');
             if ($destinationSlug) {
-                $page->setSlug(preg_replace('/[^\w]+/', '-', $slug));
+                $page->setSlug((string) preg_replace('/[^\w]+/', '-', $slug));
             }
 
             if ($destinationState) {

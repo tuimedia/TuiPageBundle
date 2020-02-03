@@ -9,11 +9,11 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
- * @method Page|null find($id, $lockMode = null, $lockVersion = null)
- * @method Page|null findOneBy(array $criteria, array $orderBy = null)
- * @method Page[]    findAll()
- * @method Page[]    findById(array|string $ids)
- * @method Page[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method PageInterface|null find($id, $lockMode = null, $lockVersion = null)
+ * @method PageInterface|null findOneBy(array $criteria, array $orderBy = null)
+ * @method PageInterface[]    findAll()
+ * @method PageInterface[]    findById(array|string $ids)
+ * @method PageInterface[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class PageRepository extends ServiceEntityRepository
 {
@@ -26,21 +26,21 @@ class PageRepository extends ServiceEntityRepository
         parent::__construct($registry, $pageClass);
     }
 
-    public function save(AbstractPage $page)
+    public function save(PageInterface $page)
     {
         $em = $this->getEntityManager();
         $em->persist($page);
         $em->flush();
     }
 
-    public function delete(AbstractPage $page)
+    public function delete(PageInterface $page)
     {
         $em = $this->getEntityManager();
         $em->remove($page);
         $em->flush();
     }
 
-    public function validate(AbstractPage $page)
+    public function validate(PageInterface $page)
     {
         return $this->validator->validate($page);
     }
@@ -58,7 +58,7 @@ class PageRepository extends ServiceEntityRepository
         return (clone $page)->setSlug($slug);
     }
 
-    public function ensureRowIds(AbstractPage $page): bool
+    public function ensureRowIds(PageInterface $page): bool
     {
         $modified = false;
         $content = $page->getPageData()->getContent();

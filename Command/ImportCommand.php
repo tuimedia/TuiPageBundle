@@ -54,6 +54,14 @@ class ImportCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $destinationState = $input->getOption('state');
+        if (is_array($destinationState)) {
+            $io->error('Provide only one destination state');
+            return 1;
+        }
+        if ($destinationState && !is_string($destinationState)) {
+            $io->error('Invalid destination state name');
+            return 1;
+        }
 
         $argFile = (string) filter_var($input->getArgument('file'), FILTER_SANITIZE_STRING);
         if (!file_exists($argFile)) {
@@ -128,7 +136,7 @@ class ImportCommand extends Command
                 $page = clone $page;
                 // Set a temporary revision so the page will validate
                 $page->getPageData()->setRevision('ffffffff-ffff-ffff-ffff-ffffffffffff');
-                $page->setState($destinationState);
+                $page->setState((string) $destinationState);
             }
 
             $this->translationHandler->importXliff($page, $content);

@@ -133,7 +133,7 @@ class TranslationHandler
         }
         $targetLanguage = (string) $file->attributes()['target-language'];
         $original = (string) $file->attributes()['original'];
-        if (strpos($original, $page->getSlug()) === false) {
+        if (strpos($original, (string) $page->getSlug()) === false) {
             throw new \Exception('The XLIFF file appears to be for a different page');
         }
 
