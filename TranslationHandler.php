@@ -132,6 +132,10 @@ class TranslationHandler
             throw new \Exception('No XLIFF file element found');
         }
         $targetLanguage = (string) $file->attributes()['target-language'];
+        $original = (string) $file->attributes()['original'];
+        if (strpos($original, $page->getSlug()) === false) {
+            throw new \Exception('The XLIFF file appears to be for a different page');
+        }
 
         $pageData = $page->getPageData();
         $content = $pageData->getContent();
