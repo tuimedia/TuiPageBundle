@@ -7,6 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\EventListener\AbstractSessionListener;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Tui\PageBundle\Entity;
@@ -52,9 +53,31 @@ class PageController extends AbstractController
             'state' => $status,
         ]);
 
-        return $this->json($pages, 200, [], [
+        $response =  $this->json($pages, 200, [], [
             'groups' => $this->getTuiPageSerializerGroups('list_response', ['pageList']),
         ]);
+
+        $response->headers->set(AbstractSessionListener::NO_AUTO_CACHE_CONTROL_HEADER, 'true');
+        $response->setCache([
+            'private' => true,
+            'last-modified' => $this->findLatest($pages),
+        ]);
+        $response->isNotModified($request);
+
+        return $response;
+    }
+
+    private function findLatest(array $pages): \DateTimeInterface
+    {
+        $latest = new \DateTime('1970-01-01 00:00:00');
+        foreach ($pages as $page) {
+            $pageCreated = $page->getPageData()->getCreated();
+            if ($pageCreated > $latest) {
+                $latest = $pageCreated;
+            }
+        }
+
+        return $latest;
     }
 
     /**
@@ -140,7 +163,16 @@ class PageController extends AbstractController
         }
 
         $groups = $this->getTuiPageSerializerGroups('get_response', ['pageGet']);
-        return $this->generateTuiPageResponse($page, $serializer, $groups);
+        $response = $this->generateTuiPageResponse($page, $serializer, $groups);
+        $response->headers->set(AbstractSessionListener::NO_AUTO_CACHE_CONTROL_HEADER, 'true');
+        $response->setCache([
+            'private' => true,
+            'last-modified' => $page->getPageData()->getCreated(),
+            'etag' => $page->getPageData()->getRevision(),
+        ]);
+        $response->isNotModified($request);
+
+        return $response;
     }
 
     /**
