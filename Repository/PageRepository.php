@@ -5,7 +5,7 @@ namespace Tui\PageBundle\Repository;
 use Tui\PageBundle\Entity\AbstractPage;
 use Tui\PageBundle\Entity\PageInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
@@ -20,7 +20,7 @@ class PageRepository extends ServiceEntityRepository
     protected $validator;
     protected $schemas;
 
-    public function __construct(RegistryInterface $registry, ValidatorInterface $validator, $pageClass)
+    public function __construct(ManagerRegistry $registry, ValidatorInterface $validator, $pageClass)
     {
         $this->validator = $validator;
         parent::__construct($registry, $pageClass);

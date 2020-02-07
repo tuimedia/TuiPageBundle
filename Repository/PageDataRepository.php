@@ -4,7 +4,7 @@ namespace Tui\PageBundle\Repository;
 
 use Tui\PageBundle\Entity\PageData;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @method PageData|null find($id, $lockMode = null, $lockVersion = null)
@@ -14,7 +14,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  */
 class PageDataRepository extends ServiceEntityRepository
 {
-    public function __construct(RegistryInterface $registry, $pageDataClass)
+    public function __construct(ManagerRegistry $registry, $pageDataClass)
     {
         parent::__construct($registry, $pageDataClass);
     }
