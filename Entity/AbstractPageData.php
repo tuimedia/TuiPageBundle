@@ -78,10 +78,7 @@ abstract class AbstractPageData implements PageDataInterface
 
     public function __construct()
     {
-        $time = date_create_immutable();
-        if (!$time) {
-            throw new \LogicException('Unable to retrieve system time');
-        }
+        $time = new \DateTimeImmutable();
         $this->created = $time;
     }
 
@@ -121,7 +118,7 @@ abstract class AbstractPageData implements PageDataInterface
         return $this;
     }
 
-    public function getCreated(): ?\DateTimeImmutable
+    public function getCreated(): \DateTimeImmutable
     {
         return $this->created;
     }
