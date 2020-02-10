@@ -3,6 +3,7 @@
 namespace Tui\PageBundle\Controller;
 
 use Swagger\Annotations as SWG;
+use ElasticSearcher\Abstracts\AbstractResultParser;
 use ElasticSearcher\ElasticSearcher;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -96,6 +97,7 @@ class SearchController extends AbstractController
             return $this->json([
                 'results' => [],
                 'total' => 0,
+                'didYouMean' => null,
             ]);
         }
         $pages = [];
@@ -108,6 +110,7 @@ class SearchController extends AbstractController
         $response = [
             'results' => $pages,
             'total' => $results->getTotal(),
+            'didYouMean' => $this->parseSuggestions($results),
         ];
 
         $serializerGroups = array_values(array_unique(array_merge([
@@ -117,5 +120,15 @@ class SearchController extends AbstractController
         return $this->json($response, 200, [], [
             'groups' => $serializerGroups,
         ]);
+    }
+
+    private function parseSuggestions(AbstractResultParser $results): ?string
+    {
+        $suggestions = $results->get('suggest.dym');
+        if (!count($suggestions) || !count($suggestions[0]['options'])) {
+            return null;
+        }
+
+        return $suggestions[0]['options'][0]['text'];
     }
 }

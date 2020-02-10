@@ -74,6 +74,14 @@ class PageQuery extends AbstractQuery
                     ],
                 ],
             ],
+            'suggest' => [
+                'text' => $q,
+                'dym' => [
+                    'phrase' => [
+                        'field' => '_all',
+                    ],
+                ],
+            ],
         ]);
 
         $this->paginate($this->getData('page'), $this->getData('size'));
