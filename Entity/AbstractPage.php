@@ -8,7 +8,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * @UniqueEntity(fields={"state", "slug"}, message="A page already exists with that URL path (the combination of state and slug must be unique)")
+ * @UniqueEntity(fields={"state", "slug"}, message="A page already exists with that URL path and state")
  * @ORM\Table(name="tui_page",
  *   uniqueConstraints={@ORM\UniqueConstraint(name="state_slug_unique",columns={"state","slug"})}
  * )
