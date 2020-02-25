@@ -60,7 +60,7 @@ class PageController extends AbstractController
         $response->headers->set(AbstractSessionListener::NO_AUTO_CACHE_CONTROL_HEADER, 'true');
         $response->setCache([
             'private' => true,
-            'last-modified' => $this->findLatest($pages),
+            'last_modified' => $this->findLatest($pages),
         ]);
         $response->isNotModified($request);
 
@@ -167,7 +167,7 @@ class PageController extends AbstractController
         $response->headers->set(AbstractSessionListener::NO_AUTO_CACHE_CONTROL_HEADER, 'true');
         $response->setCache([
             'private' => true,
-            'last-modified' => $page->getPageData()->getCreated(),
+            'last_modified' => $page->getPageData()->getCreated(),
             'etag' => $page->getPageData()->getRevision(),
         ]);
         $response->isNotModified($request);
