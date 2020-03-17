@@ -66,6 +66,7 @@ abstract class AbstractPageData implements PageDataInterface
      * @ORM\Column(type="json_array")
      * @Assert\Type(type="array")
      * @Groups({"pageCreate", "pageGet"})
+     * @var array
      */
     private $content = [];
 
@@ -73,6 +74,7 @@ abstract class AbstractPageData implements PageDataInterface
      * @ORM\Column(type="json_array")
      * @Assert\Type(type="array")
      * @Groups({"pageList", "pageCreate", "pageGet"})
+     * @var array
      */
     private $metadata = [];
 

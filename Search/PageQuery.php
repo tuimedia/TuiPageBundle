@@ -18,7 +18,7 @@ class PageQuery extends AbstractQuery
         parent::__construct($searcher);
     }
 
-    public function setup()
+    public function setup(): void
     {
         $this->searchIn($this->getData('index'), 'pages');
 

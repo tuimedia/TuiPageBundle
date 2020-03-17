@@ -6,6 +6,7 @@ use Tui\PageBundle\Entity\AbstractPage;
 use Tui\PageBundle\Entity\PageInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
@@ -17,30 +18,30 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  */
 class PageRepository extends ServiceEntityRepository
 {
+    /** @var ValidatorInterface */
     protected $validator;
-    protected $schemas;
 
-    public function __construct(ManagerRegistry $registry, ValidatorInterface $validator, $pageClass)
+    public function __construct(ManagerRegistry $registry, ValidatorInterface $validator, string $pageClass)
     {
         $this->validator = $validator;
         parent::__construct($registry, $pageClass);
     }
 
-    public function save(PageInterface $page)
+    public function save(PageInterface $page): void
     {
         $em = $this->getEntityManager();
         $em->persist($page);
         $em->flush();
     }
 
-    public function delete(PageInterface $page)
+    public function delete(PageInterface $page): void
     {
         $em = $this->getEntityManager();
         $em->remove($page);
         $em->flush();
     }
 
-    public function validate(PageInterface $page)
+    public function validate(PageInterface $page): ?ConstraintViolationListInterface
     {
         return $this->validator->validate($page);
     }

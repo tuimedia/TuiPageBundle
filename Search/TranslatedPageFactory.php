@@ -2,9 +2,11 @@
 namespace Tui\PageBundle\Search;
 
 use Tui\PageBundle\Entity\PageInterface;
+use Tui\PageBundle\Search\TransformerInterface;
 
 class TranslatedPageFactory
 {
+    /** @var TransformerInterface[] */
     private $transformers = [];
 
     public function __construct(array $componentTransformers = null)
@@ -14,7 +16,7 @@ class TranslatedPageFactory
         }
     }
 
-    public function setTransformers(array $componentTransformers)
+    public function setTransformers(array $componentTransformers): void
     {
         $this->transformers = $componentTransformers;
     }

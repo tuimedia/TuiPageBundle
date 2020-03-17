@@ -21,6 +21,7 @@ class AbstractPage implements PageInterface
      * @ORM\GeneratedValue(strategy="UUID")
      * @ORM\Column(type="guid")
      * @Groups({"pageList", "pageGet"})
+     * @var string
      */
     protected $id;
 
@@ -31,6 +32,7 @@ class AbstractPage implements PageInterface
      * @Assert\Length(max=128, maxMessage="Slug cannot be longer than {{ limit }} characters")
      * @Assert\Regex(pattern="/^[\w-]+$/", message="URL path (slug) can only contain lower case letters, numbers and dashes.")
      * @Assert\NotBlank
+     * @var string
      */
     protected $slug;
 
@@ -39,6 +41,7 @@ class AbstractPage implements PageInterface
      * @Groups({"pageList", "pageCreate", "pageGet"})
      * @Assert\Type("string")
      * @Assert\Length(max=32, maxMessage="State must not be longer than {{ limit }} characters")
+     * @var string
      */
     protected $state;
 

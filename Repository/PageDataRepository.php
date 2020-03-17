@@ -14,7 +14,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class PageDataRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry, $pageDataClass)
+    public function __construct(ManagerRegistry $registry, string $pageDataClass)
     {
         parent::__construct($registry, $pageDataClass);
     }

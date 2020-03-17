@@ -7,7 +7,6 @@ class Sanitizer
 {
     private $antixss;
     private $pageSchema;
-    private $schemas;
 
     function __construct(AntiXSS $antixss, PageSchema $pageSchema) {
         $this->antixss = $antixss;

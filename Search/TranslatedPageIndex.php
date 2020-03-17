@@ -40,5 +40,7 @@ class TranslatedPageIndex extends \ElasticSearcher\Abstracts\AbstractIndex
                 ],
             ],
         ]);
+
+        return []; // ElasticSearcher's AbstractIndex incorrectly has a useless and wrong return type doc-comment
     }
 }

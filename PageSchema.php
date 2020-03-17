@@ -8,14 +8,17 @@ use Opis\JsonSchema\MediaTypes\Text;
 
 class PageSchema
 {
+    /** @var string[] */
     protected $schemas;
+
+    /** @var string */
     protected $schemaPath = __DIR__.'/Resources/schema/tui-page.schema.json';
 
-    public function __construct($componentSchemas) {
+    public function __construct(array $componentSchemas) {
         $this->schemas = $componentSchemas;
     }
 
-    public function validate($data)
+    public function validate(string $data): ?array
     {
         $data = json_decode($data);
         $schema = Schema::fromJsonString((string) file_get_contents($this->schemaPath));
@@ -47,25 +50,31 @@ class PageSchema
                 $resolvedBlock = $this->resolveBlockForLanguage($data, $block->id, $language);
 
                 // Check resulting object against the component schema
-                $schema = $this->getSchemaObjectForBlock($resolvedBlock);
+                try {
+                    $schema = $this->getSchemaObjectForBlock($resolvedBlock);
+                } catch (\Exception $e) {
+                    return $this->formatSchemaErrors([$e->getMessage()]);
+                }
                 $result = $validator->schemaValidation($resolvedBlock, $schema);
                 if ($result->hasErrors()) {
                     return $this->formatSchemaErrors($result->getErrors(), $resolvedBlock, $language);
                 }
             }
         }
+
+        return null;
     }
 
-    public function getSchemaObjectForBlock(\stdClass $block)
+    public function getSchemaObjectForBlock(\stdClass $block): Schema
     {
         if (!array_key_exists($block->component, $this->schemas)) {
-            return $this->formatSchemaErrors([
-                sprintf('No schema configured for component "%s"', $block->component),
-            ]);
+            throw new \Exception(vsprintf('No schema defined for component %s', [
+                $block->component,
+            ]));
         }
 
         if (!file_exists($this->schemas[$block->component])) {
-            throw new \Exception(vsprintf('%s Component schema not found', [
+            throw new \Exception(vsprintf('Component schema for %s defined but not found', [
                 $block->component,
             ]));
         }
@@ -73,14 +82,14 @@ class PageSchema
         return Schema::fromJsonString((string) file_get_contents($this->schemas[$block->component]));
     }
 
-    public function getSchemaForBlock(\stdClass $block)
+    public function getSchemaForBlock(\stdClass $block): object
     {
         $schema = $this->getSchemaObjectForBlock($block);
 
         return $this->deepResolveSchema($schema->resolve());
     }
 
-    protected function resolveBlockForLanguage($data, $id, $language)
+    protected function resolveBlockForLanguage(\stdClass $data, string $id, string $language): \stdClass
     {
         $resolvedBlock = new \stdClass;
         $defaultLang = $data->pageData->defaultLanguage;
@@ -111,7 +120,7 @@ class PageSchema
         return $resolvedBlock;
     }
 
-    private function formatSchemaErrors($errors, $block = null, $language = null)
+    private function formatSchemaErrors(array $errors, object $block = null, string $language = null): array
     {
         $error = [
             'type' => 'https://tuimedia.com/tui-page/errors/validation',
@@ -121,6 +130,9 @@ class PageSchema
         ];
 
         if ($block) {
+            if (!property_exists($block, 'id')) {
+                throw new \Exception('Invalid block, no id');
+            }
             $error['detail'] = sprintf('Component %s in language %s: ', $block->id, $language);
             $error['component'] = $block;
         }
@@ -140,7 +152,7 @@ class PageSchema
         return $error;
     }
 
-    public function getResolvedPageSchema()
+    public function getResolvedPageSchema(): object
     {
         $schema = Schema::fromJsonString((string) file_get_contents($this->schemaPath));
         $resolvedSchema = $this->deepResolveSchema($schema->resolve());
@@ -148,7 +160,7 @@ class PageSchema
         return $resolvedSchema;
     }
 
-    protected function deepResolveSchema(object $schema, $rootSchema = null)
+    protected function deepResolveSchema(object $schema, object $rootSchema = null): object
     {
         if (!$rootSchema) {
             $rootSchema = $schema;

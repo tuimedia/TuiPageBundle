@@ -12,7 +12,7 @@ class TranslatedPageIndexFactory
         $this->indexName = $indexName;
     }
 
-    public function createTranslatedPageIndex($language): TranslatedPageIndex
+    public function createTranslatedPageIndex(string $language): TranslatedPageIndex
     {
         return new TranslatedPageIndex($this->indexName, $language, $this->componentMappings);
     }

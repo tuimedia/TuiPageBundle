@@ -5,6 +5,9 @@ use Doctrine\Common\EventSubscriber;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use ElasticSearcher\ElasticSearcher;
+use ElasticSearcher\Managers\DocumentsManager;
+use ElasticSearcher\Managers\IndicesManager;
+use ElasticSearcher\Abstracts\AbstractIndex;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Tui\PageBundle\Entity\PageInterface;
@@ -16,13 +19,19 @@ class SearchSubscriber implements EventSubscriber
     private $searcher;
     private $logger;
     private $normalizer;
-    private $checkedIndexes = [];
-    private $languageIndex = [];
-    private $indexManager;
     private $indexFactory;
-    private $documentManager;
     private $pageFactory;
     private $enabled;
+
+    /** @var AbstractIndex[] */
+    private $languageIndex = [];
+
+    /** @var IndicesManager */
+    private $indexManager;
+
+    /** @var DocumentsManager */
+    private $documentManager;
+
 
     public function __construct(
         ElasticSearcher $searcher,
@@ -52,7 +61,7 @@ class SearchSubscriber implements EventSubscriber
     // postPersist -- add new document to index
     // preRemove -- delete from indexes
 
-    public function getSubscribedEvents()
+    public function getSubscribedEvents(): array
     {
         return [
             'postPersist',
@@ -61,7 +70,7 @@ class SearchSubscriber implements EventSubscriber
         ];
     }
 
-    public function preUpdate(PreUpdateEventArgs $args)
+    public function preUpdate(PreUpdateEventArgs $args): void
     {
         if (!$this->enabled) {
             return;
@@ -75,7 +84,7 @@ class SearchSubscriber implements EventSubscriber
         $this->updateDocumentIndexes($args);
     }
 
-    public function postPersist(LifecycleEventArgs $args)
+    public function postPersist(LifecycleEventArgs $args): void
     {
         if (!$this->enabled) {
             return;
@@ -92,7 +101,7 @@ class SearchSubscriber implements EventSubscriber
         }
     }
 
-    public function preRemove(LifecycleEventArgs $args)
+    public function preRemove(LifecycleEventArgs $args): void
     {
         if (!$this->enabled) {
             return;
@@ -109,7 +118,7 @@ class SearchSubscriber implements EventSubscriber
         }
     }
 
-    private function updateDocumentIndexes(PreUpdateEventArgs $args)
+    private function updateDocumentIndexes(PreUpdateEventArgs $args): void
     {
         $entity = $args->getObject();
         if (!$entity instanceof PageInterface) {
@@ -135,30 +144,38 @@ class SearchSubscriber implements EventSubscriber
         }
     }
 
-    private function deleteFromIndex(PageInterface $page, string $lang)
+    private function deleteFromIndex(PageInterface $page, string $lang): void
     {
         $this->logger->info(sprintf('Unindexing document %s (%s)', $page->getId(), $lang));
+        if (!$page->getId()) {
+            $this->logger->warning('Document has no id, skipping deletion.');
+            return;
+        }
         $this->documentManager->delete(
             $this->getIndexForLanguage($lang)->getName(),
             'pages',
-            $page->getId()
+            (string) $page->getId()
         );
     }
 
-    private function upsertToIndex(PageInterface $page, string $lang)
+    private function upsertToIndex(PageInterface $page, string $lang): void
     {
         $this->logger->info(sprintf('Indexing document %s (%s)', $page->getId(), $lang));
+        if (!$page->getId()) {
+            $this->logger->warning('Document has no id, skipping upsert.');
+            return;
+        }
         $translatedPage = $this->normalizer->normalize($this->pageFactory->createFromPage($page, $lang));
 
         $this->documentManager->updateOrIndex(
             $this->getIndexForLanguage($lang)->getName(),
             'pages',
-            $page->getId(),
-            $translatedPage
+            (string) $page->getId(),
+           (array) $translatedPage
         );
     }
 
-    private function getIndexForLanguage($language)
+    private function getIndexForLanguage(string $language): AbstractIndex
     {
         if (isset($this->languageIndex[$language])) {
             return $this->languageIndex[$language];

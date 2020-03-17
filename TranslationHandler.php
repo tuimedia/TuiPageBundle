@@ -15,7 +15,7 @@ class TranslationHandler
         $this->router = $router;
     }
 
-    public function generateXliff(PageInterface $page, $targetLanguage)
+    public function generateXliff(PageInterface $page, string $targetLanguage): string
     {
         $pageData = $page->getPageData();
         $content = $pageData->getContent();
@@ -37,7 +37,11 @@ class TranslationHandler
         $date = new \DateTime();
         $file->setAttribute('date', $date->format('Y-m-d\TH:i:s\Z'));
 
-        $file->setAttribute('source-language', $this->convertLangCode($pageData->getDefaultLanguage()));
+        $sourceLanguage = $pageData->getDefaultLanguage();
+        if (!$sourceLanguage) {
+            throw new \Exception('Unable to create translation file, page has no default language set');
+        }
+        $file->setAttribute('source-language', $this->convertLangCode($sourceLanguage));
         $file->setAttribute('target-language', $this->convertLangCode($targetLanguage));
         $file->setAttribute('datatype', 'plaintext');
 
@@ -68,10 +72,11 @@ class TranslationHandler
 
         }
 
-        return $doc->saveXML();
+        return $doc->saveXML() ?: '';
     }
 
-    private function addArrayRecursive($doc, $element, string $resPrefix, array $sourceValues, array $targetValues) {
+    private function addArrayRecursive(\DOMDocument $doc, \DOMElement $element, string $resPrefix, array $sourceValues, array $targetValues): void
+    {
         foreach ($sourceValues as $key => $value) {
             if (is_array($value)) {
                 $this->addArrayRecursive($doc, $element, vsprintf('%s[%s]', [
@@ -101,18 +106,18 @@ class TranslationHandler
         }
     }
 
-    private function convertLangCode($code): string
+    private function convertLangCode(string $code): string
     {
-        return strtr((string) $code, ['_' => '-']);
+        return strtr($code, ['_' => '-']);
     }
 
-    private function addNote($doc, $element, string $text)
+    private function addNote(\DOMDocument $doc, \DOMElement $element, string $text): void
     {
         $element->appendChild($note = $doc->createElement('note'));
         $note->appendChild($doc->createTextNode($text));
     }
 
-    public function importXliff(PageInterface $page, string $xliffData)
+    public function importXliff(PageInterface $page, string $xliffData): void
     {
         // Load & check
         $previous = libxml_use_internal_errors(true);
@@ -127,12 +132,17 @@ class TranslationHandler
         $doc->registerXPathNamespace('xliff', 'urn:oasis:names:tc:xliff:document:1.2');
 
         // Get the file tag for target language, revision, etc
-        $file = $doc->xpath('//xliff:file[1]')[0];
+        $file = $doc->xpath('//xliff:file[1]');
         if (!$file) {
-            throw new \Exception('No XLIFF file element found');
+            throw new \Exception('Invalid translation file - no file element');
         }
-        $targetLanguage = (string) $file->attributes()['target-language'];
-        $original = (string) $file->attributes()['original'];
+        $file = $file[0];
+        $attributes = $file->attributes();
+        if (!$attributes instanceof \SimpleXMLElement) {
+            throw new \Exception('Invalid translation file - file element has no attributes');
+        }
+        $targetLanguage = (string) $attributes['target-language'];
+        $original = (string) $attributes['original'];
         if (strpos($original, (string) $page->getSlug()) === false) {
             throw new \Exception('The XLIFF file appears to be for a different page');
         }
@@ -150,7 +160,11 @@ class TranslationHandler
         }
 
         foreach ($units as $unit) {
-            $resource = (string) $unit->attributes()['resname'];
+            $attributes = $unit->attributes();
+            if (!$attributes instanceof \SimpleXMLElement) {
+                throw new \Exception('Invalid translation unit - no resname attribute');
+            }
+            $resource = (string) $attributes['resname'] ?? '';
             if (!preg_match('/^(\[[^\][]+])+$/', $resource)) {
                 throw new \Exception('Invalid resource name: ' . $resource);
             }
