@@ -61,6 +61,11 @@
           "title": "Custom styles for this block",
           "type": "object",
           "additionalProperties": true
+        },
+        "blocks": {
+          "title": "Child blocks",
+          "type": "array",
+          "items": { "type": "string" }
         }
       },
       "required": [
@@ -90,6 +95,10 @@
         },
         "langData": {
           "$ref": "#/definitions/langData"
+        },
+        "schemaVersion": {
+          "title": "Data format version (not editable)",
+          "type": "integer"
         }
       },
       "additionalProperties": false
@@ -107,35 +116,7 @@
     "layout": {
       "title": "Layout rows",
       "type": "array",
-      "items": {
-        "minimum": 0,
-        "$ref": "#/definitions/layoutRow"
-      }
-    },
-    "layoutRow": {
-      "title": "Layout row",
-      "type": "object",
-      "properties": {
-        "id": {
-          "title": "Block id",
-          "type": "string",
-          "minLength": 4,
-          "maxLength": 36
-        },
-        "blocks": {
-          "title": "Block ids",
-          "type": "array"
-        },
-        "component": {
-          "title": "Row component",
-          "type": "string",
-          "minLength": 1
-        }
-      },
-      "required": [
-        "blocks",
-        "component"
-      ]
+      "items": { "type": "string" }
     },
     "pageData": {
       "type": "object",
@@ -148,6 +129,7 @@
           "minLength": 36
         },
         "previousRevision": {
+          "type": "string",
           "title": "UUID of previous revision (not editable)"
         },
         "defaultLanguage": {
