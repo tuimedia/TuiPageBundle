@@ -95,6 +95,7 @@ class UpgradeCommand extends Command
                 unset($block['styles']);
                 return $block;
             }
+            return $block;
         }, $content['blocks']);
 
         $page->getPageData()->setContent($content);
