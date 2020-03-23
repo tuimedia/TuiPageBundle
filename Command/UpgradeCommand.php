@@ -76,7 +76,6 @@ class UpgradeCommand extends Command
 
         // Ensure rows have ids
         $content['layout'] = array_map(function ($row) {
-            dump($row);return $row;
             if (!array_key_exists('id', $row) || !$row['id']) {
                 $row['id'] = $this->generateId();
             }
