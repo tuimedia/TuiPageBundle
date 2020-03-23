@@ -57,11 +57,6 @@
           "type": "array",
           "items": { "$ref": "#/definitions/languageList" }
         },
-        "styles": {
-          "title": "Custom styles for this block",
-          "type": "object",
-          "additionalProperties": true
-        },
         "blocks": {
           "title": "Child blocks",
           "type": "array",
