@@ -93,7 +93,9 @@
         },
         "schemaVersion": {
           "title": "Data format version (not editable)",
-          "type": "integer"
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 2
         }
       },
       "additionalProperties": false
