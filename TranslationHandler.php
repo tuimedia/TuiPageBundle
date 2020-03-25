@@ -56,14 +56,15 @@ class TranslationHandler
         // Translatable metadata
         $this->addArrayRecursive($doc, $body, '[metadata]', $sourceLangData['metadata'] ?? [], $targetLangData['metadata'] ?? []);
 
-        foreach ($content['layout'] as $row) {
+        foreach ($content['layout'] as $rowId) {
             // Add row langdata if it exists
-            if (array_key_exists($row['id'], $sourceLangData)) {
-                $this->addArrayRecursive($doc, $body, "[{$row['id']}]", $sourceLangData[$row['id']], $targetLangData[$row['id']] ?? []);
+            if (array_key_exists($rowId, $sourceLangData)) {
+                $this->addArrayRecursive($doc, $body, "[{$rowId}]", $sourceLangData[$rowId], $targetLangData[$rowId] ?? []);
             }
 
+            $row = $content['blocks'][$rowId] ?? [];
             // Add block langdata
-            foreach ($row['blocks'] as $blockId) {
+            foreach ($row['blocks'] ?? [] as $blockId) {
                 if (!array_key_exists($blockId, $sourceLangData)) {
                     continue;
                 }
@@ -171,12 +172,8 @@ class TranslationHandler
             preg_match('/^\[([^\][]+)]/', $resource, $matches);
             $blockId = $matches[1];
 
-            if (
-                $blockId !== 'metadata'
-                && !array_key_exists($blockId, $blocks)
-                && !array_key_exists($blockId, $layout)
-            ) {
-                throw new \Exception('Missing or invalid resource: '. $blockId);
+            if ($blockId !== 'metadata' && !array_key_exists($blockId, $blocks)) {
+                throw new \Exception('Missing or invalid block: '. $blockId);
             }
 
             $target = (string) $unit->target;
@@ -196,17 +193,6 @@ class TranslationHandler
             }
             return $block;
         }, $content['blocks']);
-
-        // Enable rows for this language
-        $content['layout'] = array_map(function ($row) use ($targetLanguage) {
-            if (!array_key_exists('languages', $row)) {
-                return $row;
-            }
-            if (!in_array($targetLanguage, $row['languages'])) {
-                $row['languages'][] = $targetLanguage;
-            }
-            return $row;
-        }, $content['layout']);
 
         $content['langData'][$targetLanguage] = $langData;
         $pageData->setContent($content);

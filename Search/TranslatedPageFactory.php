@@ -66,29 +66,6 @@ class TranslatedPageFactory
             $translatedPage->types[$translatedBlock['component']][] = $translatedBlock;
         }
 
-        // Build translated rows
-        foreach ($content['layout'] as $rowData) {
-            // Skip if row has no id or language data
-            if (!array_key_exists('id', $rowData) || !array_key_exists($rowData['id'], $content['langData'])) {
-                continue;
-            }
-
-            $id = $rowData['id'];
-            $translatedBlock = $rowData;
-
-            if (isset($content['langData'][$defaultLanguage][$id])) {
-                $translatedBlock = (array) array_replace_recursive($translatedBlock, $content['langData'][$defaultLanguage][$id]);
-            }
-            if (isset($content['langData'][$language][$id])) {
-                $translatedBlock = array_replace_recursive($translatedBlock, $content['langData'][$language][$id]);
-            }
-            if (!isset($translatedPage->types[$translatedBlock['component']])) {
-                $translatedPage->types[$translatedBlock['component']] = [];
-            }
-
-            $translatedPage->types[$translatedBlock['component']][] = $translatedBlock;
-        }
-
         foreach ($this->transformers as $transformer) {
             $translatedPage = $transformer->transform($translatedPage, $page);
         }
