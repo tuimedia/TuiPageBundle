@@ -98,8 +98,10 @@ class PageSchema
             $resolvedBlock->$prop = $value;
         }
 
-        foreach ($data->pageData->content->langData->$defaultLang->$id as $prop => $value) {
-            $resolvedBlock->$prop = $value;
+        if (isset($data->pageData->content->langData->$defaultLang->$id)) {
+            foreach ($data->pageData->content->langData->$defaultLang->$id as $prop => $value) {
+                $resolvedBlock->$prop = $value;
+            }
         }
 
         if ($language === $defaultLang) {
