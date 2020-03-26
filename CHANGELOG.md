@@ -1,3 +1,9 @@
+## 0.8.1
+
+### FIXED
+
+* Fixed an exception in PageSchema while trying to validate a block with no langData in the default language.
+
 ## 0.8
 
 ### BREAKING
