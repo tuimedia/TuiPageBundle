@@ -77,9 +77,6 @@ class TranslationController extends AbstractController
             throw $this->createNotFoundException('No such page in state ' . $state);
         }
 
-        if ($pageRepository->ensureRowIds($page)) {
-            $pageRepository->save($page);
-        }
         $file = $translationHandler->generateXliff($page, $lang);
 
         $response = new Response($file, 201, [
@@ -195,7 +192,6 @@ class TranslationController extends AbstractController
             ], 409);
         }
 
-        $pageRepository->ensureRowIds($page);
         if ($destination === 'new') {
             $newPageExists = $pageRepository->findOneBy([
                 'slug' => $destinationSlug,

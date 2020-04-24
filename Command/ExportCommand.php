@@ -77,11 +77,6 @@ class ExportCommand extends Command
         }
 
         foreach ($pages as $page) {
-            if ($this->pageRepository->ensureRowIds($page)) {
-                $this->logger->info('Row ids added to page', ['slug' => $page->getSlug()]);
-                $this->pageRepository->save($page);
-            }
-
             $this->logger->info('Creating translation file', ['slug' => $page->getSlug()]);
             $file = $this->translationHandler->generateXliff($page, $targetLanguage);
             $zip->addFromString(vsprintf('%s.%s.xliff', [

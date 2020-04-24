@@ -151,7 +151,6 @@ class TranslationHandler
         $pageData = $page->getPageData();
         $content = $pageData->getContent();
         $blocks = $content['blocks'];
-        $layout = $content['layout'];
         $langData = $content['langData'][$targetLanguage] ?? [];
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
 

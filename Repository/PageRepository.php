@@ -58,22 +58,4 @@ class PageRepository extends ServiceEntityRepository
     {
         return (clone $page)->setSlug($slug);
     }
-
-    public function ensureRowIds(PageInterface $page): bool
-    {
-        $modified = false;
-        $content = $page->getPageData()->getContent();
-        $content['layout'] = array_map(function ($row) use (&$modified) {
-            if (!array_key_exists('id', $row)) {
-                $row['id'] = \base64_encode(\random_bytes(9));
-                $modified = true;
-            }
-
-            return $row;
-        }, $content['layout']);
-
-        $page->getPageData()->setContent($content);
-
-        return $modified;
-    }
 }
