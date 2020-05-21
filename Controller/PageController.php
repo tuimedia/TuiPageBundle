@@ -49,6 +49,8 @@ class PageController extends AbstractController
     {
         $status = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
 
+        $this->checkTuiPagePermissions('list');
+
         $pages = $pageRepository->findBy([
             'state' => $status,
         ]);
@@ -122,6 +124,8 @@ class PageController extends AbstractController
             return $this->json($errors, 422);
         }
 
+        $this->checkTuiPagePermissions('create', $page);
+
         $pageRepository->save($page);
 
         $groups = $this->getTuiPageSerializerGroups('create_response', ['pageGet']);
@@ -157,6 +161,8 @@ class PageController extends AbstractController
             'slug' => $slug,
             'state' => $state,
         ]);
+
+        $this->checkTuiPagePermissions('retrieve', $page);
 
         if (!$page) {
             throw $this->createNotFoundException('No such page in state ' . $state);
@@ -199,6 +205,8 @@ class PageController extends AbstractController
             'slug' => $slug,
             'state' => $state,
         ]);
+
+        $this->checkTuiPagePermissions('history', $page);
 
         if (!$page) {
             throw $this->createNotFoundException('No such page in state ' . $state);
@@ -251,6 +259,8 @@ class PageController extends AbstractController
         if (!$page) {
             throw $this->createNotFoundException('No such page in state ' . $state);
         }
+
+        $this->checkTuiPagePermissions('edit', $page);
 
         // Validate input
         $errors = $pageSchema->validate($request->getContent());
@@ -319,6 +329,8 @@ class PageController extends AbstractController
         if (!$page) {
             throw $this->createNotFoundException('No such page in state ' . $state);
         }
+
+        $this->checkTuiPagePermissions('delete', $page);
 
         $pageRepository->delete($page);
 

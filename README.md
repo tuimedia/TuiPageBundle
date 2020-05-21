@@ -49,9 +49,35 @@ framework:
         enabled: true
 ```
 
-* Set up access control on your `security.yml`. You can dump the available routes with `bin/console debug:router | grep tui_page`. This is not done by the bundle because roles and permissions may vary between apps.
+* Set up access control. By default the edit, create, delete, history, and import routes require ROLE_ADMIN. See below for how to change this or provide secure fallbacks.
 
 * Edit `config/packages/tui_page.yaml` to configure your component schemas and the search engine. Search is disabled by default; set at least one search host to enable it.
+
+## Securing endpoints
+
+The default configuration requires that the user have the ROLE_ADMIN role to access any of the write endpoints. You can configure different role (or roles) for each endpoint in `config/packages/tui_page.yaml`. The default parameters are shown below:
+
+```yaml
+tui_page:
+  access_control:
+    list: []
+    retrieve: []
+    export: []
+    search: []
+    edit: [ROLE_ADMIN]
+    history: [ROLE_ADMIN]
+    create: [ROLE_ADMIN]
+    import: [ROLE_ADMIN]
+    delete: [ROLE_ADMIN]
+```
+
+You can also use `access_control` rules in your `config/packages/security.yaml` file as an alternative or fallback to secure any new endpoints:
+
+```yaml
+security:
+    access_control:
+        - { path: ^/api/pages, methods: [PUT, POST, DELETE], roles: [ROLE_ADMIN] }
+```
 
 ## Setting up the entities
 
