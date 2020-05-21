@@ -10,12 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
-use Tui\PageBundle\Entity;
-use Tui\PageBundle\Entity\AbstractPage;
-use Tui\PageBundle\Entity\PageInterface;
-use Tui\PageBundle\Sanitizer;
 use Tui\PageBundle\PageSchema;
-use Tui\PageBundle\Repository\PageDataRepository;
 use Tui\PageBundle\Repository\PageRepository;
 
 class TranslationController extends AbstractController
@@ -59,7 +54,6 @@ class TranslationController extends AbstractController
      */
     public function export(
         Request $request,
-        SerializerInterface $serializer,
         PageRepository $pageRepository,
         TranslationHandler $translationHandler,
         string $slug,
@@ -76,6 +70,8 @@ class TranslationController extends AbstractController
         if (!$page) {
             throw $this->createNotFoundException('No such page in state ' . $state);
         }
+
+        $this->checkTuiPagePermissions('export', $page);
 
         $file = $translationHandler->generateXliff($page, $lang);
 
@@ -172,6 +168,8 @@ class TranslationController extends AbstractController
         if (!$page) {
             throw $this->createNotFoundException('No such page in state ' . $state);
         }
+
+        $this->checkTuiPagePermissions('import', $page);
 
         $destination = filter_var($request->query->get('destination', 'original'), FILTER_SANITIZE_STRING);
         $destinationState = filter_var($request->query->get('destinationState', 'live'), FILTER_SANITIZE_STRING);

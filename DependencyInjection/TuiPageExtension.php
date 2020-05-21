@@ -41,5 +41,15 @@ class TuiPageExtension extends ConfigurableExtension
         $container->setParameter('tui_page.serializer_groups.create_response', $mergedConfig['serializer_groups']['create_response']);
         $container->setParameter('tui_page.serializer_groups.update_request', $mergedConfig['serializer_groups']['update_request']);
         $container->setParameter('tui_page.serializer_groups.update_response', $mergedConfig['serializer_groups']['update_response']);
+        $mergedConfig['access_roles'] = $mergedConfig['access_roles'] ?? [];
+        $container->setParameter('tui_page.access_roles.retrieve', $mergedConfig['access_roles']['retrieve'] ?? []);
+        $container->setParameter('tui_page.access_roles.history', $mergedConfig['access_roles']['history'] ?? []);
+        $container->setParameter('tui_page.access_roles.import', $mergedConfig['access_roles']['import'] ?? []);
+        $container->setParameter('tui_page.access_roles.export', $mergedConfig['access_roles']['export'] ?? []);
+        $container->setParameter('tui_page.access_roles.list', $mergedConfig['access_roles']['list'] ?? []);
+        $container->setParameter('tui_page.access_roles.search', $mergedConfig['access_roles']['search'] ?? []);
+        $container->setParameter('tui_page.access_roles.create', $mergedConfig['access_roles']['create'] ?? []);
+        $container->setParameter('tui_page.access_roles.edit', $mergedConfig['access_roles']['edit'] ?? []);
+        $container->setParameter('tui_page.access_roles.delete', $mergedConfig['access_roles']['delete'] ?? []);
     }
 }
