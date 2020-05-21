@@ -1,3 +1,10 @@
+## 0.8.2
+
+### NEW
+
+* A new `access_control` configuration array contains roles to check before performing each of the write actions on the API. This works in addition to the existing advice to set up an `access_control` rule on the security component. See the README for details on how to configure this.
+
+
 ## 0.8.1
 
 ### FIXED

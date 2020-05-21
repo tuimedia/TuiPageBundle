@@ -71,6 +71,8 @@ tui_page:
     delete: [ROLE_ADMIN]
 ```
 
+You can use any role or permission, including ones you create [custom voters](https://symfony.com/doc/current/security/voters.html) for. Wherever a page object exists, it is passed as the subject to the voter ('list' and 'search' don't have page objects)
+
 You can also use `access_control` rules in your `config/packages/security.yaml` file as an alternative or fallback to secure any new endpoints:
 
 ```yaml
