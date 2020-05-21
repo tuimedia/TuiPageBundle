@@ -1,4 +1,10 @@
-## 0.8.2
+## 0.8.4
+
+### FIXED
+
+* Implement missing `search` permission check
+
+## 0.8.3
 
 ### NEW
 

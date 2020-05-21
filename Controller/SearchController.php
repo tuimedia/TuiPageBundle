@@ -19,6 +19,8 @@ use Tui\PageBundle\Search\TranslatedPageIndexFactory;
 
 class SearchController extends AbstractController
 {
+    use TuiPageResponseTrait;
+
     /**
      * Search pages
      * @Route("/search", methods={"GET"}, name="tui_page_search")
@@ -75,6 +77,8 @@ class SearchController extends AbstractController
             ]);
         }
 
+        $this->checkTuiPagePermissions('search');
+
         $terms = substr((string) filter_var($request->query->get('q', ''), FILTER_SANITIZE_STRING), 0, 128);
         $language = substr((string) filter_var($request->query->get('language', 'en_GB'), FILTER_SANITIZE_STRING), 0, 32);
         $state = substr((string) filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING), 0, 32);
@@ -113,12 +117,8 @@ class SearchController extends AbstractController
             'didYouMean' => $this->parseSuggestions($results),
         ];
 
-        $serializerGroups = array_values(array_unique(array_merge([
-            'pageList',
-        ], (array) $this->getParameter('tui_page.serializer_groups.search_response'))));
-
         return $this->json($response, 200, [], [
-            'groups' => $serializerGroups,
+            'groups' => $this->getTuiPageSerializerGroups('search_response', ['pageList']),
         ]);
     }
 
