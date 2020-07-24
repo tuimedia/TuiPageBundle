@@ -1,3 +1,11 @@
+# Changes
+
+## 0.8.5
+
+### FIXED
+
+* Exceptions thrown within the SearchSubscriber are no longer fatal. Instead they're logged as errors and execution continues.
+
 ## 0.8.4
 
 ### FIXED
