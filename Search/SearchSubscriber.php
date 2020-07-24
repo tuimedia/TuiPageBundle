@@ -81,7 +81,13 @@ class SearchSubscriber implements EventSubscriber
             return;
         }
 
-        $this->updateDocumentIndexes($args);
+        try {
+            $this->updateDocumentIndexes($args);
+        } catch (\Exception $e) {
+            $this->logger->error('Search index update failed', [
+                'exception' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function postPersist(LifecycleEventArgs $args): void
@@ -97,7 +103,13 @@ class SearchSubscriber implements EventSubscriber
 
         $pageData = $entity->getPageData();
         foreach ($pageData->getAvailableLanguages() as $lang) {
-            $this->upsertToIndex($entity, $lang);
+            try {
+                $this->upsertToIndex($entity, $lang);
+            } catch (\Exception $e) {
+                $this->logger->error('Search index update failed', [
+                    'exception' => $e->getMessage(),
+                ]);
+            }
         }
     }
 
@@ -114,7 +126,13 @@ class SearchSubscriber implements EventSubscriber
 
         $pageData = $entity->getPageData();
         foreach ($pageData->getAvailableLanguages() as $lang) {
-            $this->deleteFromIndex($entity, $lang);
+            try {
+                $this->deleteFromIndex($entity, $lang);
+            } catch (\Exception $e) {
+                $this->logger->error('Search index update failed', [
+                    'exception' => $e->getMessage(),
+                ]);
+            }
         }
     }
 
