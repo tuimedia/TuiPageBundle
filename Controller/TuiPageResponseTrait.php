@@ -6,6 +6,7 @@ use Tui\PageBundle\Entity\PageDataInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 trait TuiPageResponseTrait
 {
@@ -72,8 +73,16 @@ trait TuiPageResponseTrait
             // Since Symfony 4.4 passing an array to denyAccessUnlessGranted is deprecated
             // - call multiple times instead
             foreach ($roles as $role) {
-                $this->denyAccessUnlessGranted($role, $page);
+                if ($this->isGranted($role, $page)) {
+                    return;
+                }
             }
+
+            $exception = $this->createAccessDeniedException('Access Denied.');
+            $exception->setAttributes($roles);
+            $exception->setSubject($page);
+
+            throw $exception;
         }
     }
 }
