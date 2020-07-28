@@ -69,7 +69,11 @@ trait TuiPageResponseTrait
     {
         $roles = (array) $this->getParameter('tui_page.access_roles.' . $check);
         if (count($roles)) {
-            $this->denyAccessUnlessGranted($roles, $page);
+            // Since Symfony 4.4 passing an array to denyAccessUnlessGranted is deprecated
+            // - call multiple times instead
+            foreach ($roles as $role) {
+                $this->denyAccessUnlessGranted($role, $page);
+            }
         }
     }
 }
