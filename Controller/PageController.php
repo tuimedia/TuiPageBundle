@@ -166,13 +166,12 @@ class PageController extends AbstractController
 
         $groups = $this->getTuiPageSerializerGroups('get_response', ['pageGet']);
         $response = $this->generateTuiPageResponse($page, $serializer, $groups);
-        $response->headers->set(AbstractSessionListener::NO_AUTO_CACHE_CONTROL_HEADER, 'true');
-        $response->setCache([
-            'private' => true,
-            'last_modified' => $page->getPageData()->getCreated(),
-            'etag' => $page->getPageData()->getRevision(),
-        ]);
-        $response->isNotModified($request);
+        // $response->headers->set(AbstractSessionListener::NO_AUTO_CACHE_CONTROL_HEADER, 'true');
+        // $response->setCache([
+        //     'private' => true,
+        //     'etag' => $page->getPageData()->getRevision(),
+        // ]);
+        // $response->isNotModified($request);
 
         return $response;
     }
