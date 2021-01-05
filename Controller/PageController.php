@@ -6,13 +6,9 @@ use Swagger\Annotations as SWG;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\EventListener\AbstractSessionListener;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
-use Tui\PageBundle\Entity;
-use Tui\PageBundle\Entity\AbstractPage;
-use Tui\PageBundle\Entity\PageInterface;
 use Tui\PageBundle\Sanitizer;
 use Tui\PageBundle\PageSchema;
 use Tui\PageBundle\Repository\PageDataRepository;
@@ -170,13 +166,12 @@ class PageController extends AbstractController
 
         $groups = $this->getTuiPageSerializerGroups('get_response', ['pageGet']);
         $response = $this->generateTuiPageResponse($page, $serializer, $groups);
-        $response->headers->set(AbstractSessionListener::NO_AUTO_CACHE_CONTROL_HEADER, 'true');
-        $response->setCache([
-            'private' => true,
-            'last_modified' => $page->getPageData()->getCreated(),
-            'etag' => $page->getPageData()->getRevision(),
-        ]);
-        $response->isNotModified($request);
+        // $response->headers->set(AbstractSessionListener::NO_AUTO_CACHE_CONTROL_HEADER, 'true');
+        // $response->setCache([
+        //     'private' => true,
+        //     'etag' => $page->getPageData()->getRevision(),
+        // ]);
+        // $response->isNotModified($request);
 
         return $response;
     }
@@ -197,7 +192,7 @@ class PageController extends AbstractController
      *   description="Page namespace"
      * )
      */
-    public function history(Request $request, SerializerInterface $serializer, PageRepository $pageRepository, PageDataRepository $pageDataRepository, $slug)
+    public function history(Request $request, PageRepository $pageRepository, PageDataRepository $pageDataRepository, $slug)
     {
         $state = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
 

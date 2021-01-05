@@ -2,7 +2,7 @@
 namespace Tui\PageBundle\Search;
 
 use Doctrine\Common\EventSubscriber;
-use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
+use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use ElasticSearcher\ElasticSearcher;
 use ElasticSearcher\Managers\DocumentsManager;

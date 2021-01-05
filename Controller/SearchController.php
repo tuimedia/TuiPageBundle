@@ -8,12 +8,7 @@ use ElasticSearcher\ElasticSearcher;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\SerializerInterface;
-use Tui\PageBundle\Entity;
-use Tui\PageBundle\PageSchema;
-use Tui\PageBundle\Repository\PageDataRepository;
 use Tui\PageBundle\Repository\PageRepository;
-use Tui\PageBundle\Sanitizer;
 use Tui\PageBundle\Search\PageQuery;
 use Tui\PageBundle\Search\TranslatedPageIndexFactory;
 
