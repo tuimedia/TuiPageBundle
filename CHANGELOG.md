@@ -1,10 +1,27 @@
 # Changes
 
-## 0.8.5
+## 0.8.8
+
+### FIXED
+
+* Disabled broken cache headers & checking in PageController::retrieve
+* Fixed deprecated (and then broken) SearchSubscriber argument type
+
+## 0.8.7
+
+### FIXED
+
+* Fix deprecation in checkTuiPagePermissions
+
+## 0.8.6
 
 ### FIXED
 
 * Exceptions thrown within the SearchSubscriber are no longer fatal. Instead they're logged as errors and execution continues.
+
+## 0.8.5
+
+I forgot how to count, I guess. This version never existed.
 
 ## 0.8.4
 
