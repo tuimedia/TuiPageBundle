@@ -140,7 +140,6 @@ bin/console make:migration
 bin/console doctrine:migrations:migrate
 ```
 
-
 ## Exposing your custom properties in API calls
 
 The advantage of extending the `AbstractPage` and `AbstractPageData` is that you can add your own properties and methods. If you want these to appear in the serialized output of the bundle API calls, annotate the properties or methods you want to serialize with the `@Groups()` annotation. Each kind of view has its own serializer group so you can decide what to show and when.
@@ -187,6 +186,8 @@ The most notable thing this method does is to assert the type of certain object 
 
 Every content component you create for the frontend should have a JSON Schema file describing its contents. The schema is used by TuiPageBundle to validate and sanitise its content. If you don't define a schema, that component will not be validated or sanitised beyond the required fields, so… define a schema!
 
+A generic schema exists for all content components, so you don't need to (and shouldn't) include `id`, `component`, `languages` or `styles` in your schema file.
+
 You can also optionally supply [ElasticSearch mapping configuration](https://www.elastic.co/guide/en/elasticsearch/reference/5.6/mapping.html) for your component.
 
 ```yaml
@@ -200,6 +201,45 @@ tui_page:
         type: object
         properties:
           url: { enabled: false }
+```
+
+An example schema for the minimal component might look like this:
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://api.example.com/MyGreeting.schema.json#",
+  "type": "object",
+  "properties": {
+    "salutation": {
+      "title": "Optional salutation",
+      "type": "string",
+      "maxLength": 1024
+    },
+    "greeting": {
+      "title": "HTML greeting text",
+      "type": "string",
+      "contentMediaType": "text/html",
+      "minLength": 1,
+      "maxLength": 10240
+    }
+  },
+  "required": [
+    "greeting"
+  ]
+}
+```
+
+Check the [JSON Schema specification](https://json-schema.org/latest/json-schema-validation.html) for options. Use the `"contentMediaType": "text/html"` to allow (some) HTML in your fields. The [JSON Schema Validator](https://www.jsonschemavalidator.net) is pretty handy too.
+
+During development, you might find it neater to mount your schema folder onto the docker container so that you don't have to keep copying the schemas every time you change them. Open up your `docker-compose.yml` file and add a volume a bit like this:
+
+```yaml
+  app:
+    # ...
+    volumes:
+      # ...
+      - ./api/public/schemas:/var/www/app/public/schemas:cached
 ```
 
 ### Transforming content for search
@@ -240,7 +280,6 @@ class HtmlBlockTransformer implements TransformerInterface
 }
 ```
 
-
 ## Notes and known issues
 
 * slugs are globally unique
@@ -254,4 +293,3 @@ Page input (add/edit) is validated through a JSON Schema defined in `Resources/s
 Validation and sanitising of your content blocks is applied using the JSON Schema files from your configuration. Make sure you define all the properties on your content components EXCEPT for those already checked by the overall page schema: `id`, `component`, `languages` and `styles`.
 
 The default string filter removes all HTML (it uses `filter_var()` under the hood, so it might also remove HTML characters like < entirely). If you need HTML, set a `"contentMediaType": "text/html"` property in the schema for the desired field and an anti-xss filter will be applied instead.
-

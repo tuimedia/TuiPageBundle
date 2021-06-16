@@ -40,7 +40,7 @@ abstract class AbstractPageData implements PageDataInterface
 
     /**
      * @ORM\Column(type="string", length=32)
-     * @Groups({"pageCreate", "pageGet"})
+     * @Groups({"pageCreate", "pageGet", "pageList"})
      * @Assert\Type(type="string")
      * @Assert\Length(max=32)
      * @var string
@@ -49,7 +49,7 @@ abstract class AbstractPageData implements PageDataInterface
 
     /**
      * @ORM\Column(type="array")
-     * @Groups({"pageCreate", "pageGet"})
+     * @Groups({"pageCreate", "pageGet", "pageList"})
      * @Assert\Type(type="array")
      * @var string[]
      */
