@@ -121,7 +121,6 @@ class PageController extends AbstractController
         }
 
         $this->checkTuiPagePermissions('create', $page);
-
         $pageRepository->save($page);
 
         $groups = $this->getTuiPageSerializerGroups('create_response', ['pageGet']);
