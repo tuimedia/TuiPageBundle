@@ -216,6 +216,15 @@ class TranslationController extends AbstractController
             }
         }
 
+        if ($destination === 'original') {
+            // Create a new revision
+            $pageRef = $page->getPageData()->getPageRef();
+            $page->setPageData(clone $page->getPageData());
+            $page->getPageData()->setPageRef($pageRef);
+            // Set a temporary revision so the page will validate
+            $page->getPageData()->setRevision('ffffffff-ffff-ffff-ffff-ffffffffffff');
+        }
+
         try {
             $translationHandler->importXliff($page, $request->getContent());
         } catch (\Exception $e) {
@@ -234,7 +243,7 @@ class TranslationController extends AbstractController
             return $this->json($errors, 422);
         }
         // Remove the temporary revision
-        if ($destination === 'new') {
+        if ($page->getPageData()->getRevision() === 'ffffffff-ffff-ffff-ffff-ffffffffffff') {
             $page->getPageData()->setRevision(null);
         }
 
