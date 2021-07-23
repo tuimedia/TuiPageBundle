@@ -23,7 +23,9 @@ class ReindexCommand extends Command
     private $pageRepository;
     private $searcher;
     private $normalizer;
+    private $bulkThreshold = 20;
     private $languageIndex = [];
+    private $indexingQueue = [];
 
     public function __construct(
         NormalizerInterface $normalizer,
@@ -104,10 +106,42 @@ class ReindexCommand extends Command
                 $translatedPage = $this->normalizer->normalize($this->pageFactory->createFromPage($page, $language));
                 $this->logger->debug('Translated page: ' . json_encode($translatedPage));
                 $documentManager->updateOrIndex($this->languageIndex[$language], 'pages', $page->getId(), (array) $translatedPage);
+                $this->queueIndex($this->languageIndex[$language], (array) $translatedPage);
             }
         }
+        $this->drainQueue();
 
         return 0;
+    }
+
+    private function queueIndex($index, array $data): void
+    {
+        $this->logger->info('Enqueuing bulk index');
+        if (!array_key_exists($index, $this->indexingQueue)) {
+            $this->indexingQueue[$index] = [];
+        }
+        array_push($this->indexingQueue[$index], $data);
+        if (count($this->indexingQueue[$index]) > $this->bulkThreshold) {
+            $this->logger->info('Triggering bulk index');
+            $this->bulkIndex($index, $this->indexingQueue[$index]);
+            $this->indexingQueue[$index] = [];
+        }
+    }
+
+    private function bulkIndex($index, array $data): void
+    {
+        $this->logger->info('Performing bulk index');
+        $documentManager = $this->searcher->documentsManager();
+        $documentManager->bulkIndex($index, 'page', $data);
+    }
+
+    private function drainQueue(): void
+    {
+        $this->logger->info('Draining queue');
+        foreach ($this->indexingQueue as $index => $queue) {
+            $this->bulkIndex($index, $queue);
+            $this->indexingQueue[$index] = [];
+        }
     }
 
     private function getLanguages(array $pages): array
