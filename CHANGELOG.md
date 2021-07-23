@@ -1,5 +1,11 @@
 # Changes
 
+## 0.8.11
+
+### CHANGED
+
+* The `pages:reindex` command now performs bulk indexing of 20 pages at a time for better performance.
+
 ## 0.8.10
 
 ### CHANGED
