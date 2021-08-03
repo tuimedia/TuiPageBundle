@@ -23,7 +23,7 @@ class ReindexCommand extends Command
     private $pageRepository;
     private $searcher;
     private $normalizer;
-    private $bulkThreshold = 20;
+    private $bulkIndexThreshold = 50;
     private $languageIndex = [];
     private $indexingQueue = [];
 
@@ -33,7 +33,8 @@ class ReindexCommand extends Command
         ElasticSearcher $searcher,
         PageRepository $pageRepository,
         TranslatedPageFactory $pageFactory,
-        TranslatedPageIndexFactory $indexFactory
+        TranslatedPageIndexFactory $indexFactory,
+        int $bulkIndexThreshold = 50
     ) {
         $this->indexFactory = $indexFactory;
         $this->logger = $logger;
@@ -41,6 +42,7 @@ class ReindexCommand extends Command
         $this->pageRepository = $pageRepository;
         $this->searcher = $searcher;
         $this->normalizer = $normalizer;
+        $this->bulkIndexThreshold = $bulkIndexThreshold;
         parent::__construct();
     }
 
@@ -121,7 +123,7 @@ class ReindexCommand extends Command
             $this->indexingQueue[$index] = [];
         }
         array_push($this->indexingQueue[$index], $data);
-        if (count($this->indexingQueue[$index]) > $this->bulkThreshold) {
+        if (count($this->indexingQueue[$index]) > $this->bulkIndexThreshold) {
             $this->logger->info('Triggering bulk index');
             $this->bulkIndex($index, $this->indexingQueue[$index]);
             $this->indexingQueue[$index] = [];

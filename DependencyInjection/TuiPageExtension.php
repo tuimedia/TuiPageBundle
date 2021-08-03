@@ -27,6 +27,7 @@ class TuiPageExtension extends ConfigurableExtension
         $container->setParameter('tui_page.search_enabled', !!count($mergedConfig['search_hosts']));
         $container->setParameter('tui_page.search_hosts', $mergedConfig['search_hosts']);
         $container->setParameter('tui_page.search_index', $mergedConfig['search_index']);
+        $container->setParameter('tui_page.bulk_index_threshold', $mergedConfig['bulk_index_threshold']);
         $container->setParameter('tui_page.schemas', $schemas);
         $container->setParameter('tui_page.transformers', $transformers);
         $container->setParameter('tui_page.mappings', $mappings);

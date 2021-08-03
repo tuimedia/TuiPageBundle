@@ -20,6 +20,7 @@ services:
           $indexName: '%tui_page.search_index%'
           $componentMappings: '%tui_page.mappings%'
           $searchEnabled: '%tui_page.search_enabled%'
+          $bulkIndexThreshold: '%tui_page.bulk_index_threshold%'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
