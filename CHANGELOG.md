@@ -1,5 +1,11 @@
 # Changes
 
+## 0.8.12
+
+### CHANGED
+
+* A new `bulk_index_threshold` config setting allows you to set the number of pages in each indexing batch. The default is now 50.
+
 ## 0.8.11
 
 ### CHANGED
