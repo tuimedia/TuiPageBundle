@@ -103,13 +103,14 @@ class PageController extends AbstractController
     public function create(Request $request, SerializerInterface $serializer, PageRepository $pageRepository, Sanitizer $sanitizer, PageSchema $pageSchema)
     {
         // Validate input
-        $errors = $pageSchema->validate($request->getContent());
+        $content = $sanitizer->cleanRequestContent($request->getContent());
+        $errors = $pageSchema->validate($content);
         if ($errors) {
             return $this->json($errors, 422);
         }
 
         // Filter input
-        $filteredContent = $sanitizer->cleanPage($request->getContent());
+        $filteredContent = $sanitizer->cleanPage($content);
 
         $groups = $this->getTuiPageSerializerGroups('create_request', ['pageCreate']);
         $page = $serializer->deserialize($filteredContent, $this->pageClass, 'json', [
@@ -253,13 +254,14 @@ class PageController extends AbstractController
         }
 
         // Validate input
-        $errors = $pageSchema->validate($request->getContent());
+        $content = $sanitizer->cleanRequestContent($request->getContent());
+        $errors = $pageSchema->validate($content);
         if ($errors) {
             return $this->json($errors, 422);
         }
 
         // Filter input
-        $filteredContent = $sanitizer->cleanPage($request->getContent());
+        $filteredContent = $sanitizer->cleanPage($content);
 
         $previousRevision = $page->getPageData()->getRevision();
         $pageRef = $page->getPageData()->getPageRef();

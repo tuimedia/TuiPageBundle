@@ -7,11 +7,20 @@ class Sanitizer
 {
     private $antixss;
     private $pageSchema;
-    private $schemas;
 
     function __construct(AntiXSS $antixss, PageSchema $pageSchema) {
         $this->antixss = $antixss;
         $this->pageSchema = $pageSchema;
+    }
+
+    /**
+     * Clean input to remove invalid utf-8, control characters, etc
+     */
+    public function cleanRequestContent(string $rawContent = ''): string
+    {
+        $content = iconv('utf-8', 'utf-8//ignore', $rawContent);
+
+        return $content;
     }
 
     /**

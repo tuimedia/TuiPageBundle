@@ -18,6 +18,9 @@ class PageSchema
     public function validate($data)
     {
         $data = json_decode($data);
+        if (!$data) {
+            return $this->formatSchemaErrors(['Missing or invalid JSON body']);
+        }
         $schema = Schema::fromJsonString((string) file_get_contents($this->schemaPath));
 
         $validator = new Validator();
