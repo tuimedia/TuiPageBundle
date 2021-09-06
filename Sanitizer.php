@@ -18,7 +18,16 @@ class Sanitizer
      */
     public function cleanRequestContent(string $rawContent = ''): string
     {
-        $content = iconv('utf-8', 'utf-8//ignore', $rawContent);
+        $previous = ini_get('mbstring.substitute_character');
+        if ($previous !== 'none') {
+            ini_set('mbstring.substitute_character', 'none');
+        }
+
+        $content = mb_convert_encoding($rawContent, 'UTF-8', 'UTF-8');
+
+        if ($previous !== 'none') {
+            ini_set('mbstring.substitute_character', $previous);
+        }
 
         return $content;
     }
