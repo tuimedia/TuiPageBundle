@@ -52,5 +52,6 @@ class TuiPageExtension extends ConfigurableExtension
         $container->setParameter('tui_page.access_roles.create', $mergedConfig['access_roles']['create'] ?? []);
         $container->setParameter('tui_page.access_roles.edit', $mergedConfig['access_roles']['edit'] ?? []);
         $container->setParameter('tui_page.access_roles.delete', $mergedConfig['access_roles']['delete'] ?? []);
+        $container->setParameter('tui_page.valid_languages', $mergedConfig['valid_languages'] ?? []);
     }
 }
