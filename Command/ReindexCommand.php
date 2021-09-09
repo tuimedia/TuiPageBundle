@@ -118,13 +118,13 @@ class ReindexCommand extends Command
 
     private function queueIndex($index, array $data): void
     {
-        $this->logger->info('Enqueuing bulk index');
+        $this->logger->debug('Enqueuing bulk index');
         if (!array_key_exists($index, $this->indexingQueue)) {
             $this->indexingQueue[$index] = [];
         }
         array_push($this->indexingQueue[$index], $data);
         if (count($this->indexingQueue[$index]) > $this->bulkIndexThreshold) {
-            $this->logger->info('Triggering bulk index');
+            $this->logger->debug('Triggering bulk index');
             $this->bulkIndex($index, $this->indexingQueue[$index]);
             $this->indexingQueue[$index] = [];
         }

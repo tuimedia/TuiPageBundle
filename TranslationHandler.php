@@ -9,14 +9,20 @@ use Tui\PageBundle\Entity\PageInterface;
 class TranslationHandler
 {
     private $router;
+    private $validLanguages;
 
-    public function __construct(UrlGeneratorInterface $router)
-    {
+    public function __construct(
+        UrlGeneratorInterface $router,
+        array $validLanguages = null
+    ) {
         $this->router = $router;
+        $this->validLanguages = $validLanguages;
     }
 
     public function generateXliff(PageInterface $page, string $targetLanguage): string
     {
+        $this->validateTargetLanguage($targetLanguage);
+
         $pageData = $page->getPageData();
         $content = $pageData->getContent();
         $sourceLangData = $content['langData'][$pageData->getDefaultLanguage()];
@@ -143,9 +149,11 @@ class TranslationHandler
             throw new \Exception('Invalid translation file - file element has no attributes');
         }
         $targetLanguage = (string) $attributes['target-language'];
+        $this->validateTargetLanguage($targetLanguage);
+
         $original = (string) $attributes['original'];
         if (strpos($original, (string) $page->getSlug()) === false) {
-            throw new \Exception('The XLIFF file appears to be for a different page');
+            throw new \Exception('The XLIFF file looks like it\'s for a different page. Or did the URL change?');
         }
 
         $pageData = $page->getPageData();
@@ -172,7 +180,7 @@ class TranslationHandler
             $blockId = $matches[1];
 
             if ($blockId !== 'metadata' && !array_key_exists($blockId, $blocks)) {
-                throw new \Exception('Missing or invalid block: '. $blockId);
+                throw new \Exception('This file contains a translation for content that isn\'t on this page. Id: '. $blockId);
             }
 
             $target = (string) $unit->target;
@@ -197,5 +205,19 @@ class TranslationHandler
         $pageData->setContent($content);
         $availableLanguages = array_merge($pageData->getAvailableLanguages(), [$targetLanguage]);
         $pageData->setAvailableLanguages(array_values(array_unique($availableLanguages)));
+    }
+
+    private function validateTargetLanguage(string $language)
+    {
+        if (!$this->validLanguages || !is_array($this->validLanguages)) {
+            return true;
+        }
+
+        if (!in_array($language, $this->validLanguages)) {
+            throw new \DomainException(vsprintf('Unsupported target language %s (valid: %s)', [
+                $language,
+                join(', ', $this->validLanguages),
+            ]));
+        }
     }
 }

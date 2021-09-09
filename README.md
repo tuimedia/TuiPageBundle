@@ -79,6 +79,7 @@ You can also use `access_control` rules in your `config/packages/security.yaml` 
 security:
     access_control:
         - { path: ^/api/pages, methods: [PUT, POST, DELETE], roles: [ROLE_ADMIN] }
+        - { path: ^/api/translations, methods: [PUT, POST, DELETE], roles: [ROLE_ADMIN] }
 ```
 
 ## Setting up the entities
@@ -278,6 +279,22 @@ class HtmlBlockTransformer implements TransformerInterface
     return $translatedPage;
   }
 }
+```
+
+## Translation
+
+XLIFF import and export endpoints exist for each page. This documentation needs fleshing out. TranslationController is annotated with API Doc comments, which is a good place to start.
+
+* `GET /translations/{slug}/{lang}`
+* `PUT /translations/{slug}`
+
+### Limiting target languages
+
+This applies to both the export and import endpoints.
+
+```yaml
+tui_page:
+    valid_languages: ['en_GB', 'fr', 'es']
 ```
 
 ## Notes and known issues
