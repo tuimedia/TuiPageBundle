@@ -1,5 +1,21 @@
 # Changes
 
+## 0.8.14
+
+### NEW
+
+* Added (e.g.) `valid_languages: ['en_GB', 'fr']` parameter to the config so you can reject unexpected translations.
+
+### CHANGED
+
+* Downgraded some bulk indexing messages from `info` to `debug`
+
+## 0.8.13
+
+### FIXED
+
+* Bump http-foundation minimum version to 4.x or 5.0.4
+
 ## 0.8.12
 
 ### CHANGED
