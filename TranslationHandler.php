@@ -93,6 +93,11 @@ class TranslationHandler
                 continue;
             }
 
+            // Skip non-string values
+            if (!is_string($value) || !rtrim($value)) {
+                continue;
+            }
+
             $element->appendChild($unit = $doc->createElement('trans-unit'));
             $unit->setAttribute('resname', vsprintf('%s[%s]', [$resPrefix, $key]));
             $unit->setAttribute('id', hash('sha1', (string) $unit->getNodePath()));
@@ -159,7 +164,8 @@ class TranslationHandler
         $pageData = $page->getPageData();
         $content = $pageData->getContent();
         $blocks = $content['blocks'];
-        $langData = $content['langData'][$targetLanguage] ?? [];
+        // Copy the default language if there isn't already a translation available
+        $langData = $content['langData'][$targetLanguage] ?? $content['langData'][$pageData->getDefaultLanguage()];
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
 
         $units = $doc->xpath('//xliff:trans-unit');
