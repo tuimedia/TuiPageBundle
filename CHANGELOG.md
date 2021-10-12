@@ -1,5 +1,12 @@
 # Changes
 
+## 0.8.15
+
+### CHANGED
+
+* XLIFF translation export no longer includes empty or non-string values
+* XLIFF translation import now initialises the target language with a copy of the default language langData
+
 ## 0.8.14
 
 ### NEW
