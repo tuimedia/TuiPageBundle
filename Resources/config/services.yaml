@@ -22,6 +22,7 @@ services:
           $searchEnabled: '%tui_page.search_enabled%'
           $bulkIndexThreshold: '%tui_page.bulk_index_threshold%'
           $validLanguages: '%tui_page.valid_languages%'
+          $searchHosts: '%tui_page.search_hosts%'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
@@ -47,16 +48,6 @@ services:
         class: voku\helper\AntiXSS
         calls:
             - [ 'removeEvilHtmlTags', [['iframe']]]
-
-    ElasticSearcher\Environment:
-        class: ElasticSearcher\Environment
-        arguments:
-          - { hosts: '%tui_page.search_hosts%' }
-
-    ElasticSearcher\ElasticSearcher:
-        class: ElasticSearcher\ElasticSearcher
-        arguments:
-          - '@ElasticSearcher\Environment'
 
     Tui\PageBundle\Search\SearchSubscriber:
         class: Tui\PageBundle\Search\SearchSubscriber
