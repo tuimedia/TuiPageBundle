@@ -16,7 +16,8 @@ abstract class AbstractPageData implements PageDataInterface
 {
     /**
      * @ORM\Id()
-     * @ORM\GeneratedValue(strategy="UUID")
+     * @ORM\GeneratedValue(strategy="CUSTOM")
+     * @ORM\CustomIdGenerator("doctrine.uuid_generator")
      * @ORM\Column(type="guid")
      * @Groups({"pageList", "pageGet"})
      * @var string|null
@@ -63,7 +64,7 @@ abstract class AbstractPageData implements PageDataInterface
     private $created;
 
     /**
-     * @ORM\Column(type="json_array")
+     * @ORM\Column(type="json")
      * @Assert\Type(type="array")
      * @Groups({"pageCreate", "pageGet"})
      * @var array
@@ -71,7 +72,7 @@ abstract class AbstractPageData implements PageDataInterface
     private $content = [];
 
     /**
-     * @ORM\Column(type="json_array")
+     * @ORM\Column(type="json")
      * @Assert\Type(type="array")
      * @Groups({"pageList", "pageCreate", "pageGet"})
      * @var array

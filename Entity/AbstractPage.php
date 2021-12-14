@@ -18,7 +18,8 @@ class AbstractPage implements PageInterface
 {
     /**
      * @ORM\Id()
-     * @ORM\GeneratedValue(strategy="UUID")
+     * @ORM\GeneratedValue(strategy="CUSTOM")
+     * @ORM\CustomIdGenerator("doctrine.uuid_generator")
      * @ORM\Column(type="guid")
      * @Groups({"pageList", "pageGet"})
      * @var string
