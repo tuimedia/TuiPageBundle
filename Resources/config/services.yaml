@@ -17,18 +17,21 @@ services:
           $componentSchemas: '%tui_page.schemas%'
           $pageClass: '%tui_page.page_class%'
           $pageDataClass: '%tui_page.page_data_class%'
-          $indexName: '%tui_page.search_index%'
-          $componentMappings: '%tui_page.mappings%'
+          $indexPrefix: '%tui_page.search_index%'
           $searchEnabled: '%tui_page.search_enabled%'
           $bulkIndexThreshold: '%tui_page.bulk_index_threshold%'
           $validLanguages: '%tui_page.valid_languages%'
           $searchHosts: '%tui_page.search_hosts%'
+          $typesenseApiKey: '%tui_page.search_api_key%'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
     Tui\PageBundle\:
         resource: '../../*'
         exclude: '../../{DependencyInjection,Entity,Tests}'
+
+    Tui\PageBundle\Search\TypesenseClient:
+        tags: ['tui_page.transformer_consumer']
 
     Tui\PageBundle\Search\TranslatedPageFactory:
         tags: ['tui_page.transformer_consumer']
