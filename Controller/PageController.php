@@ -43,7 +43,7 @@ class PageController extends AbstractController
      */
     public function index(Request $request, PageRepository $pageRepository)
     {
-        $status = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
+        $state = preg_replace('/\W+/', '-', strip_tags($request->query->get('state', 'live')));
 
         $this->checkTuiPagePermissions('list');
 
@@ -150,7 +150,7 @@ class PageController extends AbstractController
      */
     public function retrieve(Request $request, SerializerInterface $serializer, PageRepository $pageRepository, $slug)
     {
-        $state = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
+        $state = preg_replace('/\W+/', '-', strip_tags($request->query->get('state', 'live')));
 
         $page = $pageRepository->findOneBy([
             'slug' => $slug,
@@ -193,7 +193,7 @@ class PageController extends AbstractController
      */
     public function history(Request $request, PageRepository $pageRepository, PageDataRepository $pageDataRepository, $slug)
     {
-        $state = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
+        $state = preg_replace('/\W+/', '-', strip_tags($request->query->get('state', 'live')));
 
         $page = $pageRepository->findOneBy([
             'slug' => $slug,
@@ -240,7 +240,7 @@ class PageController extends AbstractController
      */
     public function edit(Request $request, SerializerInterface $serializer, PageRepository $pageRepository, Sanitizer $sanitizer, PageSchema $pageSchema, $slug)
     {
-        $state = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
+        $state = preg_replace('/\W+/', '-', strip_tags($request->query->get('state', 'live')));
         if (!$state) {
             throw new \InvalidArgumentException('Must specify state in query string');
         }
@@ -310,7 +310,7 @@ class PageController extends AbstractController
      */
     public function delete(Request $request, PageRepository $pageRepository, $slug)
     {
-        $state = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
+        $state = preg_replace('/\W+/', '-', strip_tags($request->query->get('state', 'live')));
         if (!$state) {
             throw new \InvalidArgumentException('Must specify state in query string');
         }

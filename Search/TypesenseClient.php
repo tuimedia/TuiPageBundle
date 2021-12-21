@@ -35,6 +35,35 @@ class TypesenseClient
         $this->typesenseApiKey = $typesenseApiKey;
     }
 
+    public function search(string $collection, array $query): ?array
+    {
+        $queryMerged = array_replace([
+            'query_by' => 'searchableText',
+            'prefix' => false,
+        ], $query);
+
+        // `q` is required, but it can be an empty string or * to return all
+        if (!isset($queryMerged['q'])) {
+            return null;
+        }
+
+        return $this->http->request('GET', vsprintf('%s/collections/%s/documents/search', [
+            $this->getSearchHost(),
+            $collection,
+        ]), [
+            'headers' => [
+                'X-TYPESENSE-API-KEY' => $this->typesenseApiKey,
+            ],
+            'query' => $queryMerged,
+        ])->toArray();
+    }
+
+    /** TODO: handle multiple servers somehow instead of always returning the first one */
+    private function getSearchHost(): string
+    {
+        return $this->hosts[0];
+    }
+
     public function setTransformers(array $componentTransformers): void
     {
         $this->transformers = $componentTransformers;
@@ -51,7 +80,7 @@ class TypesenseClient
     public function listCollections(): array
     {
         return $this->http->request('GET', vsprintf('%s/collections', [
-            $this->hosts[0],
+            $this->getSearchHost(),
         ]), [
             'headers' => [
                 'X-TYPESENSE-API-KEY' => $this->typesenseApiKey,
@@ -62,7 +91,7 @@ class TypesenseClient
     public function deleteCollection(string $name): array
     {
         return $this->http->request('DELETE', vsprintf('%s/collections/%s', [
-            $this->hosts[0],
+            $this->getSearchHost(),
             $name,
         ]), [
             'headers' => [
@@ -100,14 +129,24 @@ class TypesenseClient
     public function upsertDocument(string $collection, array $doc): array
     {
         return $this->http->request('POST', vsprintf('%s/collections/%s/documents', [
-            $this->hosts[0],
+            $this->getSearchHost(),
             $collection,
         ]), [
             'headers' => [ 'X-TYPESENSE-API-KEY' => $this->typesenseApiKey ],
             'query' => ['action' => 'upsert'],
             'json' => $doc,
         ])->toArray();
+    }
 
+    public function deleteDocument(string $collection, string $id): array
+    {
+        return $this->http->request('DELETE', vsprintf('%s/collections/%s/documents/%s', [
+            $this->getSearchHost(),
+            $collection,
+            $id,
+        ]), [
+            'headers' => [ 'X-TYPESENSE-API-KEY' => $this->typesenseApiKey ],
+        ])->toArray();
     }
 
     public function bulkImport(string $collection, array $docs): array
@@ -118,8 +157,8 @@ class TypesenseClient
             return json_encode($doc);
         }, $docs));
 
-        $response = $this->http->request('POST', vsprintf('%s/collections/%s/documents/import', [
-            $this->hosts[0],
+        $content = $this->http->request('POST', vsprintf('%s/collections/%s/documents/import', [
+            $this->getSearchHost(),
             $collection,
         ]), [
             'headers' => [
@@ -128,9 +167,8 @@ class TypesenseClient
             ],
             'query' => ['action' => 'upsert'],
             'body' => $body,
-        ]);
+        ])->getContent();
 
-        $content = $response->getContent();
         // Parse responses, look for errors
         $responseLines = array_map(function ($line): array {
             return (array) json_decode($line, true);
@@ -140,7 +178,7 @@ class TypesenseClient
         });
         if (count($errors)) {
             foreach ($errors as $docIdx => $error) {
-                $this->log->error(sprintf('Bulk import returned an error for document index %d', $docIdx), $error);
+                $this->log->error(sprintf('Bulk import returned an error for document index %d', $docIdx), ['error' => $error]);
             }
             throw new BulkImportException(sprintf('Bulk import returned %d error(s)', count($errors)));
         }
