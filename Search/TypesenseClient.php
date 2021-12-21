@@ -4,6 +4,7 @@ namespace Tui\PageBundle\Search;
 
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Tui\PageBundle\Entity\PageInterface;
 
 class TypesenseClient
 {
@@ -33,6 +34,25 @@ class TypesenseClient
         $this->indexPrefix = $indexPrefix;
         $this->log = $log;
         $this->typesenseApiKey = $typesenseApiKey;
+    }
+
+    public function createSearchDocument(PageInterface $page, string $language): array
+    {
+        $translatedPage = [
+            'id' => (string) $page->getId(),
+            'revision' => (string) $page->getPageData()->getRevision(),
+            'state' => (string) $page->getState(),
+            'slug' => (string) $page->getSlug(),
+            'searchableText' => [],
+        ];
+
+        foreach ($this->transformers as $transformer) {
+            $translatedPage = $transformer->transformDocument($translatedPage, $page, $language);
+        }
+
+        $translatedPage['searchableText'] = array_values(array_filter($translatedPage['searchableText']));
+
+        return $translatedPage;
     }
 
     public function search(string $collection, array $query): ?array

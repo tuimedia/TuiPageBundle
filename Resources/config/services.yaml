@@ -33,11 +33,6 @@ services:
     Tui\PageBundle\Search\TypesenseClient:
         tags: ['tui_page.transformer_consumer']
 
-    Tui\PageBundle\Search\TranslatedPageFactory:
-        tags: ['tui_page.transformer_consumer']
-        arguments:
-          - []
-
     # controllers are imported separately to make sure services can be injected
     # as action arguments even if you don't extend any base controller class
     Tui\PageBundle\Controller\:

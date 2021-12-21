@@ -6,7 +6,6 @@ use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Psr\Log\LoggerInterface;
 use Tui\PageBundle\Entity\PageInterface;
-use Tui\PageBundle\Search\TranslatedPageFactory;
 
 class SearchSubscriber implements EventSubscriber
 {
@@ -18,7 +17,6 @@ class SearchSubscriber implements EventSubscriber
     public function __construct(
         TypesenseClient $searcher,
         LoggerInterface $logger,
-        TranslatedPageFactory $pageFactory,
         bool $searchEnabled
     )
     {
@@ -28,7 +26,6 @@ class SearchSubscriber implements EventSubscriber
 
         $this->searcher = $searcher;
         $this->logger = $logger;
-        $this->pageFactory = $pageFactory;
         $this->enabled = $searchEnabled;
     }
 
@@ -158,7 +155,7 @@ class SearchSubscriber implements EventSubscriber
             return;
         }
 
-        $translatedPage = $this->pageFactory->createFromPage($page, $lang);
+        $translatedPage = $this->searcher->createSearchDocument($page, $lang);
         $index = $this->searcher->getCollectionNameForLanguage($lang);
 
         try {

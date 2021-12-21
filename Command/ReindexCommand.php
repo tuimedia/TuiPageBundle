@@ -10,8 +10,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Tui\PageBundle\Repository\PageRepository;
 use Tui\PageBundle\Repository\PageDataRepository;
 use Tui\PageBundle\Search\TypesenseClient;
-use Tui\PageBundle\Search\TranslatedPageFactory;
-use Tui\PageBundle\Search\TranslatedPageIndexFactory;
 
 class ReindexCommand extends Command
 {
@@ -29,11 +27,9 @@ class ReindexCommand extends Command
         TypesenseClient $searcher,
         PageRepository $pageRepository,
         PageDataRepository $pageDataRepository,
-        TranslatedPageFactory $pageFactory,
         int $bulkIndexThreshold = 40
     ) {
         $this->logger = $logger;
-        $this->pageFactory = $pageFactory;
         $this->pageRepository = $pageRepository;
         $this->pageDataRepository = $pageDataRepository;
         $this->searcher = $searcher;
@@ -82,7 +78,7 @@ class ReindexCommand extends Command
             $pages = $this->pageRepository->getPagesForIndexing($this->bulkIndexThreshold, $offset);
             foreach ($pages as $page) {
                 foreach ($page->getPageData()->getAvailableLanguages() as $language) {
-                    $translatedPage = $this->pageFactory->createFromPage($page, $language);
+                    $translatedPage = $this->searcher->createSearchDocument($page, $language);
                     if (!isset($batch[$language])) {
                         $batch[$language] = [];
                     }
