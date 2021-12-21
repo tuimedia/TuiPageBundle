@@ -65,7 +65,7 @@ class ReindexCommand extends Command
                     $this->searcher->deleteCollection($collectionName);
                 }
                 $this->logger->info('Creating collection ' . $collectionName);
-                $this->searcher->createCollection($language);
+                $this->searcher->createCollection($collectionName);
             }
         }
 

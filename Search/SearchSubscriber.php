@@ -12,6 +12,7 @@ class SearchSubscriber implements EventSubscriber
     private $searcher;
     private $logger;
     private $enabled;
+    private $collections = null;
 
     public function __construct(
         TypesenseClient $searcher,
@@ -156,11 +157,29 @@ class SearchSubscriber implements EventSubscriber
 
         $translatedPage = $this->searcher->createSearchDocument($page, $lang);
         $index = $this->searcher->getCollectionNameForLanguage($lang);
+        $this->createCollectionIfNotExists($index);
 
         try {
             $this->searcher->upsertDocument($index, $translatedPage);
         } catch (\Exception $e) {
             $this->logger->warning('Document deletion raised error', ['message' => $e->getMessage()]);
+        }
+    }
+
+    private function createCollectionIfNotExists(string $name): void
+    {
+        // Load the list of collections if we haven't already
+        if (is_null($this->collections)) {
+            $this->collections = array_map(function ($collection) {
+                return $collection['name'];
+            }, $this->searcher->listCollections());
+        }
+
+        // Create the index if it's not in the list
+        if (!in_array($name, $this->collections)) {
+            $this->logger->info('Creating collection ' . $name);
+            $this->searcher->createCollection($name);
+            $this->collections[] = $name;
         }
     }
 }

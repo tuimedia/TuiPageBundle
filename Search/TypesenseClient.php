@@ -120,11 +120,11 @@ class TypesenseClient
         ])->toArray();
     }
 
-    public function createCollection(string $lang): array
+    public function createCollection(string $name): array
     {
         // Create initial collection
         $config = [
-            'name' => $this->getCollectionNameForLanguage($lang),
+            'name' => $name,
             'fields' => [
                 [ 'name' => 'id', 'type' => 'string'],
                 [ 'name' => 'slug', 'type' => 'string'],
