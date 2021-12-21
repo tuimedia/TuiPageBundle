@@ -11,7 +11,6 @@ class SearchSubscriber implements EventSubscriber
 {
     private $searcher;
     private $logger;
-    private $pageFactory;
     private $enabled;
 
     public function __construct(
