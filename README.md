@@ -4,9 +4,9 @@ An API for managing rich, versioned, multilingual content.
 
 ## Requirements
 
-* Symfony 4.1
-* Doctrine ORM
-* ElasticSearch 5 (optional as long as you don't want search)
+* Symfony 4 or 5
+* Doctrine ORM 2
+* Typesearch 0.22.1
 
 ## Installation
 
@@ -189,8 +189,6 @@ Every content component you create for the frontend should have a JSON Schema fi
 
 A generic schema exists for all content components, so you don't need to (and shouldn't) include `id`, `component`, `languages` or `styles` in your schema file.
 
-You can also optionally supply [ElasticSearch mapping configuration](https://www.elastic.co/guide/en/elasticsearch/reference/5.6/mapping.html) for your component.
-
 ```yaml
 tui_page:
   components:
@@ -198,10 +196,6 @@ tui_page:
       schema: '%kernel.project_dir%/public/schemas/PageText.schema.json'
     PageImage:
       schema: '%kernel.project_dir%/public/schemas/PageImage.schema.json'
-      mapping:
-        type: object
-        properties:
-          url: { enabled: false }
 ```
 
 An example schema for the minimal component might look like this:
@@ -233,19 +227,9 @@ An example schema for the minimal component might look like this:
 
 Check the [JSON Schema specification](https://json-schema.org/latest/json-schema-validation.html) for options. Use the `"contentMediaType": "text/html"` to allow (some) HTML in your fields. The [JSON Schema Validator](https://www.jsonschemavalidator.net) is pretty handy too.
 
-During development, you might find it neater to mount your schema folder onto the docker container so that you don't have to keep copying the schemas every time you change them. Open up your `docker-compose.yml` file and add a volume a bit like this:
-
-```yaml
-  app:
-    # ...
-    volumes:
-      # ...
-      - ./api/public/schemas:/var/www/app/public/schemas:cached
-```
-
 ### Transforming content for search
 
-During indexing, pages are transformed into an intermediate format that's better suited for search indexing. A `Tui\PageBundle\Search\TranslatedPage` instance is created for each language version of a page. You can define a transformer to hook into this process to modify the translated content before it's indexed, for instance to inject video transcripts, or to remove HTML formatting. The original page object is also included so that you can, for instance, add extra properties from your page object (like tags).
+During indexing, pages are transformed into an intermediate format that's better suited for search indexing. A JSON document is created for each language version of a page. To add the searchable text from your components to this document, define a transformer to hook into this process.
 
 Transformers must implement `Tui\PageBundle\Search\TransformerInterface`, and be tagged with the `tui_page.transformer` tag, which you can do automatically in your `services.yml`:
 
@@ -263,17 +247,33 @@ namespace App\SearchTransformer;
 use Tui\PageBundle\Search\TransformerInterface;
 use Tui\PageBundle\Entity\PageInterface;
 
-class HtmlBlockTransformer implements TransformerInterface
+class AppSearchTransformer implements TransformerInterface
 {
-  public function transform(TranslatedPage $translatedPage, ?PageInterface $page)
+  public function transformSchema(array $config): array
   {
-    if (!isset($translatedPage->types['HtmlBlock'])) {
-      return;
-    }
+    // You can define new fields for the searchable document here
+    // For example if you'd like to facet search results by tags
+    $config['fields'][] = [ 'name' => 'tags', 'type' => 'string[]', 'facet' => true];
+    return $config;
+  }
 
-    foreach ($translatedPage->types['HtmlBlock'] as $idx => $block) {
-      $block['html'] = strip_tags($block['html']);
-      $translatedPage->types['HtmlBlock'][$idx] = $block;
+  public function transformDocument(array $translatedPage, PageInterface $page, string $language): array
+  {
+    // Set custom fields
+    $translatedPage['tags'] = $page->getTags()->map(function ($tag) {
+      return $tag->getSlug();
+    })->toArray();
+
+    // Add the content of your PageText blocks
+    $content = $page->getPageData()->getContent();
+    $langData = $content['langData'][$language] ?? [];
+
+    foreach ($content['blocks'] as $blockId => $data) {
+      if ($data['component'] === 'PageText') {
+        $blockText = $langData[$blockId] ?? [];
+        $translatedPage['searchableText'][] = $blockText['title'] ?? null;
+        $translatedPage['searchableText'][] = html_entity_decode((string) strip_tags($blockText['copy'] ?? ''), ENT_QUOTES);
+      }
     }
 
     return $translatedPage;
@@ -309,4 +309,6 @@ Page input (add/edit) is validated through a JSON Schema defined in `Resources/s
 
 Validation and sanitising of your content blocks is applied using the JSON Schema files from your configuration. Make sure you define all the properties on your content components EXCEPT for those already checked by the overall page schema: `id`, `component`, `languages` and `styles`.
 
-The default string filter removes all HTML (it uses `filter_var()` under the hood, so it might also remove HTML characters like < entirely). If you need HTML, set a `"contentMediaType": "text/html"` property in the schema for the desired field and an anti-xss filter will be applied instead.
+The default string filter removes all HTML (it uses `strip_tags()` under the hood, so it might also remove HTML characters like < entirely). If you need HTML, set a `"contentMediaType": "text/html"` property in the schema for the desired field and an anti-xss filter will be applied instead.
+
+There's no schema for the metadata section, so it's all recursively cleaned by the default string filter.

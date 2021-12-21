@@ -3,14 +3,11 @@
 namespace Tui\PageBundle\Controller;
 
 use Swagger\Annotations as SWG;
-use ElasticSearcher\Abstracts\AbstractResultParser;
-use ElasticSearcher\ElasticSearcher;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Tui\PageBundle\Repository\PageRepository;
-use Tui\PageBundle\Search\PageQuery;
-use Tui\PageBundle\Search\TranslatedPageIndexFactory;
+use Tui\PageBundle\Search\TypesenseClient;
 
 class SearchController extends AbstractController
 {
@@ -63,7 +60,7 @@ class SearchController extends AbstractController
      *   description="Page of results to return"
      * )
      */
-    public function search(Request $request, PageRepository $pageRepository, ElasticSearcher $searcher, PageQuery $query, TranslatedPageIndexFactory $indexFactory, bool $searchEnabled)
+    public function search(Request $request, PageRepository $pageRepository, TypesenseClient $searcher, bool $searchEnabled)
     {
         if (!$searchEnabled) {
             return $this->json([
@@ -77,53 +74,55 @@ class SearchController extends AbstractController
         $terms = substr((string) filter_var($request->query->get('q', ''), FILTER_SANITIZE_STRING), 0, 128);
         $language = substr((string) filter_var($request->query->get('language', 'en_GB'), FILTER_SANITIZE_STRING), 0, 32);
         $state = substr((string) filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING), 0, 32);
-        $index = $indexFactory->createTranslatedPageIndex($language);
-        $searcher->indicesManager()->register($index);
+        $index = $searcher->getCollectionNameForLanguage($language);
+
         $size = $request->query->getInt('size', 50) ?: 1;
         $size = ($size > 100 || $size < 1) ? 50 : $size;
 
-        $query->addData([
-            'index' => $index->getName(),
-            'state' => $state,
+        $query = [
             'q' => $terms,
+            'query_by' => 'searchableText',
+            'filter_by' => vsprintf('state:%s', [$state]),
             'page' => $request->query->getInt('page', 1),
-            'size' => $request->query->getInt('size', 50),
-        ]);
+            'per_page' => $request->query->getInt('size', 50),
+            'prefix' => false,
+        ];
 
         try {
-            $results = $query->run();
+            $results = $searcher->search($index, $query);
         } catch (\Exception $e) {
             return $this->json([
                 'results' => [],
                 'total' => 0,
-                'didYouMean' => null,
             ]);
         }
-        $pages = [];
 
-        if ($results->getTotal() > 0) {
-            $ids = array_column($results->getResults(), '_id');
-            $pages = $pageRepository->findById($ids);
+        $pages = [];
+        if (($results['found'] ?? 0) > 0) {
+            $ids = array_map(function ($result) {
+                return $result['document']['id'];
+            }, $results['hits'] ?? []);
+
+            $pagesById = [];
+            // Sort results by relevance
+            foreach ($pageRepository->findById($ids) as $page) {
+                $pagesById[$page->getId()] = $page;
+            }
+            foreach ($ids as $id) {
+                if (!array_key_exists($id, $pagesById)) {
+                    continue;
+                }
+                $pages[] = $pagesById[$id];
+            }
         }
 
         $response = [
             'results' => $pages,
-            'total' => $results->getTotal(),
-            'didYouMean' => $this->parseSuggestions($results),
+            'total' => $results['found'],
         ];
 
         return $this->json($response, 200, [], [
             'groups' => $this->getTuiPageSerializerGroups('search_response', ['pageList']),
         ]);
-    }
-
-    private function parseSuggestions(AbstractResultParser $results): ?string
-    {
-        $suggestions = $results->get('suggest.dym');
-        if (!count($suggestions) || !count($suggestions[0]['options'])) {
-            return null;
-        }
-
-        return $suggestions[0]['options'][0]['text'];
     }
 }

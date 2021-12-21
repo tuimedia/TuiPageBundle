@@ -5,5 +5,9 @@ use Tui\PageBundle\Entity\PageInterface;
 
 interface TransformerInterface
 {
-    public function transform(TranslatedPage $translatedPage, PageInterface $page): TranslatedPage;
+    /** Modify a Typesense document before indexing */
+    public function transformDocument(array $translatedPage, PageInterface $page, string $language): array;
+
+    /** Modify a Typesense collection schema */
+    public function transformSchema(array $config): array;
 }
