@@ -19,11 +19,11 @@ class ImportCommand extends Command
     use TuiPageResponseTrait;
 
     protected static $defaultName = 'pages:import-xliff';
-    private $logger;
-    private $pageRepository;
-    private $pageSchema;
-    private $serializer;
-    private $translationHandler;
+    private LoggerInterface $logger;
+    private PageRepository $pageRepository;
+    private PageSchema $pageSchema;
+    private SerializerInterface $serializer;
+    private TranslationHandler $translationHandler;
 
     public function __construct(
         LoggerInterface $logger,
@@ -49,7 +49,7 @@ class ImportCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
@@ -85,7 +85,7 @@ class ImportCommand extends Command
                     'message' => $this->getZipErrorMessage($result),
                 ]);
                 $io->error('Failed to create zip archive: ' . $this->getZipErrorMessage($result));
-                return $result;
+                return (int) $result;
             }
 
             for ($i = 0; $i < $zip->numFiles; $i++) {
