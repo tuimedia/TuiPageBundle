@@ -14,11 +14,10 @@ use Tui\PageBundle\Search\TypesenseClient;
 class ReindexCommand extends Command
 {
     protected static $defaultName = 'pages:reindex';
-    private $logger;
-    private $pageFactory;
-    private $pageRepository;
-    private $pageDataRepository;
-    private $searcher;
+    private LoggerInterface $logger;
+    private PageRepository $pageRepository;
+    private PageDataRepository $pageDataRepository;
+    private TypesenseClient $searcher;
     private $bulkIndexThreshold = 40; // https://typesense.org/docs/0.22.1/api/documents.html#configure-batch-size
     private $indexingQueue = [];
 
@@ -45,7 +44,7 @@ class ReindexCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 

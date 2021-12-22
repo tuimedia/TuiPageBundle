@@ -14,8 +14,8 @@ class UpgradeCommand extends Command
 {
     const CURRENT_VERSION = 2;
     protected static $defaultName = 'pages:upgrade';
-    private $logger;
-    private $pageRepository;
+    private LoggerInterface $logger;
+    private PageRepository $pageRepository;
 
     public function __construct(
         LoggerInterface $logger,
@@ -33,7 +33,7 @@ class UpgradeCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 

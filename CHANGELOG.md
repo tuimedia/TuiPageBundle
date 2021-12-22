@@ -19,6 +19,10 @@ Read [`UPGRADE-0.9.md`](./UPGRADE-0.9.md) for instructions on how to upgrade to 
 
 * `Tui\PageBundle\Search\TypesenseClient` is a new search index and indexing client
 
+### CHANGED
+
+* Fix various deprecations in PHP 8.1 and Symfony 5.4
+
 ## 0.8.15
 
 ### CHANGED
