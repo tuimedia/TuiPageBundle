@@ -107,7 +107,7 @@ class Sanitizer
     private function stringClean($value)
     {
         return html_entity_decode(
-            (string) filter_var($value, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES),
+            (string) htmlspecialchars(strip_tags($value), ENT_NOQUOTES),
             ENT_QUOTES,
             'UTF-8'
         );
@@ -179,7 +179,7 @@ class Sanitizer
             }
 
             return html_entity_decode(
-                (string) filter_var($value, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES),
+                (string) htmlspecialchars(strip_tags($value), ENT_NOQUOTES),
                 ENT_QUOTES,
                 'UTF-8'
             );

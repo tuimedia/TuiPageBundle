@@ -4,41 +4,19 @@ namespace Tui\PageBundle\Search;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
-use ElasticSearcher\ElasticSearcher;
-use ElasticSearcher\Managers\DocumentsManager;
-use ElasticSearcher\Managers\IndicesManager;
-use ElasticSearcher\Abstracts\AbstractIndex;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Tui\PageBundle\Entity\PageInterface;
-use Tui\PageBundle\Search\TranslatedPageFactory;
-use Tui\PageBundle\Search\TranslatedPageIndexFactory;
 
 class SearchSubscriber implements EventSubscriber
 {
     private $searcher;
     private $logger;
-    private $normalizer;
-    private $indexFactory;
-    private $pageFactory;
     private $enabled;
-
-    /** @var AbstractIndex[] */
-    private $languageIndex = [];
-
-    /** @var IndicesManager */
-    private $indexManager;
-
-    /** @var DocumentsManager */
-    private $documentManager;
-
+    private $collections = null;
 
     public function __construct(
-        ElasticSearcher $searcher,
-        NormalizerInterface $normalizer,
+        TypesenseClient $searcher,
         LoggerInterface $logger,
-        TranslatedPageFactory $pageFactory,
-        TranslatedPageIndexFactory $indexFactory,
         bool $searchEnabled
     )
     {
@@ -47,14 +25,8 @@ class SearchSubscriber implements EventSubscriber
         }
 
         $this->searcher = $searcher;
-        $this->normalizer = $normalizer;
         $this->logger = $logger;
-        $this->indexFactory = $indexFactory;
-        $this->pageFactory = $pageFactory;
         $this->enabled = $searchEnabled;
-
-        $this->indexManager = $this->searcher->indicesManager();
-        $this->documentManager = $this->searcher->documentsManager();
     }
 
     // preUpdate - get diff of availableLanguages, ensure indexes exist, add/remove translated document from each
@@ -104,7 +76,7 @@ class SearchSubscriber implements EventSubscriber
         $pageData = $entity->getPageData();
         foreach ($pageData->getAvailableLanguages() as $lang) {
             try {
-                $this->upsertToIndex($entity, $lang);
+                $this->upsertForLang($entity, $lang);
             } catch (\Exception $e) {
                 $this->logger->error('Search index update failed', [
                     'exception' => $e->getMessage(),
@@ -149,71 +121,65 @@ class SearchSubscriber implements EventSubscriber
                 $args->getNewValue('pageData')->getAvailableLanguages()
             );
             foreach ($langsToRemove as $lang) {
-                $index = $this->getIndexForLanguage($lang);
-                $this->deleteFromIndex($entity, $lang);
+                $index = $this->searcher->getCollectionNameForLanguage($lang);
+                $this->deleteFromIndex($entity, $index);
             }
         }
 
         $pageData = $entity->getPageData();
 
         foreach ($pageData->getAvailableLanguages() as $lang) {
-            $index = $this->getIndexForLanguage($lang);
-            $this->upsertToIndex($entity, $lang);
+            $this->upsertForLang($entity, $lang);
         }
     }
 
-    private function deleteFromIndex(PageInterface $page, string $lang): void
+    private function deleteFromIndex(PageInterface $page, string $index): void
     {
-        $this->logger->info(sprintf('Unindexing document %s (%s)', $page->getId(), $lang));
+        $this->logger->info(sprintf('Unindexing document %s (%s)', $page->getId(), $index));
         if (!$page->getId()) {
             $this->logger->warning('Document has no id, skipping deletion.');
             return;
         }
-        $this->documentManager->delete(
-            $this->getIndexForLanguage($lang)->getName(),
-            'pages',
-            (string) $page->getId()
-        );
+        try {
+            $this->searcher->deleteDocument($index, (string) $page->getId());
+        } catch (\Exception $e) {
+            $this->logger->warning('Document deletion raised error', ['message' => $e->getMessage()]);
+        }
     }
 
-    private function upsertToIndex(PageInterface $page, string $lang): void
+    private function upsertForLang(PageInterface $page, string $lang): void
     {
         $this->logger->info(sprintf('Indexing document %s (%s)', $page->getId(), $lang));
         if (!$page->getId()) {
             $this->logger->warning('Document has no id, skipping upsert.');
             return;
         }
-        $translatedPage = $this->normalizer->normalize($this->pageFactory->createFromPage($page, $lang));
 
-        $this->documentManager->updateOrIndex(
-            $this->getIndexForLanguage($lang)->getName(),
-            'pages',
-            (string) $page->getId(),
-           (array) $translatedPage
-        );
+        $translatedPage = $this->searcher->createSearchDocument($page, $lang);
+        $index = $this->searcher->getCollectionNameForLanguage($lang);
+        $this->createCollectionIfNotExists($index);
+
+        try {
+            $this->searcher->upsertDocument($index, $translatedPage);
+        } catch (\Exception $e) {
+            $this->logger->warning('Document deletion raised error', ['message' => $e->getMessage()]);
+        }
     }
 
-    private function getIndexForLanguage(string $language): AbstractIndex
+    private function createCollectionIfNotExists(string $name): void
     {
-        if (isset($this->languageIndex[$language])) {
-            return $this->languageIndex[$language];
+        // Load the list of collections if we haven't already
+        if (is_null($this->collections)) {
+            $this->collections = array_map(function ($collection) {
+                return $collection['name'];
+            }, $this->searcher->listCollections());
         }
 
-        // Create and register an index manager
-        $index = $this->indexFactory->createTranslatedPageIndex($language);
-        $this->logger->info(sprintf('Registering index %s', $index->getName()));
-        $this->indexManager->register($index);
-
-        if ($this->indexManager->exists($index->getName())) {
-            $this->logger->info('Index exists. Updating.');
-            $this->indexManager->update($index->getName());
-        } else {
-            $this->logger->info('Index does not exist. Creating.');
-            $this->indexManager->create($index->getName());
+        // Create the index if it's not in the list
+        if (!in_array($name, $this->collections)) {
+            $this->logger->info('Creating collection ' . $name);
+            $this->searcher->createCollection($name);
+            $this->collections[] = $name;
         }
-
-        $this->languageIndex[$language] = $index;
-
-        return $index;
     }
 }

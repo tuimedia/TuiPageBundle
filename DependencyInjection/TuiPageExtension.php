@@ -17,20 +17,18 @@ class TuiPageExtension extends ConfigurableExtension
         $loader->load('services.yaml');
 
         $schemas = [];
-        $mappings = [];
         $transformers = [];
         foreach ($mergedConfig['components'] as $component => $componentConfig) {
             $schemas[$component] = $componentConfig['schema'];
-            $mappings[$component] = $componentConfig['mapping'];
         }
 
         $container->setParameter('tui_page.search_enabled', !!count($mergedConfig['search_hosts']));
         $container->setParameter('tui_page.search_hosts', $mergedConfig['search_hosts']);
         $container->setParameter('tui_page.search_index', $mergedConfig['search_index']);
+        $container->setParameter('tui_page.search_api_key', $mergedConfig['search_api_key']);
         $container->setParameter('tui_page.bulk_index_threshold', $mergedConfig['bulk_index_threshold']);
         $container->setParameter('tui_page.schemas', $schemas);
         $container->setParameter('tui_page.transformers', $transformers);
-        $container->setParameter('tui_page.mappings', $mappings);
         $container->setParameter('tui_page.page_class', $mergedConfig['page_class']);
         $container->setParameter('tui_page.page_data_class', $mergedConfig['page_data_class']);
         $container->setParameter('tui_page.serializer_groups.get_response', $mergedConfig['serializer_groups']['get_response']);

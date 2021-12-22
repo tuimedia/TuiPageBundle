@@ -14,9 +14,9 @@ use Tui\PageBundle\TranslationHandler;
 class ExportCommand extends Command
 {
     protected static $defaultName = 'pages:export-xliff';
-    private $logger;
-    private $pageRepository;
-    private $translationHandler;
+    private LoggerInterface $logger;
+    private PageRepository $pageRepository;
+    private TranslationHandler $translationHandler;
 
     public function __construct(
         LoggerInterface $logger,
@@ -39,7 +39,7 @@ class ExportCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
@@ -73,7 +73,7 @@ class ExportCommand extends Command
                 'message' => $this->getZipErrorMessage($result),
             ]);
             $io->error('Failed to create zip archive: ' . $this->getZipErrorMessage($result));
-            return $result;
+            return (int) $result;
         }
 
         foreach ($pages as $page) {

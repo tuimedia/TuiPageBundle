@@ -6,7 +6,7 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Configuration implements ConfigurationInterface
 {
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('tui_page');
 
@@ -16,15 +16,18 @@ class Configuration implements ConfigurationInterface
             ->fixXmlConfig('valid_language')
             ->children()
                 ->arrayNode('search_hosts')
-                    ->info('ElasticSearch host(s) (if unset, search will be disabled)')
+                    ->info('Search host(s) (if unset, search will be disabled)')
                     ->beforeNormalization()
                         ->castToArray()
                     ->end()
                     ->scalarPrototype()->end()
                 ->end()
                 ->scalarNode('search_index')
-                    ->info('Search index to use')
+                    ->info('Search index prefix')
                     ->defaultValue('tuipage')
+                ->end()
+                ->scalarNode('search_api_key')
+                    ->info('Typesense API key')
                 ->end()
                 ->scalarNode('bulk_index_threshold')
                     ->info('Maximum number of documents to index at once')
@@ -184,10 +187,6 @@ class Configuration implements ConfigurationInterface
                                 ->info('Path to JSON schema for this component')
                                 ->isRequired()
                                 ->cannotBeEmpty()
-                            ->end()
-                            ->arrayNode('mapping')
-                                ->info('Optional search mapping')
-                                ->variablePrototype()->end()
                             ->end()
                         ->end()
                     ->end()

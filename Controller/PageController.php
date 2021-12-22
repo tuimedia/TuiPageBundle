@@ -41,9 +41,9 @@ class PageController extends AbstractController
      *   description="Page namespace to use"
      * )
      */
-    public function index(Request $request, PageRepository $pageRepository)
+    public function index(Request $request, PageRepository $pageRepository): Response
     {
-        $status = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
+        $state = preg_replace('/\W+/', '-', strip_tags($request->query->get('state', 'live')));
 
         $this->checkTuiPagePermissions('list');
 
@@ -98,7 +98,13 @@ class PageController extends AbstractController
      *   @SWG\Schema(type="object")
      * )
      */
-    public function create(Request $request, SerializerInterface $serializer, PageRepository $pageRepository, Sanitizer $sanitizer, PageSchema $pageSchema)
+    public function create(
+        Request $request,
+        SerializerInterface $serializer,
+        PageRepository $pageRepository,
+        Sanitizer $sanitizer,
+        PageSchema $pageSchema
+    ): Response
     {
         // Validate input
         $errors = $pageSchema->validate($request->getContent());
@@ -148,9 +154,14 @@ class PageController extends AbstractController
      *   description="Page namespace"
      * )
      */
-    public function retrieve(Request $request, SerializerInterface $serializer, PageRepository $pageRepository, $slug)
+    public function retrieve(
+        Request $request,
+        SerializerInterface $serializer,
+        PageRepository $pageRepository,
+        $slug
+    ): Response
     {
-        $state = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
+        $state = preg_replace('/\W+/', '-', strip_tags($request->query->get('state', 'live')));
 
         $page = $pageRepository->findOneBy([
             'slug' => $slug,
@@ -191,9 +202,14 @@ class PageController extends AbstractController
      *   description="Page namespace"
      * )
      */
-    public function history(Request $request, PageRepository $pageRepository, PageDataRepository $pageDataRepository, $slug)
+    public function history(
+        Request $request,
+        PageRepository $pageRepository,
+        PageDataRepository $pageDataRepository,
+        $slug
+    ): Response
     {
-        $state = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
+        $state = preg_replace('/\W+/', '-', strip_tags($request->query->get('state', 'live')));
 
         $page = $pageRepository->findOneBy([
             'slug' => $slug,
@@ -238,9 +254,15 @@ class PageController extends AbstractController
      *   @SWG\Schema(type="object")
      * )
      */
-    public function edit(Request $request, SerializerInterface $serializer, PageRepository $pageRepository, Sanitizer $sanitizer, PageSchema $pageSchema, $slug)
+    public function edit(
+        Request $request,
+        SerializerInterface $serializer, PageRepository $pageRepository,
+        Sanitizer $sanitizer,
+        PageSchema $pageSchema,
+        $slug
+    ): Response
     {
-        $state = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
+        $state = preg_replace('/\W+/', '-', strip_tags($request->query->get('state', 'live')));
         if (!$state) {
             throw new \InvalidArgumentException('Must specify state in query string');
         }
@@ -308,9 +330,9 @@ class PageController extends AbstractController
      *   description="Page namespace"
      * )
      */
-    public function delete(Request $request, PageRepository $pageRepository, $slug)
+    public function delete(Request $request, PageRepository $pageRepository, $slug): Response
     {
-        $state = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
+        $state = preg_replace('/\W+/', '-', strip_tags($request->query->get('state', 'live')));
         if (!$state) {
             throw new \InvalidArgumentException('Must specify state in query string');
         }

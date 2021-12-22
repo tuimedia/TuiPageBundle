@@ -5,9 +5,14 @@ namespace Tui\PageBundle\Repository;
 use Tui\PageBundle\Entity\AbstractPage;
 use Tui\PageBundle\Entity\PageInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
+use Iterator;
+use Symfony\Component\Validator\Constraints\Traverse;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Traversable;
 
 /**
  * @method PageInterface|null find($id, $lockMode = null, $lockVersion = null)
@@ -57,5 +62,22 @@ class PageRepository extends ServiceEntityRepository
     public function clonePage(PageInterface $page, string $slug): PageInterface
     {
         return (clone $page)->setSlug($slug);
+    }
+
+    public function getQueryForIndexing(): Query
+    {
+        return $this->createQueryBuilder('p')
+            ->select('p, pd')
+            ->join('p.pageData', 'pd')
+            ->getQuery();
+    }
+
+    public function getPagesForIndexing(int $limit = 500, int $offset = 0): Traversable
+    {
+        $query = $this->getQueryForIndexing()
+            ->setFirstResult($offset)
+            ->setMaxResults($limit);
+
+        return new Paginator($query);
     }
 }
