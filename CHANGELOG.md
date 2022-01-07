@@ -1,5 +1,11 @@
 # Changes
 
+## 0.9.1
+
+### NEW
+
+* Defined `Tui\PageBundle\Entity\IsIndexableInterface`. Implement this in your Page entity to control whether a page is indexed or not. For convenience, AbstractPage implements this so you can simply override the `function isIndexable(): bool` method.
+
 ## 0.9.0
 
 ### BREAKING
