@@ -283,6 +283,43 @@ class AppSearchTransformer implements TransformerInterface
 }
 ```
 
+## Excluding pages from the bulk reindex command
+
+The `pages:reindex` command fetches all pages by default. By overriding the bundle's PageRepository class with your own, you can replace either the `getQueryForIndexing` method, or the `getPagesForIndexing` method that calls it. In this example, pages matching a URL pattern are excluded, and custom tags are included:
+
+```php
+public function getQueryForIndexing(): Query
+    {
+        $qb = $this->createQueryBuilder('p');
+        return $qb
+            ->select('p, pd, pt, t')
+            ->join('p.pageData', 'pd')
+            ->leftJoin('p.pageTags', 'pt')
+            ->leftJoin('pt.tag', 't')
+            ->where($qb->expr()->notLike('p.slug', ':pattern'))
+            ->setParameter('pattern', 'landing-%')
+            ->getQuery();
+    }
+```
+
+To have your class provided to the indexer, override the bundle's repository service definition:
+
+```yaml
+# app/config/services.yaml
+services:
+  # ...
+      Tui\PageBundle\Repository\PageRepository:
+        class: App\Repository\PageRepository
+        arguments:
+            $pageClass: '%tui_page.page_class%'
+```
+
+## Excluding pages from the search subscriber
+
+If your Page entity doesn't extend `Tui\PageBundle\Entity\AbstractPage` then update it to implement both `Tui\PageBundle\Entity\IsIndexableInterface`.
+
+Now define the `isIndexable(): bool` method in your entity. If this method returns false, the page won't be indexed.
+
 ## Translation
 
 XLIFF import and export endpoints exist for each page. This documentation needs fleshing out. TranslationController is annotated with API Doc comments, which is a good place to start.
