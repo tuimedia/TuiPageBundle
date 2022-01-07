@@ -7,6 +7,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Tui\PageBundle\Entity\IsIndexableInterface;
 use Tui\PageBundle\Repository\PageRepository;
 use Tui\PageBundle\Repository\PageDataRepository;
 use Tui\PageBundle\Search\TypesenseClient;
@@ -76,6 +77,9 @@ class ReindexCommand extends Command
             $batch = [];
             $pages = $this->pageRepository->getPagesForIndexing($this->bulkIndexThreshold, $offset);
             foreach ($pages as $page) {
+                if ($page instanceof IsIndexableInterface && !$page->isIndexable()) {
+                    continue;
+                }
                 foreach ($page->getPageData()->getAvailableLanguages() as $language) {
                     $translatedPage = $this->searcher->createSearchDocument($page, $language);
                     if (!isset($batch[$language])) {

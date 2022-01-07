@@ -14,7 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * )
  * @ORM\MappedSuperclass
  */
-class AbstractPage implements PageInterface
+class AbstractPage implements PageInterface, IsIndexableInterface
 {
     /**
      * @ORM\Id()
@@ -104,5 +104,10 @@ class AbstractPage implements PageInterface
 
         $this->id = null;
         $this->setPageData(clone $this->getPageData());
+    }
+
+    public function isIndexable(): bool
+    {
+        return true;
     }
 }

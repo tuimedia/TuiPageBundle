@@ -5,6 +5,7 @@ use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Psr\Log\LoggerInterface;
+use Tui\PageBundle\Entity\IsIndexableInterface;
 use Tui\PageBundle\Entity\PageInterface;
 
 class SearchSubscriber implements EventSubscriber
@@ -53,6 +54,10 @@ class SearchSubscriber implements EventSubscriber
             return;
         }
 
+        if ($entity instanceof IsIndexableInterface && !$entity->isIndexable()) {
+            return;
+        }
+
         try {
             $this->updateDocumentIndexes($args);
         } catch (\Exception $e) {
@@ -70,6 +75,10 @@ class SearchSubscriber implements EventSubscriber
 
         $entity = $args->getObject();
         if (!$entity instanceof PageInterface) {
+            return;
+        }
+
+        if ($entity instanceof IsIndexableInterface && !$entity->isIndexable()) {
             return;
         }
 
@@ -93,6 +102,10 @@ class SearchSubscriber implements EventSubscriber
 
         $entity = $args->getObject();
         if (!$entity instanceof PageInterface) {
+            return;
+        }
+
+        if ($entity instanceof IsIndexableInterface && !$entity->isIndexable()) {
             return;
         }
 

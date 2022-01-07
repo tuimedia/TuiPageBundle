@@ -2,11 +2,13 @@
 
 An API for managing rich, versioned, multilingual content.
 
+[TOC]
+
 ## Requirements
 
 * Symfony 4 or 5
 * Doctrine ORM 2
-* Typesearch 0.22.1
+* Typesense 0.22.1
 
 ## Installation
 
@@ -160,7 +162,7 @@ API calls and their serializer groups:
 * `PUT /pages/{slug}` - `pageCreate` (for deserializing), `pageGet` (for the response)
 * `GET /search` - `pageList`
 
-### Adding custom serializer groups
+## Adding custom serializer groups
 
 You can provide additional serializer groups that TuiPageBundle uses for serializing and deserializing in its controllers. Edit `config/packages/tui_page.yaml`:
 
@@ -177,7 +179,7 @@ tui_page:
         update_response: ['myPageUpdate']
 ```
 
-### Creating custom controllers
+## Creating custom controllers
 
 You may find yourself needing to return serialized TuiPage objects from your own controllers. To ensure consistent output, consider using the `Tui\PageBundle\Controller\TuiPageResponseTrait` and calling `$this->generateTuiPageResponse($page, $serializer, $groups = [], $statusCode = 200)` to create your response object.
 
@@ -185,7 +187,7 @@ The most notable thing this method does is to assert the type of certain object 
 
 ## Content components
 
-Every content component you create for the frontend should have a JSON Schema file describing its contents. The schema is used by TuiPageBundle to validate and sanitise its content. If you don't define a schema, that component will not be validated or sanitised beyond the required fields, so… define a schema!
+Every content component you create for the frontend must have a JSON Schema file describing its contents. The schema is used by TuiPageBundle to validate and sanitise its content. If you don't define a schema, that component will not be validated or sanitised beyond the required fields, so… define a schema!
 
 A generic schema exists for all content components, so you don't need to (and shouldn't) include `id`, `component`, `languages` or `styles` in your schema file.
 
@@ -280,6 +282,43 @@ class AppSearchTransformer implements TransformerInterface
   }
 }
 ```
+
+## Excluding pages from the bulk reindex command
+
+The `pages:reindex` command fetches all pages by default. By overriding the bundle's PageRepository class with your own, you can replace either the `getQueryForIndexing` method, or the `getPagesForIndexing` method that calls it. In this example, pages matching a URL pattern are excluded, and custom tags are included:
+
+```php
+public function getQueryForIndexing(): Query
+    {
+        $qb = $this->createQueryBuilder('p');
+        return $qb
+            ->select('p, pd, pt, t')
+            ->join('p.pageData', 'pd')
+            ->leftJoin('p.pageTags', 'pt')
+            ->leftJoin('pt.tag', 't')
+            ->where($qb->expr()->notLike('p.slug', ':pattern'))
+            ->setParameter('pattern', 'landing-%')
+            ->getQuery();
+    }
+```
+
+To have your class provided to the indexer, override the bundle's repository service definition:
+
+```yaml
+# app/config/services.yaml
+services:
+  # ...
+      Tui\PageBundle\Repository\PageRepository:
+        class: App\Repository\PageRepository
+        arguments:
+            $pageClass: '%tui_page.page_class%'
+```
+
+## Excluding pages from the search subscriber
+
+If your Page entity doesn't extend `Tui\PageBundle\Entity\AbstractPage` then update it to implement both `Tui\PageBundle\Entity\IsIndexableInterface`.
+
+Now define the `isIndexable(): bool` method in your entity. If this method returns false, the page won't be indexed.
 
 ## Translation
 
