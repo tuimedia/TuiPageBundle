@@ -3,37 +3,48 @@
 namespace Tui\PageBundle\Search;
 
 use Psr\Log\LoggerInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Tui\PageBundle\Entity\PageInterface;
+use Symfony\Component\HttpClient\HttplugClient;
+use Typesense\Client;
 
 class TypesenseClient
 {
-    private array $hosts;
-    private HttpClientInterface $http;
+    private Client $typesense;
     private string $indexPrefix;
     private LoggerInterface $log;
-    private string $typesenseApiKey;
 
     /** @var TransformerInterface[] */
     private array $transformers = [];
 
     public function __construct(
         LoggerInterface $log,
-        HttpClientInterface $http,
         string $indexPrefix,
-        array $searchHosts,
         string $typesenseApiKey,
+        array $searchHosts,
         array $componentTransformers = null,
     ) {
         if ($componentTransformers) {
             $this->transformers = $componentTransformers;
         }
 
-        $this->http = $http;
-        $this->hosts = $searchHosts;
         $this->indexPrefix = $indexPrefix;
         $this->log = $log;
-        $this->typesenseApiKey = $typesenseApiKey;
+        $this->typesense = new Client([
+            'api_key' => $typesenseApiKey,
+            'nodes' => $this->formatHosts($searchHosts),
+            'client' => new HttplugClient(),
+        ]);
+    }
+
+    private function formatHosts(array $searchHosts): array
+    {
+        return array_map(function ($host) {
+            return [
+                'protocol' => parse_url($host, PHP_URL_SCHEME),
+                'host' => parse_url($host, PHP_URL_HOST),
+                'port' => parse_url($host, PHP_URL_PORT),
+            ];
+        }, $searchHosts);
     }
 
     public function createSearchDocument(PageInterface $page, string $language): array
@@ -67,21 +78,7 @@ class TypesenseClient
             return null;
         }
 
-        return $this->http->request('GET', vsprintf('%s/collections/%s/documents/search', [
-            $this->getSearchHost(),
-            $collection,
-        ]), [
-            'headers' => [
-                'X-TYPESENSE-API-KEY' => $this->typesenseApiKey,
-            ],
-            'query' => $queryMerged,
-        ])->toArray();
-    }
-
-    /** TODO: handle multiple servers somehow instead of always returning the first one */
-    private function getSearchHost(): string
-    {
-        return $this->hosts[0];
+        return $this->typesense->collections[$collection]->documents->search($queryMerged);
     }
 
     public function setTransformers(array $componentTransformers): void
@@ -99,25 +96,12 @@ class TypesenseClient
 
     public function listCollections(): array
     {
-        return $this->http->request('GET', vsprintf('%s/collections', [
-            $this->getSearchHost(),
-        ]), [
-            'headers' => [
-                'X-TYPESENSE-API-KEY' => $this->typesenseApiKey,
-            ],
-        ])->toArray();
+        return $this->typesense->collections->retrieve();
     }
 
     public function deleteCollection(string $name): array
     {
-        return $this->http->request('DELETE', vsprintf('%s/collections/%s', [
-            $this->getSearchHost(),
-            $name,
-        ]), [
-            'headers' => [
-                'X-TYPESENSE-API-KEY' => $this->typesenseApiKey,
-            ],
-        ])->toArray();
+        return $this->typesense->collections[$name]->delete();
     }
 
     public function createCollection(string $name): array
@@ -140,60 +124,27 @@ class TypesenseClient
         }
 
         // Send it
-        return $this->http->request('POST', vsprintf('%s/collections', [$this->hosts[0]]), [
-            'headers' => [ 'X-TYPESENSE-API-KEY' => $this->typesenseApiKey ],
-            'json' => $config,
-        ])->toArray();
+        return $this->typesense->collections->create($config);
     }
 
     public function upsertDocument(string $collection, array $doc): array
     {
-        return $this->http->request('POST', vsprintf('%s/collections/%s/documents', [
-            $this->getSearchHost(),
-            $collection,
-        ]), [
-            'headers' => [ 'X-TYPESENSE-API-KEY' => $this->typesenseApiKey ],
-            'query' => ['action' => 'upsert'],
-            'json' => $doc,
-        ])->toArray();
+        return $this->typesense->collections[$collection]->documents->upsert($doc);
     }
 
     public function deleteDocument(string $collection, string $id): array
     {
-        return $this->http->request('DELETE', vsprintf('%s/collections/%s/documents/%s', [
-            $this->getSearchHost(),
-            $collection,
-            $id,
-        ]), [
-            'headers' => [ 'X-TYPESENSE-API-KEY' => $this->typesenseApiKey ],
-        ])->toArray();
+        return $this->typesense->collections[$collection]->documents[$id]->delete();
     }
 
     public function bulkImport(string $collection, array $docs): array
     {
-        // Typesense takes JSONL(ines) instead of a JSON array of JSON docs, because… ???
-        // Anyway, make that
-        $body = join(PHP_EOL, array_map(function ($doc) {
-            return json_encode($doc);
-        }, $docs));
+        $result = $this->typesense->collections[$collection]->documents->import($docs, [
+            'action' => 'upsert'
+        ]);
 
-        $content = $this->http->request('POST', vsprintf('%s/collections/%s/documents/import', [
-            $this->getSearchHost(),
-            $collection,
-        ]), [
-            'headers' => [
-                'X-TYPESENSE-API-KEY' => $this->typesenseApiKey,
-                'Content-Type' => 'text/plain',
-            ],
-            'query' => ['action' => 'upsert'],
-            'body' => $body,
-        ])->getContent();
-
-        // Parse responses, look for errors
-        $responseLines = array_map(function ($line): array {
-            return (array) json_decode($line, true);
-        }, explode("\n", $content));
-        $errors = array_filter($responseLines, function ($response): bool {
+        // Look for errors in the responses
+        $errors = array_filter($result, function ($response): bool {
             return $response['success'] !== true;
         });
         if (count($errors)) {
@@ -203,6 +154,6 @@ class TypesenseClient
             throw new BulkImportException(sprintf('Bulk import returned %d error(s)', count($errors)));
         }
 
-        return $responseLines;
+        return $result;
     }
 }
