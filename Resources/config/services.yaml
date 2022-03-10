@@ -17,7 +17,6 @@ services:
           $componentSchemas: '%tui_page.schemas%'
           $pageClass: '%tui_page.page_class%'
           $pageDataClass: '%tui_page.page_data_class%'
-          $componentMappings: '%tui_page.mappings%'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
