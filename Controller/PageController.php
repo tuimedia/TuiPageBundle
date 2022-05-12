@@ -50,7 +50,7 @@ class PageController extends AbstractController
         $status = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
 
         $pages = $pageRepository->findBy([
-            'state' => $status,
+            'state' => $state,
         ]);
 
         $response =  $this->json($pages, 200, [], [
