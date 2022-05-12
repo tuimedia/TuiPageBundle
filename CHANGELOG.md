@@ -1,5 +1,17 @@
 # Changes
 
+## 0.9.3
+
+### CHANGED
+
+* Fix page list endpoint
+
+## 0.9.2
+
+## CHANGED
+
+* Uses the official typesense client instead of making its own http calls. This adds retries, multi-server support, etc.
+
 ## 0.9.1
 
 ### NEW
