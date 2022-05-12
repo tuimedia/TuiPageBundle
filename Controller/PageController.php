@@ -48,7 +48,7 @@ class PageController extends AbstractController
         $this->checkTuiPagePermissions('list');
 
         $pages = $pageRepository->findBy([
-            'state' => $status,
+            'state' => $state,
         ]);
 
         $response =  $this->json($pages, 200, [], [
