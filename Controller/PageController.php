@@ -43,7 +43,7 @@ class PageController extends AbstractController
      */
     public function index(Request $request, PageRepository $pageRepository)
     {
-        $status = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
+        $state = preg_replace('/\W+/', '-', strip_tags($request->query->get('state', 'live')));
 
         $this->checkTuiPagePermissions('list');
 
