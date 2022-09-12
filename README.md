@@ -18,8 +18,8 @@ An API for managing rich, versioned, multilingual content.
 {
     "type": "project",
     "repositories": [{
-      "type": "composer",
-      "url": "https://useful.tuimedia.com:8082"
+      "type": "vcs",
+      "url": "https://bitbucket.org/tui/tuipagebundle.git"
     }],
     "require": {
       "…": "etc"
