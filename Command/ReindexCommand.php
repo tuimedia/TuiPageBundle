@@ -75,7 +75,7 @@ class ReindexCommand extends Command
 
         $resultOffsets = $count > $limit ?
             range(0, $count, $limit) :
-            // Don't bulk update more than once if we have less pages than the update limit
+            // Don't bulk update more than once if we have fewer pages than the update limit
             [0];
 
         foreach ($resultOffsets as $offset) {
