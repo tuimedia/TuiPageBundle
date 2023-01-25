@@ -1,5 +1,17 @@
 # Changes
 
+## 0.9.5
+
+### FIXED
+
+* SearchSubscriber no longer checks `isIndexable` when deleting Page entities.
+
+## 0.9.4
+
+### FIXED
+
+* Fix error in pages:reindex command when indexing fewer pages than the bulk_index_threshold
+
 ## 0.9.3
 
 ### CHANGED

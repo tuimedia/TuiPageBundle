@@ -72,7 +72,12 @@ class ReindexCommand extends Command
         // Get all pages
         $count = $this->pageRepository->count([]);
         $limit = $this->bulkIndexThreshold;
-        $resultOffsets = range(0, $count, $limit);
+
+        $resultOffsets = $count > $limit ?
+            range(0, $count, $limit) :
+            // Don't bulk update more than once if we have fewer pages than the update limit
+            [0];
+
         foreach ($resultOffsets as $offset) {
             $batch = [];
             $pages = $this->pageRepository->getPagesForIndexing($this->bulkIndexThreshold, $offset);
