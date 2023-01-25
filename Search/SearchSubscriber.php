@@ -105,10 +105,6 @@ class SearchSubscriber implements EventSubscriber
             return;
         }
 
-        if ($entity instanceof IsIndexableInterface && !$entity->isIndexable()) {
-            return;
-        }
-
         $pageData = $entity->getPageData();
         foreach ($pageData->getAvailableLanguages() as $lang) {
             try {
