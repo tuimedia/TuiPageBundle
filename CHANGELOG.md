@@ -1,5 +1,11 @@
 # Changes
 
+## 0.9.6
+
+### CHANGED
+
+* Add Symfony 6.x to supported versions (actual support not guaranteed yet)
+
 ## 0.9.5
 
 ### FIXED
