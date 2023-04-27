@@ -55,6 +55,7 @@ class ExportCommand extends Command
 
         if (!count($pages)) {
             $this->logger->info('No pages found, exiting early');
+
             return 0;
         }
 
@@ -65,7 +66,7 @@ class ExportCommand extends Command
                 $targetLanguage,
             ]);
         }
-        $zip = new \ZipArchive;
+        $zip = new \ZipArchive();
         $result = $zip->open((string) filter_var($filename, FILTER_SANITIZE_STRING), \ZipArchive::CREATE | \ZipArchive::EXCL);
         if ($result !== true) {
             $this->logger->error('Failed to create zip archive', [
@@ -73,6 +74,7 @@ class ExportCommand extends Command
                 'message' => $this->getZipErrorMessage($result),
             ]);
             $io->error('Failed to create zip archive: ' . $this->getZipErrorMessage($result));
+
             return (int) $result;
         }
 
@@ -91,12 +93,12 @@ class ExportCommand extends Command
 
     private function getZipErrorMessage($code)
     {
-        switch($code) {
+        switch ($code) {
             case \ZipArchive::ER_EXISTS: return 'File already exists';
             case \ZipArchive::ER_INVAL: return 'Invalid filename';
             case \ZipArchive::ER_OPEN: return 'Unable to open file';
             case \ZipArchive::ER_MEMORY: return 'Memory error';
             default: return 'Unknown error';
-        };
+        }
     }
 }

@@ -2,9 +2,9 @@
 
 namespace Tui\PageBundle\Repository;
 
-use Tui\PageBundle\Entity\PageData;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Tui\PageBundle\Entity\PageData;
 
 /**
  * @method PageData|null find($id, $lockMode = null, $lockVersion = null)

@@ -2,24 +2,24 @@
 
 namespace Tui\PageBundle\Controller;
 
-use Tui\PageBundle\TranslationHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Tui\PageBundle\PageSchema;
 use Tui\PageBundle\Repository\PageRepository;
+use Tui\PageBundle\TranslationHandler;
 
 class TranslationController extends AbstractController
 {
     use TuiPageResponseTrait;
 
     /**
-     * Export page translation file
+     * Export page translation file.
      */
-    #[Route("/translations/{slug}/{lang}", methods: ["GET"], name: "tui_page_get_translation")]
+    #[Route('/translations/{slug}/{lang}', methods: ['GET'], name: 'tui_page_get_translation')]
     public function export(
         Request $request,
         PageRepository $pageRepository,
@@ -60,9 +60,9 @@ class TranslationController extends AbstractController
     }
 
     /**
-     * Import translation into page
+     * Import translation into page.
      */
-    #[Route("/translations/{slug}", methods: ["PUT"], name: "tui_page_put_translation")]
+    #[Route('/translations/{slug}', methods: ['PUT'], name: 'tui_page_put_translation')]
     public function import(
         Request $request,
         SerializerInterface $serializer,

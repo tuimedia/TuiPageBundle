@@ -3,16 +3,14 @@ namespace Tui\PageBundle\Command;
 
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Tui\PageBundle\Repository\PageRepository;
 
 class UpgradeCommand extends Command
 {
-    const CURRENT_VERSION = 2;
+    public const CURRENT_VERSION = 2;
     protected static $defaultName = 'pages:upgrade';
     private LoggerInterface $logger;
     private PageRepository $pageRepository;
@@ -41,6 +39,7 @@ class UpgradeCommand extends Command
 
         if (!count($pages)) {
             $this->logger->info('No pages found, exiting early');
+
             return 0;
         }
 
@@ -59,7 +58,7 @@ class UpgradeCommand extends Command
                     'version' => $version + 1,
                     'content' => $page->getPageData()->getContent(),
                 ]);
-                $version++;
+                ++$version;
             }
             $this->pageRepository->save($page);
         }
@@ -79,6 +78,7 @@ class UpgradeCommand extends Command
             if (!array_key_exists('id', $row) || !$row['id']) {
                 $row['id'] = $this->generateId();
             }
+
             return $row;
         }, $content['layout'] ?? []);
 
@@ -93,8 +93,10 @@ class UpgradeCommand extends Command
         $content['blocks'] = array_map(function ($block) {
             if (array_key_exists('styles', $block)) {
                 unset($block['styles']);
+
                 return $block;
             }
+
             return $block;
         }, $content['blocks']);
 

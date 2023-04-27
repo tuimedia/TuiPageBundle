@@ -3,7 +3,6 @@ namespace Tui\PageBundle;
 
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Tui\PageBundle\TuiPageBundle;
 use Tui\PageBundle\Entity\PageInterface;
 
 class TranslationHandler
@@ -76,7 +75,6 @@ class TranslationHandler
                 }
                 $this->addArrayRecursive($doc, $body, "[$blockId]", $sourceLangData[$blockId] ?? [], $targetLangData[$blockId] ?? []);
             }
-
         }
 
         return $doc->saveXML() ?: '';
@@ -186,7 +184,7 @@ class TranslationHandler
             $blockId = $matches[1];
 
             if ($blockId !== 'metadata' && !array_key_exists($blockId, $blocks)) {
-                throw new \Exception('This file contains a translation for content that isn\'t on this page. Id: '. $blockId);
+                throw new \Exception('This file contains a translation for content that isn\'t on this page. Id: ' . $blockId);
             }
 
             $target = (string) $unit->target;
@@ -204,6 +202,7 @@ class TranslationHandler
             if (!in_array($targetLanguage, $block['languages'])) {
                 $block['languages'][] = $targetLanguage;
             }
+
             return $block;
         }, $content['blocks']);
 
@@ -220,10 +219,7 @@ class TranslationHandler
         }
 
         if (!in_array($language, $this->validLanguages)) {
-            throw new \DomainException(vsprintf('Unsupported target language %s (valid: %s)', [
-                $language,
-                join(', ', $this->validLanguages),
-            ]));
+            throw new \DomainException(vsprintf('Unsupported target language %s (valid: %s)', [$language, join(', ', $this->validLanguages)]));
         }
     }
 }

@@ -8,8 +8,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Tui\PageBundle\Entity\IsIndexableInterface;
-use Tui\PageBundle\Repository\PageRepository;
 use Tui\PageBundle\Repository\PageDataRepository;
+use Tui\PageBundle\Repository\PageRepository;
 use Tui\PageBundle\Search\TypesenseClient;
 
 class ReindexCommand extends Command
