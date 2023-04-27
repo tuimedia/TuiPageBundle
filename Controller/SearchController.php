@@ -2,7 +2,6 @@
 
 namespace Tui\PageBundle\Controller;
 
-use Swagger\Annotations as SWG;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -15,51 +14,8 @@ class SearchController extends AbstractController
 
     /**
      * Search pages
-     * @Route("/search", methods={"GET"}, name="tui_page_search")
-     * @SWG\Response(
-     *   response=200,
-     *   description="Returns a list of pages"
-     * )
-     * @SWG\Parameter(
-     *   in="query",
-     *   required=false,
-     *   name="q",
-     *   type="string",
-     *   description="Search terms (can be empty, but that will return no results)"
-     * )
-     * @SWG\Parameter(
-     *   in="query",
-     *   required=false,
-     *   name="language",
-     *   default="en_GB",
-     *   type="string",
-     *   description="Language to search"
-     * )
-     * @SWG\Parameter(
-     *   in="query",
-     *   required=false,
-     *   default="live",
-     *   name="state",
-     *   type="string",
-     *   description="Page namespace to search"
-     * )
-     * @SWG\Parameter(
-     *   in="query",
-     *   required=false,
-     *   default=50,
-     *   name="size",
-     *   type="integer",
-     *   description="Maximum number of results per page"
-     * )
-     * @SWG\Parameter(
-     *   in="query",
-     *   required=false,
-     *   default=1,
-     *   name="page",
-     *   type="integer",
-     *   description="Page of results to return"
-     * )
      */
+    #[Route("/search", methods: ["GET"], name: "tui_page_search")]
     public function search(Request $request, PageRepository $pageRepository, TypesenseClient $searcher, bool $searchEnabled)
     {
         if (!$searchEnabled) {

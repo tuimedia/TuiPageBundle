@@ -1,5 +1,20 @@
 # Changes
 
+## 0.10.0
+
+### BREAKING
+
+* Minimum PHP version is now 8
+* Minimum Symfony version is now 5.4
+* No longer includes Swagger annotations
+* Removed SchemaController
+
+### CHANGED
+
+* Route annotations are now attributes
+
+* Fix SearchSubscriber failing to delete documents from index on entity deletion
+
 ## 0.9.8
 
 ### FIXED
