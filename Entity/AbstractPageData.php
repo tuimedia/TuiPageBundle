@@ -2,81 +2,59 @@
 
 namespace Tui\PageBundle\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\MappedSuperclass
- * @ORM\Table(name="tui_page_data")
-*/
+#[ORM\MappedSuperclass]
+#[ORM\Table(name: 'tui_page_data')]
 abstract class AbstractPageData implements PageDataInterface
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue(strategy="CUSTOM")
-     * @ORM\CustomIdGenerator("doctrine.uuid_generator")
-     * @ORM\Column(type="guid")
-     * @Groups({"pageList", "pageGet"})
-     * @var string|null
-     */
-    private $revision;
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
+    #[ORM\CustomIdGenerator('doctrine.uuid_generator')]
+    #[ORM\Column(type: 'guid')]
+    #[Groups(['pageList', 'pageGet'])]
+    private ?string $revision = null;
+
+    #[ORM\Column(type: 'guid', nullable: true)]
+    #[Groups(['pageList', 'pageGet'])]
+    private ?string $previousRevision = null;
+
+    #[ORM\Column(type: 'string', length: 128)]
+    #[Assert\Type(type: 'string')]
+    #[Assert\Length(max: 128)]
+    private ?string $pageRef = null;
+
+    #[ORM\Column(type: 'string', length: 32)]
+    #[Groups(['pageCreate', 'pageGet', 'pageList'])]
+    #[Assert\Type(type: 'string')]
+    #[Assert\Length(max: 32)]
+    private string $defaultLanguage = 'en_GB';
 
     /**
-     * @ORM\Column(type="guid", nullable=true)
-     * @Groups({"pageList", "pageGet"})
-     * @var string|null
-     */
-    private $previousRevision;
-
-    /**
-     * @ORM\Column(type="string", length=128)
-     * @Assert\Type(type="string")
-     * @Assert\Length(max=128)
-     * @var string|null
-     */
-    private $pageRef;
-
-    /**
-     * @ORM\Column(type="string", length=32)
-     * @Groups({"pageCreate", "pageGet", "pageList"})
-     * @Assert\Type(type="string")
-     * @Assert\Length(max=32)
-     * @var string
-     */
-    private $defaultLanguage = 'en_GB';
-
-    /**
-     * @ORM\Column(type="array")
-     * @Groups({"pageCreate", "pageGet", "pageList"})
-     * @Assert\Type(type="array")
      * @var string[]
      */
-    private $availableLanguages = ['en_GB'];
+    #[ORM\Column(type: 'array')]
+    #[Groups(['pageCreate', 'pageGet', 'pageList'])]
+    #[Assert\Type(type: 'array')]
+    private array $availableLanguages = ['en_GB'];
+
+    #[ORM\Column(type: 'datetime_immutable')]
+    #[Groups(['pageList', 'pageGet'])]
+    private \DateTimeImmutable $created;
+
+    #[ORM\Column(type: 'json')]
+    #[Assert\Type(type: 'array')]
+    #[Groups(['pageCreate', 'pageGet'])]
+    private array $content = [];
 
     /**
-     * @ORM\Column(type="datetime_immutable")
-     * @Groups({"pageList", "pageGet"})
-     * @var \DateTimeImmutable
-     */
-    private $created;
-
-    /**
-     * @ORM\Column(type="json")
-     * @Assert\Type(type="array")
-     * @Groups({"pageCreate", "pageGet"})
      * @var array
      */
-    private $content = [];
-
-    /**
-     * @ORM\Column(type="json")
-     * @Assert\Type(type="array")
-     * @Groups({"pageList", "pageCreate", "pageGet"})
-     * @var array
-     */
+    #[ORM\Column(type: 'json')]
+    #[Assert\Type(type: 'array')]
+    #[Groups(['pageList', 'pageCreate', 'pageGet'])]
     private $metadata = [];
 
     public function __construct()
@@ -169,9 +147,7 @@ abstract class AbstractPageData implements PageDataInterface
         return $this;
     }
 
-    /**
-     * @Groups({"pageList", "pageGet"})
-     */
+    #[Groups(['pageList', 'pageGet'])]
     public function getTranslatedMetadata(): array
     {
         $global = $this->metadata;
@@ -196,7 +172,7 @@ abstract class AbstractPageData implements PageDataInterface
         return $this->metadata;
     }
 
-    public function setMetadata($metadata): PageDataInterface
+    public function setMetadata(array $metadata): PageDataInterface
     {
         $this->metadata = $metadata;
 

@@ -19,32 +19,21 @@ class ImportCommand extends Command
     use TuiPageResponseTrait;
 
     protected static $defaultName = 'pages:import-xliff';
-    private LoggerInterface $logger;
-    private PageRepository $pageRepository;
-    private PageSchema $pageSchema;
-    private SerializerInterface $serializer;
-    private TranslationHandler $translationHandler;
+    protected static $defaultDescription = 'Import XLIFF translations';
 
     public function __construct(
-        LoggerInterface $logger,
-        PageRepository $pageRepository,
-        PageSchema $pageSchema,
-        SerializerInterface $serializer,
-        TranslationHandler $translationHandler
+        private LoggerInterface $logger,
+        private PageRepository $pageRepository,
+        private PageSchema $pageSchema,
+        private SerializerInterface $serializer,
+        private TranslationHandler $translationHandler
     ) {
-        $this->logger = $logger;
-        $this->pageRepository = $pageRepository;
-        $this->translationHandler = $translationHandler;
-        $this->serializer = $serializer;
-        $this->pageSchema = $pageSchema;
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
-        $this
-            ->setDescription('Import XLIFF translations')
-            ->addArgument('file', InputArgument::REQUIRED, 'XLIFF or ZIP archive')
+        $this->addArgument('file', InputArgument::REQUIRED, 'XLIFF or ZIP archive')
             ->addOption('state', null, InputOption::VALUE_REQUIRED, 'Save as a new page in this state')
         ;
     }
@@ -56,17 +45,20 @@ class ImportCommand extends Command
         $destinationState = $input->getOption('state');
         if (is_array($destinationState)) {
             $io->error('Provide only one destination state');
-            return 1;
+
+            return Command::FAILURE;
         }
         if ($destinationState && !is_string($destinationState)) {
             $io->error('Invalid destination state name');
-            return 1;
+
+            return Command::FAILURE;
         }
 
         $argFile = (string) filter_var($input->getArgument('file'), FILTER_SANITIZE_STRING);
         if (!file_exists($argFile)) {
             $io->error('File not found');
-            return 1;
+
+            return Command::FAILURE;
         }
 
         // Build a list of files to process
@@ -75,9 +67,10 @@ class ImportCommand extends Command
             if (!$this->hasZipSupport()) {
                 $this->logger->error('Zip file given but the PHP zip extension not installed or enabled');
                 $io->error('Zip file given but the PHP zip extension is not installed or enabled');
-                return 1;
+
+                return Command::FAILURE;
             }
-            $zip = new \ZipArchive;
+            $zip = new \ZipArchive();
             $result = $zip->open($argFile, \ZipArchive::CHECKCONS);
             if ($result !== true) {
                 $this->logger->error('Failed to open zip archive', [
@@ -85,10 +78,11 @@ class ImportCommand extends Command
                     'message' => $this->getZipErrorMessage($result),
                 ]);
                 $io->error('Failed to create zip archive: ' . $this->getZipErrorMessage($result));
+
                 return (int) $result;
             }
 
-            for ($i = 0; $i < $zip->numFiles; $i++) {
+            for ($i = 0; $i < $zip->numFiles; ++$i) {
                 $innerFilename = $zip->getNameIndex($i);
                 if (preg_match('/\.(?:xlf|xliff)$/', (string) $innerFilename)) {
                     $files[] = sprintf('zip://%s#%s', $argFile, $innerFilename);
@@ -159,17 +153,17 @@ class ImportCommand extends Command
             $this->pageRepository->save($page);
         }
 
-        return 0;
+        return Command::SUCCESS;
     }
 
-    private function getZipErrorMessage($code)
+    private function getZipErrorMessage(int $code): string
     {
-        switch($code) {
-            case \ZipArchive::ER_INCONS: return 'Zip file is corrupted';
-            case \ZipArchive::ER_INVAL: return 'Invalid filename';
-            case \ZipArchive::ER_OPEN: return 'Unable to open file';
-            case \ZipArchive::ER_MEMORY: return 'Memory error';
-            default: return 'Unknown error';
+        return match ($code) {
+            \ZipArchive::ER_INCONS => 'Zip file is corrupted',
+            \ZipArchive::ER_INVAL => 'Invalid filename',
+            \ZipArchive::ER_OPEN => 'Unable to open file',
+            \ZipArchive::ER_MEMORY => 'Memory error',
+            default => 'Unknown error',
         };
     }
 
@@ -188,11 +182,11 @@ class ImportCommand extends Command
         $doc->registerXPathNamespace('xliff', 'urn:oasis:names:tc:xliff:document:1.2');
 
         // Get the file tag for target language, revision, etc
-        $file = $doc->xpath('//xliff:file[1]')[0];
-        if (!$file) {
+        $files = $doc->xpath('//xliff:file[1]');
+        if (!$files || !isset($files[0])) {
             throw new \Exception('No XLIFF file element found');
         }
-        $original = (string) $file->attributes()['original'];
+        $original = (string) $files[0]->attributes()['original'];
 
         $query = (string) parse_url($original, PHP_URL_QUERY);
         parse_str($query, $params);

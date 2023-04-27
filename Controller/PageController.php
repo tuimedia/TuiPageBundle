@@ -2,48 +2,32 @@
 
 namespace Tui\PageBundle\Controller;
 
-use Swagger\Annotations as SWG;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\EventListener\AbstractSessionListener;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
-use Tui\PageBundle\Sanitizer;
 use Tui\PageBundle\PageSchema;
 use Tui\PageBundle\Repository\PageDataRepository;
 use Tui\PageBundle\Repository\PageRepository;
+use Tui\PageBundle\Sanitizer;
 
 class PageController extends AbstractController
 {
     use TuiPageResponseTrait;
 
-    protected $pageClass;
-
-    function __construct(string $pageClass) {
-        $this->pageClass = $pageClass;
+    public function __construct(protected string $pageClass)
+    {
     }
 
     /**
-     * List pages
-     *
-     * @Route("/pages", methods={"GET"}, name="tui_page_index")
-     * @SWG\Response(
-     *   response=200,
-     *   description="Returns a list of pages"
-     * )
-     * @SWG\Parameter(
-     *   in="query",
-     *   required=false,
-     *   default="live",
-     *   name="state",
-     *   type="string",
-     *   description="Page namespace to use"
-     * )
+     * List pages.
      */
+    #[Route('/pages', methods: ['GET'], name: 'tui_page_index')]
     public function index(Request $request, PageRepository $pageRepository): Response
     {
-        $state = preg_replace('/\W+/', '-', strip_tags($request->query->get('state', 'live')));
+        $state = preg_replace('/\W+/', '-', strip_tags((string) $request->query->get('state', 'live')));
 
         $this->checkTuiPagePermissions('list');
 
@@ -51,7 +35,7 @@ class PageController extends AbstractController
             'state' => $state,
         ]);
 
-        $response =  $this->json($pages, 200, [], [
+        $response = $this->json($pages, 200, [], [
             'groups' => $this->getTuiPageSerializerGroups('list_response', ['pageList']),
         ]);
 
@@ -79,33 +63,16 @@ class PageController extends AbstractController
     }
 
     /**
-     * Create a new page
-     *
-     * @Route("/pages", methods={"POST"}, name="tui_page_create")
-     * @SWG\Response(
-     *   response=201,
-     *   description="Returns the created page"
-     * )
-     * @SWG\Response(
-     *   response=422,
-     *   description="Validation error(s) in application/problem+json format"
-     * )
-     * @SWG\Parameter(
-     *   in="body",
-     *   required=true,
-     *   name="request",
-     *   description="Page content",
-     *   @SWG\Schema(type="object")
-     * )
+     * Create a new page.
      */
+    #[Route('/pages', methods: ['POST'], name: 'tui_page_create')]
     public function create(
         Request $request,
         SerializerInterface $serializer,
         PageRepository $pageRepository,
         Sanitizer $sanitizer,
         PageSchema $pageSchema
-    ): Response
-    {
+    ): Response {
         // Validate input
         $errors = $pageSchema->validate($request->getContent());
         if ($errors) {
@@ -122,7 +89,7 @@ class PageController extends AbstractController
         $page->getPageData()->setPageRef(rtrim(strtr(base64_encode(random_bytes(24)), '+/', '-_'), '='));
 
         $errors = $pageRepository->validate($page);
-        if (count($errors) > 0) {
+        if (($errors === null ? 0 : count($errors)) > 0) {
             return $this->json($errors, 422);
         }
 
@@ -130,38 +97,21 @@ class PageController extends AbstractController
         $pageRepository->save($page);
 
         $groups = $this->getTuiPageSerializerGroups('create_response', ['pageGet']);
+
         return $this->generateTuiPageResponse($page, $serializer, $groups, 201);
     }
 
     /**
-     * Get page
-     *
-     * @Route("/pages/{slug}", methods={"GET"}, name="tui_page_get")
-     * @SWG\Response(
-     *   response=200,
-     *   description="Success"
-     * )
-     * @SWG\Response(
-     *   response=404,
-     *   description="Page not found in the given state"
-     * )
-     * @SWG\Parameter(
-     *   in="query",
-     *   required=false,
-     *   type="string",
-     *   default="live",
-     *   name="state",
-     *   description="Page namespace"
-     * )
+     * Get page.
      */
+    #[Route('/pages/{slug}', methods: ['GET'], name: 'tui_page_get')]
     public function retrieve(
         Request $request,
         SerializerInterface $serializer,
         PageRepository $pageRepository,
-        $slug
-    ): Response
-    {
-        $state = preg_replace('/\W+/', '-', strip_tags($request->query->get('state', 'live')));
+        string $slug
+    ): Response {
+        $state = preg_replace('/\W+/', '-', strip_tags((string) $request->query->get('state', 'live')));
 
         $page = $pageRepository->findOneBy([
             'slug' => $slug,
@@ -187,29 +137,16 @@ class PageController extends AbstractController
     }
 
     /**
-     * Returns a list of pagedata objects containing the previous versions of the requested page
-     * @Route("/pages/{slug}/history", methods={"GET"}, name="tui_page_history")
-     * @SWG\Response(
-     *   response=200,
-     *   description="Success"
-     * )
-     * @SWG\Parameter(
-     *   in="query",
-     *   required=false,
-     *   type="string",
-     *   default="live",
-     *   name="state",
-     *   description="Page namespace"
-     * )
+     * Returns a list of pagedata objects containing the previous versions of the requested page.
      */
+    #[Route('/pages/{slug}/history', methods: ['GET'], name: 'tui_page_history')]
     public function history(
         Request $request,
         PageRepository $pageRepository,
         PageDataRepository $pageDataRepository,
-        $slug
-    ): Response
-    {
-        $state = preg_replace('/\W+/', '-', strip_tags($request->query->get('state', 'live')));
+        string $slug
+    ): Response {
+        $state = preg_replace('/\W+/', '-', strip_tags((string) $request->query->get('state', 'live')));
 
         $page = $pageRepository->findOneBy([
             'slug' => $slug,
@@ -230,39 +167,24 @@ class PageController extends AbstractController
         ]);
 
         $groups = $this->getTuiPageSerializerGroups('history_response', ['pageGet']);
+
         return $this->json($refs, 200, [], [
             'groups' => $groups,
         ]);
     }
 
     /**
-     * Edit a page
-     * @Route("/pages/{slug}", methods={"PUT"}, name="tui_page_edit")
-     * @SWG\Response(
-     *   response=200,
-     *   description="Returns the updated page"
-     * )
-     * @SWG\Response(
-     *   response=422,
-     *   description="Validation error(s) in application/problem+json format"
-     * )
-     * @SWG\Parameter(
-     *   in="body",
-     *   required=true,
-     *   name="request",
-     *   description="Page content",
-     *   @SWG\Schema(type="object")
-     * )
+     * Edit a page.
      */
+    #[Route('/pages/{slug}', methods: ['PUT'], name: 'tui_page_edit')]
     public function edit(
         Request $request,
         SerializerInterface $serializer, PageRepository $pageRepository,
         Sanitizer $sanitizer,
         PageSchema $pageSchema,
-        $slug
-    ): Response
-    {
-        $state = preg_replace('/\W+/', '-', strip_tags($request->query->get('state', 'live')));
+        string $slug
+    ): Response {
+        $state = preg_replace('/\W+/', '-', strip_tags((string) $request->query->get('state', 'live')));
         if (!$state) {
             throw new \InvalidArgumentException('Must specify state in query string');
         }
@@ -288,7 +210,7 @@ class PageController extends AbstractController
         $filteredContent = $sanitizer->cleanPage($request->getContent());
 
         $previousRevision = $page->getPageData()->getRevision();
-        $pageRef = $page->getPageData()->getPageRef();
+        $pageRef = (string) $page->getPageData()->getPageRef();
 
         // Apply the request data
         $groups = $this->getTuiPageSerializerGroups('update_request', ['pageCreate']);
@@ -302,7 +224,7 @@ class PageController extends AbstractController
 
         // Validation…
         $errors = $pageRepository->validate($page);
-        if (count($errors) > 0) {
+        if (($errors === null ? 0 : count($errors)) > 0) {
             return $this->json($errors, 422);
         }
 
@@ -310,29 +232,17 @@ class PageController extends AbstractController
         $pageRepository->save($page);
 
         $groups = $this->getTuiPageSerializerGroups('update_response', ['pageGet']);
+
         return $this->generateTuiPageResponse($page, $serializer, $groups);
     }
 
     /**
-     * Delete a page from the given namespace
-     *
-     * @Route("/pages/{slug}", methods={"DELETE"}, name="tui_page_delete")
-     * @SWG\Response(
-     *   response=204,
-     *   description="Returns an empty response"
-     * )
-     * @SWG\Parameter(
-     *   in="query",
-     *   required=false,
-     *   type="string",
-     *   default="live",
-     *   name="state",
-     *   description="Page namespace"
-     * )
+     * Delete a page from the given namespace.
      */
-    public function delete(Request $request, PageRepository $pageRepository, $slug): Response
+    #[Route('/pages/{slug}', methods: ['DELETE'], name: 'tui_page_delete')]
+    public function delete(Request $request, PageRepository $pageRepository, string $slug): Response
     {
-        $state = preg_replace('/\W+/', '-', strip_tags($request->query->get('state', 'live')));
+        $state = preg_replace('/\W+/', '-', strip_tags((string) $request->query->get('state', 'live')));
         if (!$state) {
             throw new \InvalidArgumentException('Must specify state in query string');
         }

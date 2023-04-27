@@ -1,0 +1,8 @@
+parameters:
+    inferPrivatePropertyTypeFromConstructor: true
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
+    doctrine:
+        allowNullablePropertyForRequiredField: true
+    excludePaths:
+        - vendor

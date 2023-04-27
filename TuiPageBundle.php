@@ -7,12 +7,12 @@ use Tui\PageBundle\DependencyInjection\TransformerPass;
 
 class TuiPageBundle extends Bundle
 {
-    const VERSION = 1.0;
+    public const VERSION = 1.0;
 
     public function build(ContainerBuilder $container): void
     {
         parent::build($container);
 
-        $container->addCompilerPass(new TransformerPass());
+        $container->addCompilerPass(new TransformerPass(), \Symfony\Component\DependencyInjection\Compiler\PassConfig::TYPE_BEFORE_OPTIMIZATION, 0);
     }
 }

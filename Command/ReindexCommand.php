@@ -8,41 +8,29 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Tui\PageBundle\Entity\IsIndexableInterface;
-use Tui\PageBundle\Repository\PageRepository;
 use Tui\PageBundle\Repository\PageDataRepository;
+use Tui\PageBundle\Repository\PageRepository;
 use Tui\PageBundle\Search\TypesenseClient;
 
 class ReindexCommand extends Command
 {
     protected static $defaultName = 'pages:reindex';
-    private LoggerInterface $logger;
-    private PageRepository $pageRepository;
-    private PageDataRepository $pageDataRepository;
-    private TypesenseClient $searcher;
-    private $bulkIndexThreshold = 40; // https://typesense.org/docs/0.22.1/api/documents.html#configure-batch-size
-    private $indexingQueue = [];
+    protected static $defaultDescription = 'Recreate search index'; // https://typesense.org/docs/0.22.1/api/documents.html#configure-batch-size
+    private array $indexingQueue = [];
 
     public function __construct(
-        LoggerInterface $logger,
-        TypesenseClient $searcher,
-        PageRepository $pageRepository,
-        PageDataRepository $pageDataRepository,
-        int $bulkIndexThreshold = 40
+        private LoggerInterface $logger,
+        private TypesenseClient $searcher,
+        private PageRepository $pageRepository,
+        private PageDataRepository $pageDataRepository,
+        private int $bulkIndexThreshold = 40
     ) {
-        $this->logger = $logger;
-        $this->pageRepository = $pageRepository;
-        $this->pageDataRepository = $pageDataRepository;
-        $this->searcher = $searcher;
-        $this->bulkIndexThreshold = $bulkIndexThreshold;
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
-        $this
-            ->setDescription('Recreate search index')
-            ->addOption('no-reset', null, InputOption::VALUE_NONE, 'Don\'t delete existing indexes')
-        ;
+        $this->addOption('no-reset', null, InputOption::VALUE_NONE, 'Don\'t delete existing indexes');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -54,9 +42,7 @@ class ReindexCommand extends Command
 
         // Set up indexes
         if (!$input->getOption('no-reset')) {
-            $collections = array_map(function ($collection) {
-                return $collection['name'];
-            }, $this->searcher->listCollections());
+            $collections = array_map(fn ($collection) => $collection['name'], $this->searcher->listCollections());
 
             foreach ($languages as $language) {
                 $collectionName = $this->searcher->getCollectionNameForLanguage($language);
@@ -97,7 +83,7 @@ class ReindexCommand extends Command
 
         $this->drainQueue();
 
-        return 0;
+        return Command::SUCCESS;
     }
 
     private function queueIndex(string $language, array $translatedPage): void
@@ -107,14 +93,14 @@ class ReindexCommand extends Command
             $this->indexingQueue[$language] = [];
         }
         array_push($this->indexingQueue[$language], $translatedPage);
-        if (count($this->indexingQueue[$language]) >= $this->bulkIndexThreshold) {
+        if ((is_countable($this->indexingQueue[$language]) ? count($this->indexingQueue[$language]) : 0) >= $this->bulkIndexThreshold) {
             $this->logger->debug('Triggering bulk import');
             $this->bulkIndex($language, $this->indexingQueue[$language]);
             $this->indexingQueue[$language] = [];
         }
     }
 
-    private function bulkIndex($language, array $docs): void
+    private function bulkIndex(string $language, array $docs): void
     {
         $this->logger->info('Performing bulk import');
         $collectionName = $this->searcher->getCollectionNameForLanguage($language);

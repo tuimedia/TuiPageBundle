@@ -1,12 +1,11 @@
 <?php
 namespace Tui\PageBundle\Controller;
 
-use Tui\PageBundle\Entity\PageInterface;
-use Tui\PageBundle\Entity\PageDataInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Tui\PageBundle\Entity\PageDataInterface;
+use Tui\PageBundle\Entity\PageInterface;
 
 trait TuiPageResponseTrait
 {
@@ -35,7 +34,8 @@ trait TuiPageResponseTrait
         return $pageJson;
     }
 
-    public function flagEmptyObjects($innerObject, $outerObject) {
+    public function flagEmptyObjects(array $innerObject, mixed $outerObject): array
+    {
         if (!$outerObject instanceof PageDataInterface) {
             return $innerObject;
         }
@@ -55,7 +55,7 @@ trait TuiPageResponseTrait
         return $innerObject;
     }
 
-    public function getTuiPageSerializerGroups(string $action, array $default)
+    public function getTuiPageSerializerGroups(string $action, array $default): array
     {
         if (!$this instanceof AbstractController) {
             throw new \Exception('This method requires the class to extend Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController');
@@ -78,6 +78,7 @@ trait TuiPageResponseTrait
                 }
             }
 
+            /** var \Symfony\Component\HttpKernel\Exception\NotFoundHttpException */
             $exception = $this->createAccessDeniedException('Access Denied.');
             $exception->setAttributes($roles);
             $exception->setSubject($page);

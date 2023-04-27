@@ -2,9 +2,9 @@
 
 namespace Tui\PageBundle\Controller;
 
-use Swagger\Annotations as SWG;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Tui\PageBundle\Repository\PageRepository;
 use Tui\PageBundle\Search\TypesenseClient;
@@ -14,53 +14,10 @@ class SearchController extends AbstractController
     use TuiPageResponseTrait;
 
     /**
-     * Search pages
-     * @Route("/search", methods={"GET"}, name="tui_page_search")
-     * @SWG\Response(
-     *   response=200,
-     *   description="Returns a list of pages"
-     * )
-     * @SWG\Parameter(
-     *   in="query",
-     *   required=false,
-     *   name="q",
-     *   type="string",
-     *   description="Search terms (can be empty, but that will return no results)"
-     * )
-     * @SWG\Parameter(
-     *   in="query",
-     *   required=false,
-     *   name="language",
-     *   default="en_GB",
-     *   type="string",
-     *   description="Language to search"
-     * )
-     * @SWG\Parameter(
-     *   in="query",
-     *   required=false,
-     *   default="live",
-     *   name="state",
-     *   type="string",
-     *   description="Page namespace to search"
-     * )
-     * @SWG\Parameter(
-     *   in="query",
-     *   required=false,
-     *   default=50,
-     *   name="size",
-     *   type="integer",
-     *   description="Maximum number of results per page"
-     * )
-     * @SWG\Parameter(
-     *   in="query",
-     *   required=false,
-     *   default=1,
-     *   name="page",
-     *   type="integer",
-     *   description="Page of results to return"
-     * )
+     * Search pages.
      */
-    public function search(Request $request, PageRepository $pageRepository, TypesenseClient $searcher, bool $searchEnabled)
+    #[Route('/search', methods: ['GET'], name: 'tui_page_search')]
+    public function search(Request $request, PageRepository $pageRepository, TypesenseClient $searcher, bool $searchEnabled): Response
     {
         if (!$searchEnabled) {
             return $this->json([
@@ -90,7 +47,7 @@ class SearchController extends AbstractController
 
         try {
             $results = $searcher->search($index, $query);
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return $this->json([
                 'results' => [],
                 'total' => 0,
@@ -99,9 +56,7 @@ class SearchController extends AbstractController
 
         $pages = [];
         if (($results['found'] ?? 0) > 0) {
-            $ids = array_map(function ($result) {
-                return $result['document']['id'];
-            }, $results['hits'] ?? []);
+            $ids = array_map(fn ($result) => $result['document']['id'], $results['hits'] ?? []);
 
             $pagesById = [];
             // Sort results by relevance
@@ -118,7 +73,7 @@ class SearchController extends AbstractController
 
         $response = [
             'results' => $pages,
-            'total' => $results['found'],
+            'total' => $results['found'] ?? 0,
         ];
 
         return $this->json($response, 200, [], [

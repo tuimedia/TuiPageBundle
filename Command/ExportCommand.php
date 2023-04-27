@@ -14,26 +14,19 @@ use Tui\PageBundle\TranslationHandler;
 class ExportCommand extends Command
 {
     protected static $defaultName = 'pages:export-xliff';
-    private LoggerInterface $logger;
-    private PageRepository $pageRepository;
-    private TranslationHandler $translationHandler;
+    protected static $defaultDescription = 'Create an XLIFF export for translation';
 
     public function __construct(
-        LoggerInterface $logger,
-        PageRepository $pageRepository,
-        TranslationHandler $translationHandler
+        private LoggerInterface $logger,
+        private PageRepository $pageRepository,
+        private TranslationHandler $translationHandler
     ) {
-        $this->logger = $logger;
-        $this->pageRepository = $pageRepository;
-        $this->translationHandler = $translationHandler;
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
-        $this
-            ->setDescription('Create an XLIFF export for translation')
-            ->addArgument('target_language', InputArgument::REQUIRED, 'Target language')
+        $this->addArgument('target_language', InputArgument::REQUIRED, 'Target language')
             ->addOption('state', null, InputOption::VALUE_REQUIRED, 'Page state', 'live')
             ->addOption('file', null, InputOption::VALUE_REQUIRED, 'Output filename')
         ;
@@ -55,7 +48,8 @@ class ExportCommand extends Command
 
         if (!count($pages)) {
             $this->logger->info('No pages found, exiting early');
-            return 0;
+
+            return (int) Command::SUCCESS;
         }
 
         $filename = $input->getOption('file');
@@ -65,7 +59,7 @@ class ExportCommand extends Command
                 $targetLanguage,
             ]);
         }
-        $zip = new \ZipArchive;
+        $zip = new \ZipArchive();
         $result = $zip->open((string) filter_var($filename, FILTER_SANITIZE_STRING), \ZipArchive::CREATE | \ZipArchive::EXCL);
         if ($result !== true) {
             $this->logger->error('Failed to create zip archive', [
@@ -73,6 +67,7 @@ class ExportCommand extends Command
                 'message' => $this->getZipErrorMessage($result),
             ]);
             $io->error('Failed to create zip archive: ' . $this->getZipErrorMessage($result));
+
             return (int) $result;
         }
 
@@ -86,17 +81,17 @@ class ExportCommand extends Command
         }
         $zip->close();
 
-        return 0;
+        return (int) Command::SUCCESS;
     }
 
-    private function getZipErrorMessage($code)
+    private function getZipErrorMessage(int $code): string
     {
-        switch($code) {
-            case \ZipArchive::ER_EXISTS: return 'File already exists';
-            case \ZipArchive::ER_INVAL: return 'Invalid filename';
-            case \ZipArchive::ER_OPEN: return 'Unable to open file';
-            case \ZipArchive::ER_MEMORY: return 'Memory error';
-            default: return 'Unknown error';
+        return match ($code) {
+            \ZipArchive::ER_EXISTS => 'File already exists',
+            \ZipArchive::ER_INVAL => 'Invalid filename',
+            \ZipArchive::ER_OPEN => 'Unable to open file',
+            \ZipArchive::ER_MEMORY => 'Memory error',
+            default => 'Unknown error',
         };
     }
 }

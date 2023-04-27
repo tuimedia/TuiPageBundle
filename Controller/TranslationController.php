@@ -2,63 +2,32 @@
 
 namespace Tui\PageBundle\Controller;
 
-use Tui\PageBundle\TranslationHandler;
-use Swagger\Annotations as SWG;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Tui\PageBundle\PageSchema;
 use Tui\PageBundle\Repository\PageRepository;
+use Tui\PageBundle\TranslationHandler;
 
 class TranslationController extends AbstractController
 {
     use TuiPageResponseTrait;
 
     /**
-     * Export page translation file
-     *
-     * @Route("/translations/{slug}/{lang}", methods={"GET"}, name="tui_page_get_translation")
-     * @SWG\Response(
-     *   response=200,
-     *   description="Success"
-     * )
-     * @SWG\Response(
-     *   response=404,
-     *   description="Page not found in the given state"
-     * )
-     * @SWG\Parameter(
-     *   in="query",
-     *   required=false,
-     *   type="string",
-     *   default="live",
-     *   name="state",
-     *   description="Page namespace"
-     * )
-     * @SWG\Parameter(
-     *   in="path",
-     *   required=true,
-     *   type="string",
-     *   name="slug",
-     *   description="Page slug"
-     * )
-     * @SWG\Parameter(
-     *   in="path",
-     *   required=true,
-     *   type="string",
-     *   name="lang",
-     *   description="Destination language"
-     * )
+     * Export page translation file.
      */
+    #[Route('/translations/{slug}/{lang}', methods: ['GET'], name: 'tui_page_get_translation')]
     public function export(
         Request $request,
         PageRepository $pageRepository,
         TranslationHandler $translationHandler,
         string $slug,
         string $lang
-    ) {
+    ): Response {
         $state = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
         $lang = filter_var($lang, FILTER_SANITIZE_STRING);
 
@@ -71,6 +40,14 @@ class TranslationController extends AbstractController
             throw $this->createNotFoundException('No such page in state ' . $state);
         }
 
+        if (!$lang) {
+            return $this->json([
+                'type' => 'https://tuimedia.com/page-bundle/validation',
+                'title' => 'Invalid language parameter',
+                'detail' => 'Language parameter is required',
+            ], 400);
+        }
+
         $this->checkTuiPagePermissions('export', $page);
 
         $file = $translationHandler->generateXliff($page, $lang);
@@ -79,7 +56,7 @@ class TranslationController extends AbstractController
             'Content-Type' => 'application/x-xliff+xml',
         ]);
         $dispositionHeader = $response->headers->makeDisposition(
-            \Symfony\Component\HttpFoundation\ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
             vsprintf('%s.%s.%s.xliff', [
                 $page->getSlug(),
                 $state,
@@ -92,64 +69,9 @@ class TranslationController extends AbstractController
     }
 
     /**
-     * Import translation into page
-     *
-     * @Route("/translations/{slug}", methods={"PUT"}, name="tui_page_put_translation")
-     * @SWG\Response(
-     *   response=200,
-     *   description="Success"
-     * )
-     * @SWG\Response(
-     *   response=404,
-     *   description="Page not found in the given state"
-     * )
-     * @SWG\Parameter(
-     *   in="query",
-     *   required=false,
-     *   type="string",
-     *   default="live",
-     *   name="state",
-     *   description="Page namespace"
-     * )
-     * @SWG\Parameter(
-     *   in="query",
-     *   required=false,
-     *   type="string",
-     *   default="original",
-     *   name="destination",
-     *   description="Destination - set to 'new' to import as new page"
-     * )
-     * @SWG\Parameter(
-     *   in="query",
-     *   required=false,
-     *   type="string",
-     *   default="live",
-     *   name="destinationState",
-     *   description="Destination state"
-     * )
-     * @SWG\Parameter(
-     *   in="query",
-     *   required=false,
-     *   type="string",
-     *   default="live",
-     *   name="destinationSlug",
-     *   description="Destination slug"
-     * )
-     * @SWG\Parameter(
-     *   in="path",
-     *   required=true,
-     *   type="string",
-     *   name="slug",
-     *   description="Page slug"
-     * )
-     * @SWG\Parameter(
-     *   in="body",
-     *   required=true,
-     *   name="request",
-     *   description="XLIFF file content",
-     *   @SWG\Schema(type="string")
-     * )
+     * Import translation into page.
      */
+    #[Route('/translations/{slug}', methods: ['PUT'], name: 'tui_page_put_translation')]
     public function import(
         Request $request,
         SerializerInterface $serializer,
@@ -157,7 +79,7 @@ class TranslationController extends AbstractController
         TranslationHandler $translationHandler,
         PageSchema $pageSchema,
         string $slug
-    ) {
+    ): Response {
         $state = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
 
         $page = $pageRepository->findOneBy([
@@ -220,7 +142,7 @@ class TranslationController extends AbstractController
             // Create a new revision
             $pageRef = $page->getPageData()->getPageRef();
             $page->setPageData(clone $page->getPageData());
-            $page->getPageData()->setPageRef($pageRef);
+            $page->getPageData()->setPageRef((string) $pageRef);
             // Set a temporary revision so the page will validate
             $page->getPageData()->setRevision('ffffffff-ffff-ffff-ffff-ffffffffffff');
         }

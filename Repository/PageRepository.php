@@ -2,17 +2,13 @@
 
 namespace Tui\PageBundle\Repository;
 
-use Tui\PageBundle\Entity\AbstractPage;
-use Tui\PageBundle\Entity\PageInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
-use Iterator;
-use Symfony\Component\Validator\Constraints\Traverse;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Traversable;
+use Tui\PageBundle\Entity\PageInterface;
 
 /**
  * @method PageInterface|null find($id, $lockMode = null, $lockVersion = null)
@@ -20,12 +16,21 @@ use Traversable;
  * @method PageInterface[]    findAll()
  * @method PageInterface[]    findById(array|string $ids)
  * @method PageInterface[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ *
+ * @template T of object
+ *
+ * @template-extends ServiceEntityRepository<T>
  */
 class PageRepository extends ServiceEntityRepository
 {
     /** @var ValidatorInterface */
     protected $validator;
 
+    /**
+     * @param string $pageClass The class name of the entity this repository manages
+     *
+     * @psalm-param class-string<T> $pageClass
+     */
     public function __construct(ManagerRegistry $registry, ValidatorInterface $validator, string $pageClass)
     {
         $this->validator = $validator;
@@ -72,7 +77,7 @@ class PageRepository extends ServiceEntityRepository
             ->getQuery();
     }
 
-    public function getPagesForIndexing(int $limit = 500, int $offset = 0): Traversable
+    public function getPagesForIndexing(int $limit = 500, int $offset = 0): \Traversable
     {
         $query = $this->getQueryForIndexing()
             ->setFirstResult($offset)

@@ -7,52 +7,46 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @UniqueEntity(fields={"state", "slug"}, message="A page already exists with that URL path and state")
- * @ORM\Table(name="tui_page",
- *   uniqueConstraints={@ORM\UniqueConstraint(name="state_slug_unique",columns={"state","slug"})}
- * )
- * @ORM\MappedSuperclass
- */
+#[UniqueEntity(fields: ['state', 'slug'], message: 'A page already exists with that URL path and state')]
+#[ORM\MappedSuperclass]
+#[ORM\Table(name: 'tui_page')]
+#[ORM\UniqueConstraint(name: 'state_slug_unique', columns: ['state', 'slug'])]
 class AbstractPage implements PageInterface, IsIndexableInterface
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue(strategy="CUSTOM")
-     * @ORM\CustomIdGenerator("doctrine.uuid_generator")
-     * @ORM\Column(type="guid")
-     * @Groups({"pageList", "pageGet"})
-     * @var string
-     */
-    protected $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'CUSTOM')]
+    #[ORM\CustomIdGenerator('doctrine.uuid_generator')]
+    #[ORM\Column(type: 'guid')]
+    #[Groups(['pageList', 'pageGet'])]
+    protected ?string $id;
 
     /**
-     * @ORM\Column(type="string", length=128)
-     * @Groups({"pageList", "pageCreate", "pageGet"})
-     * @Assert\Type(type="string")
-     * @Assert\Length(max=128, maxMessage="Slug cannot be longer than {{ limit }} characters")
-     * @Assert\Regex(pattern="/^[\w-]+$/", message="URL path (slug) can only contain lower case letters, numbers and dashes.")
-     * @Assert\NotBlank
      * @var string
      */
+    #[ORM\Column(type: 'string', length: 128)]
+    #[Groups(['pageList', 'pageCreate', 'pageGet'])]
+    #[Assert\Type(type: 'string')]
+    #[Assert\Length(max: 128, maxMessage: 'Slug cannot be longer than {{ limit }} characters')]
+    #[Assert\Regex(pattern: '/^[\w-]+$/', message: 'URL path (slug) can only contain lower case letters, numbers and dashes.')]
+    #[Assert\NotBlank]
     protected $slug;
 
     /**
-     * @ORM\Column(type="string", length=32)
-     * @Groups({"pageList", "pageCreate", "pageGet"})
-     * @Assert\Type("string")
-     * @Assert\Length(max=32, maxMessage="State must not be longer than {{ limit }} characters")
      * @var string
      */
+    #[ORM\Column(type: 'string', length: 32)]
+    #[Groups(['pageList', 'pageCreate', 'pageGet'])]
+    #[Assert\Type('string')]
+    #[Assert\Length(max: 32, maxMessage: 'State must not be longer than {{ limit }} characters')]
     protected $state;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Tui\PageBundle\Entity\PageDataInterface", cascade={"persist"}, fetch="EAGER")
-     * @ORM\JoinColumn(nullable=false, referencedColumnName="revision")
-     * @Groups({"pageList", "pageCreate", "pageGet"})
-     * @Assert\Valid
      * @var AbstractPageData|PageDataInterface
      */
+    #[ORM\ManyToOne(targetEntity: PageDataInterface::class, cascade: ['persist'], fetch: 'EAGER')]
+    #[ORM\JoinColumn(nullable: false, referencedColumnName: 'revision')]
+    #[Groups(['pageList', 'pageCreate', 'pageGet'])]
+    #[Assert\Valid]
     protected $pageData;
 
     public function getId(): ?string

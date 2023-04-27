@@ -3,20 +3,12 @@ namespace Tui\PageBundle;
 
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Tui\PageBundle\TuiPageBundle;
 use Tui\PageBundle\Entity\PageInterface;
 
 class TranslationHandler
 {
-    private $router;
-    private $validLanguages;
-
-    public function __construct(
-        UrlGeneratorInterface $router,
-        array $validLanguages = null
-    ) {
-        $this->router = $router;
-        $this->validLanguages = $validLanguages;
+    public function __construct(private UrlGeneratorInterface $router, private ?array $validLanguages = null)
+    {
     }
 
     public function generateXliff(PageInterface $page, string $targetLanguage): string
@@ -76,7 +68,6 @@ class TranslationHandler
                 }
                 $this->addArrayRecursive($doc, $body, "[$blockId]", $sourceLangData[$blockId] ?? [], $targetLangData[$blockId] ?? []);
             }
-
         }
 
         return $doc->saveXML() ?: '';
@@ -157,7 +148,7 @@ class TranslationHandler
         $this->validateTargetLanguage($targetLanguage);
 
         $original = (string) $attributes['original'];
-        if (strpos($original, (string) $page->getSlug()) === false) {
+        if (!str_contains($original, (string) $page->getSlug())) {
             throw new \Exception('The XLIFF file looks like it\'s for a different page. Or did the URL change?');
         }
 
@@ -169,7 +160,7 @@ class TranslationHandler
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
 
         $units = $doc->xpath('//xliff:trans-unit');
-        if ($units === false) {
+        if ($units === false || !is_array($units)) {
             throw new \Exception('No translation units found');
         }
 
@@ -178,7 +169,7 @@ class TranslationHandler
             if (!$attributes instanceof \SimpleXMLElement) {
                 throw new \Exception('Invalid translation unit - no resname attribute');
             }
-            $resource = (string) $attributes['resname'] ?? '';
+            $resource = (string) ($attributes['resname'] ?? '');
             if (!preg_match('/^(\[[^\][]+])+$/', $resource)) {
                 throw new \Exception('Invalid resource name: ' . $resource);
             }
@@ -186,7 +177,7 @@ class TranslationHandler
             $blockId = $matches[1];
 
             if ($blockId !== 'metadata' && !array_key_exists($blockId, $blocks)) {
-                throw new \Exception('This file contains a translation for content that isn\'t on this page. Id: '. $blockId);
+                throw new \Exception('This file contains a translation for content that isn\'t on this page. Id: ' . $blockId);
             }
 
             $target = (string) $unit->target;
@@ -204,6 +195,7 @@ class TranslationHandler
             if (!in_array($targetLanguage, $block['languages'])) {
                 $block['languages'][] = $targetLanguage;
             }
+
             return $block;
         }, $content['blocks']);
 
@@ -213,17 +205,16 @@ class TranslationHandler
         $pageData->setAvailableLanguages(array_values(array_unique($availableLanguages)));
     }
 
-    private function validateTargetLanguage(string $language)
+    private function validateTargetLanguage(string $language): bool
     {
-        if (!$this->validLanguages || !is_array($this->validLanguages)) {
+        if (!is_array($this->validLanguages)) {
             return true;
         }
 
         if (!in_array($language, $this->validLanguages)) {
-            throw new \DomainException(vsprintf('Unsupported target language %s (valid: %s)', [
-                $language,
-                join(', ', $this->validLanguages),
-            ]));
+            throw new \DomainException(vsprintf('Unsupported target language %s (valid: %s)', [$language, join(', ', $this->validLanguages)]));
         }
+
+        return true;
     }
 }

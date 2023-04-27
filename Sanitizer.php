@@ -5,12 +5,8 @@ use voku\helper\AntiXSS;
 
 class Sanitizer
 {
-    private $antixss;
-    private $pageSchema;
-
-    function __construct(AntiXSS $antixss, PageSchema $pageSchema) {
-        $this->antixss = $antixss;
-        $this->pageSchema = $pageSchema;
+    public function __construct(private AntiXSS $antixss, private PageSchema $pageSchema)
+    {
     }
 
     /**
@@ -22,15 +18,19 @@ class Sanitizer
      */
     public function cleanPage(string $rawContent): string
     {
-        $data = json_decode($rawContent);
+        $data = json_decode($rawContent, null, 512, JSON_THROW_ON_ERROR);
 
         // Get resolved tui-page schema (references collapsed)
         $resolvedSchema = $this->pageSchema->getResolvedPageSchema();
 
         $data = $this->cleanBySchemaRecursive($data, $resolvedSchema);
 
+        if (!isset($data->pageData)) {
+            throw new \RuntimeException('Invalid page data');
+        }
+
         // Clean blocks & associated langData according to custom schemas
-        foreach ($data->pageData->content->blocks as $blockId => $block) {
+        foreach ($data->pageData->content?->blocks ?: [] as $blockId => $block) {
             $blockSchema = $this->pageSchema->getSchemaForBlock($block);
 
             // Main block definition
@@ -52,10 +52,11 @@ class Sanitizer
             }
         }
 
-        $json = json_encode($data);
+        $json = json_encode($data, JSON_THROW_ON_ERROR);
         if (!$json) {
             throw new \RuntimeException('Unable to encode JSON output');
         }
+
         return $json;
     }
 
@@ -75,9 +76,9 @@ class Sanitizer
 
     /**
      * Simple recursive string cleaner - recurses through arrays & objects, applies filtering to strings only
-     * Only good for, say, metadata
+     * Only good for, say, metadata.
      */
-    private function stringCleanRecursive($data)
+    private function stringCleanRecursive(mixed $data): mixed
     {
         $dataIsArray = is_array($data);
         $dataIsObject = is_object($data);
@@ -104,7 +105,7 @@ class Sanitizer
         return $data;
     }
 
-    private function stringClean($value)
+    private function stringClean(string $value): string
     {
         return html_entity_decode(
             (string) htmlspecialchars(strip_tags($value), ENT_NOQUOTES),
@@ -113,9 +114,9 @@ class Sanitizer
         );
     }
 
-    private function cleanBySchemaRecursive($data, $schema)
+    private function cleanBySchemaRecursive(object $data, object $schema): object
     {
-        foreach ($data as $prop => $value) {
+        foreach (get_object_vars($data) as $prop => $value) {
             $propSchema = $schema->properties->{$prop} ?? null;
 
             // Look for a matching patternProperty schema
@@ -142,7 +143,7 @@ class Sanitizer
 
     // TODO: this assumes type is a single value, but arrays of valid types are also allowed in JSON Schema
     // There is a special case we do handle: where type is an array of (any type or null)
-    private function cleanValue($value, $propSchema)
+    private function cleanValue(mixed $value, object $propSchema): mixed
     {
         // If type isn't set but there's a `properties` prop, assume object, else assume string
         // Should really set a type though - might be smarter to throw an exception
@@ -169,10 +170,10 @@ class Sanitizer
         }
 
         if ($type === 'boolean') {
-            return !!$value;
+            return (bool) $value;
         }
 
-        if ($type === 'string') {
+        if ($type === 'string' && is_string($value)) {
             // Look for a content type - run HTML fields through antiXSS and everything else through filter_var
             if (isset($propSchema->contentMediaType) && $propSchema->contentMediaType === 'text/html') {
                 return $this->antixss->xss_clean($value);
@@ -196,9 +197,9 @@ class Sanitizer
                 return $value;
             }
 
-            return array_map(function ($subValue) use ($subSchema) {
-                return $this->cleanValue($subValue, $subSchema);
-            }, $value);
+            return array_map(fn ($subValue) => $this->cleanValue($subValue, $subSchema), $value);
         }
+
+        return $value;
     }
 }
