@@ -34,7 +34,7 @@ trait TuiPageResponseTrait
         return $pageJson;
     }
 
-    public function flagEmptyObjects($innerObject, $outerObject)
+    public function flagEmptyObjects(array $innerObject, mixed $outerObject): array
     {
         if (!$outerObject instanceof PageDataInterface) {
             return $innerObject;
@@ -55,7 +55,7 @@ trait TuiPageResponseTrait
         return $innerObject;
     }
 
-    public function getTuiPageSerializerGroups(string $action, array $default)
+    public function getTuiPageSerializerGroups(string $action, array $default): array
     {
         if (!$this instanceof AbstractController) {
             throw new \Exception('This method requires the class to extend Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController');
@@ -78,6 +78,7 @@ trait TuiPageResponseTrait
                 }
             }
 
+            /** var \Symfony\Component\HttpKernel\Exception\NotFoundHttpException */
             $exception = $this->createAccessDeniedException('Access Denied.');
             $exception->setAttributes($roles);
             $exception->setSubject($page);

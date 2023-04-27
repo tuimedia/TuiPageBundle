@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Tui\PageBundle\PageSchema;
@@ -26,7 +27,7 @@ class TranslationController extends AbstractController
         TranslationHandler $translationHandler,
         string $slug,
         string $lang
-    ) {
+    ): Response {
         $state = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
         $lang = filter_var($lang, FILTER_SANITIZE_STRING);
 
@@ -39,6 +40,14 @@ class TranslationController extends AbstractController
             throw $this->createNotFoundException('No such page in state ' . $state);
         }
 
+        if (!$lang) {
+            return $this->json([
+                'type' => 'https://tuimedia.com/page-bundle/validation',
+                'title' => 'Invalid language parameter',
+                'detail' => 'Language parameter is required',
+            ], 400);
+        }
+
         $this->checkTuiPagePermissions('export', $page);
 
         $file = $translationHandler->generateXliff($page, $lang);
@@ -47,7 +56,7 @@ class TranslationController extends AbstractController
             'Content-Type' => 'application/x-xliff+xml',
         ]);
         $dispositionHeader = $response->headers->makeDisposition(
-            \Symfony\Component\HttpFoundation\ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
             vsprintf('%s.%s.%s.xliff', [
                 $page->getSlug(),
                 $state,
@@ -70,7 +79,7 @@ class TranslationController extends AbstractController
         TranslationHandler $translationHandler,
         PageSchema $pageSchema,
         string $slug
-    ) {
+    ): Response {
         $state = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
 
         $page = $pageRepository->findOneBy([
@@ -133,7 +142,7 @@ class TranslationController extends AbstractController
             // Create a new revision
             $pageRef = $page->getPageData()->getPageRef();
             $page->setPageData(clone $page->getPageData());
-            $page->getPageData()->setPageRef($pageRef);
+            $page->getPageData()->setPageRef((string) $pageRef);
             // Set a temporary revision so the page will validate
             $page->getPageData()->setRevision('ffffffff-ffff-ffff-ffff-ffffffffffff');
         }

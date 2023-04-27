@@ -16,12 +16,21 @@ use Tui\PageBundle\Entity\PageInterface;
  * @method PageInterface[]    findAll()
  * @method PageInterface[]    findById(array|string $ids)
  * @method PageInterface[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ *
+ * @template T of object
+ *
+ * @template-extends ServiceEntityRepository<T>
  */
 class PageRepository extends ServiceEntityRepository
 {
     /** @var ValidatorInterface */
     protected $validator;
 
+    /**
+     * @param string $pageClass The class name of the entity this repository manages
+     *
+     * @psalm-param class-string<T> $pageClass
+     */
     public function __construct(ManagerRegistry $registry, ValidatorInterface $validator, string $pageClass)
     {
         $this->validator = $validator;

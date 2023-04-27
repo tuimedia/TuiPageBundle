@@ -4,6 +4,7 @@ namespace Tui\PageBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Tui\PageBundle\Repository\PageRepository;
 use Tui\PageBundle\Search\TypesenseClient;
@@ -16,7 +17,7 @@ class SearchController extends AbstractController
      * Search pages.
      */
     #[Route('/search', methods: ['GET'], name: 'tui_page_search')]
-    public function search(Request $request, PageRepository $pageRepository, TypesenseClient $searcher, bool $searchEnabled)
+    public function search(Request $request, PageRepository $pageRepository, TypesenseClient $searcher, bool $searchEnabled): Response
     {
         if (!$searchEnabled) {
             return $this->json([
@@ -46,7 +47,7 @@ class SearchController extends AbstractController
 
         try {
             $results = $searcher->search($index, $query);
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return $this->json([
                 'results' => [],
                 'total' => 0,
@@ -55,9 +56,7 @@ class SearchController extends AbstractController
 
         $pages = [];
         if (($results['found'] ?? 0) > 0) {
-            $ids = array_map(function ($result) {
-                return $result['document']['id'];
-            }, $results['hits'] ?? []);
+            $ids = array_map(fn ($result) => $result['document']['id'], $results['hits'] ?? []);
 
             $pagesById = [];
             // Sort results by relevance
@@ -74,7 +73,7 @@ class SearchController extends AbstractController
 
         $response = [
             'results' => $pages,
-            'total' => $results['found'],
+            'total' => $results['found'] ?? 0,
         ];
 
         return $this->json($response, 200, [], [

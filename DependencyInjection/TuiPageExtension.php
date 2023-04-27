@@ -8,7 +8,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 
 class TuiPageExtension extends ConfigurableExtension
 {
-    public function loadInternal(array $mergedConfig, ContainerBuilder $container)
+    public function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {
         $loader = new YamlFileLoader(
             $container,
@@ -22,7 +22,7 @@ class TuiPageExtension extends ConfigurableExtension
             $schemas[$component] = $componentConfig['schema'];
         }
 
-        $container->setParameter('tui_page.search_enabled', (bool) count($mergedConfig['search_hosts']));
+        $container->setParameter('tui_page.search_enabled', (bool) (is_countable($mergedConfig['search_hosts']) ? count($mergedConfig['search_hosts']) : 0));
         $container->setParameter('tui_page.search_hosts', $mergedConfig['search_hosts']);
         $container->setParameter('tui_page.search_index', $mergedConfig['search_index']);
         $container->setParameter('tui_page.search_api_key', $mergedConfig['search_api_key']);
@@ -40,7 +40,7 @@ class TuiPageExtension extends ConfigurableExtension
         $container->setParameter('tui_page.serializer_groups.create_response', $mergedConfig['serializer_groups']['create_response']);
         $container->setParameter('tui_page.serializer_groups.update_request', $mergedConfig['serializer_groups']['update_request']);
         $container->setParameter('tui_page.serializer_groups.update_response', $mergedConfig['serializer_groups']['update_response']);
-        $mergedConfig['access_roles'] = $mergedConfig['access_roles'] ?? [];
+        $mergedConfig['access_roles'] ??= [];
         $container->setParameter('tui_page.access_roles.retrieve', $mergedConfig['access_roles']['retrieve'] ?? []);
         $container->setParameter('tui_page.access_roles.history', $mergedConfig['access_roles']['history'] ?? []);
         $container->setParameter('tui_page.access_roles.import', $mergedConfig['access_roles']['import'] ?? []);
