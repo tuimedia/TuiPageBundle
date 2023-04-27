@@ -3,8 +3,8 @@
 namespace Tui\PageBundle\Search;
 
 use Psr\Log\LoggerInterface;
-use Tui\PageBundle\Entity\PageInterface;
 use Symfony\Component\HttpClient\HttplugClient;
+use Tui\PageBundle\Entity\PageInterface;
 use Typesense\Client;
 
 class TypesenseClient
@@ -110,11 +110,11 @@ class TypesenseClient
         $config = [
             'name' => $name,
             'fields' => [
-                [ 'name' => 'id', 'type' => 'string'],
-                [ 'name' => 'slug', 'type' => 'string'],
-                [ 'name' => 'state', 'type' => 'string', 'facet' => true],
-                [ 'name' => 'revision', 'type' => 'string'],
-                [ 'name' => 'searchableText', 'type' => 'string[]'],
+                ['name' => 'id', 'type' => 'string'],
+                ['name' => 'slug', 'type' => 'string'],
+                ['name' => 'state', 'type' => 'string', 'facet' => true],
+                ['name' => 'revision', 'type' => 'string'],
+                ['name' => 'searchableText', 'type' => 'string[]'],
             ],
         ];
 
@@ -140,7 +140,7 @@ class TypesenseClient
     public function bulkImport(string $collection, array $docs): array
     {
         $result = $this->typesense->collections[$collection]->documents->import($docs, [
-            'action' => 'upsert'
+            'action' => 'upsert',
         ]);
 
         // Look for errors in the responses

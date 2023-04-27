@@ -1,10 +1,10 @@
 <?php
 namespace Tui\PageBundle\DependencyInjection;
 
-use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
+use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use Symfony\Component\Config\FileLocator;
+use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 
 class TuiPageExtension extends ConfigurableExtension
 {
@@ -12,7 +12,7 @@ class TuiPageExtension extends ConfigurableExtension
     {
         $loader = new YamlFileLoader(
             $container,
-            new FileLocator(__DIR__.'/../Resources/config')
+            new FileLocator(__DIR__ . '/../Resources/config')
         );
         $loader->load('services.yaml');
 
@@ -22,7 +22,7 @@ class TuiPageExtension extends ConfigurableExtension
             $schemas[$component] = $componentConfig['schema'];
         }
 
-        $container->setParameter('tui_page.search_enabled', !!count($mergedConfig['search_hosts']));
+        $container->setParameter('tui_page.search_enabled', (bool) count($mergedConfig['search_hosts']));
         $container->setParameter('tui_page.search_hosts', $mergedConfig['search_hosts']);
         $container->setParameter('tui_page.search_index', $mergedConfig['search_index']);
         $container->setParameter('tui_page.search_api_key', $mergedConfig['search_api_key']);

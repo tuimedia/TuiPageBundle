@@ -13,9 +13,9 @@ class SearchController extends AbstractController
     use TuiPageResponseTrait;
 
     /**
-     * Search pages
+     * Search pages.
      */
-    #[Route("/search", methods: ["GET"], name: "tui_page_search")]
+    #[Route('/search', methods: ['GET'], name: 'tui_page_search')]
     public function search(Request $request, PageRepository $pageRepository, TypesenseClient $searcher, bool $searchEnabled)
     {
         if (!$searchEnabled) {

@@ -1,10 +1,12 @@
 <?php
 namespace Tui\PageBundle;
 
-use Opis\JsonSchema\{
-    JsonPointer, Validator, ValidationResult, ValidationError, Schema
-};
+use Opis\JsonSchema\JsonPointer;
 use Opis\JsonSchema\MediaTypes\Text;
+use Opis\JsonSchema\Schema;
+use Opis\JsonSchema\ValidationError;
+use Opis\JsonSchema\ValidationResult;
+use Opis\JsonSchema\Validator;
 
 class PageSchema
 {
@@ -12,9 +14,10 @@ class PageSchema
     protected $schemas;
 
     /** @var string */
-    protected $schemaPath = __DIR__.'/Resources/schema/tui-page.schema.json';
+    protected $schemaPath = __DIR__ . '/Resources/schema/tui-page.schema.json';
 
-    public function __construct(array $componentSchemas) {
+    public function __construct(array $componentSchemas)
+    {
         $this->schemas = $componentSchemas;
     }
 
@@ -68,15 +71,11 @@ class PageSchema
     public function getSchemaObjectForBlock(\stdClass $block): Schema
     {
         if (!array_key_exists($block->component, $this->schemas)) {
-            throw new \Exception(vsprintf('No schema defined for component %s', [
-                $block->component,
-            ]));
+            throw new \Exception(vsprintf('No schema defined for component %s', [$block->component]));
         }
 
         if (!file_exists($this->schemas[$block->component])) {
-            throw new \Exception(vsprintf('Component schema for %s defined but not found', [
-                $block->component,
-            ]));
+            throw new \Exception(vsprintf('Component schema for %s defined but not found', [$block->component]));
         }
 
         return Schema::fromJsonString((string) file_get_contents($this->schemas[$block->component]));
@@ -91,7 +90,7 @@ class PageSchema
 
     protected function resolveBlockForLanguage(\stdClass $data, string $id, string $language): \stdClass
     {
-        $resolvedBlock = new \stdClass;
+        $resolvedBlock = new \stdClass();
         $defaultLang = $data->pageData->defaultLanguage;
 
         foreach ($data->pageData->content->blocks->$id as $prop => $value) {

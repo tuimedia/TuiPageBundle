@@ -8,7 +8,8 @@ class Sanitizer
     private $antixss;
     private $pageSchema;
 
-    function __construct(AntiXSS $antixss, PageSchema $pageSchema) {
+    public function __construct(AntiXSS $antixss, PageSchema $pageSchema)
+    {
         $this->antixss = $antixss;
         $this->pageSchema = $pageSchema;
     }
@@ -56,6 +57,7 @@ class Sanitizer
         if (!$json) {
             throw new \RuntimeException('Unable to encode JSON output');
         }
+
         return $json;
     }
 
@@ -75,7 +77,7 @@ class Sanitizer
 
     /**
      * Simple recursive string cleaner - recurses through arrays & objects, applies filtering to strings only
-     * Only good for, say, metadata
+     * Only good for, say, metadata.
      */
     private function stringCleanRecursive($data)
     {
@@ -169,7 +171,7 @@ class Sanitizer
         }
 
         if ($type === 'boolean') {
-            return !!$value;
+            return (bool) $value;
         }
 
         if ($type === 'string') {

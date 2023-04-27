@@ -19,8 +19,7 @@ class SearchSubscriber implements EventSubscriber
         TypesenseClient $searcher,
         LoggerInterface $logger,
         bool $searchEnabled
-    )
-    {
+    ) {
         if (!$searchEnabled) {
             return;
         }
@@ -148,6 +147,7 @@ class SearchSubscriber implements EventSubscriber
         $this->logger->info(sprintf('Unindexing document %s (%s)', $page->getId(), $index));
         if (!$page->getId()) {
             $this->logger->warning('Document has no id, skipping deletion.');
+
             return;
         }
         try {
@@ -162,6 +162,7 @@ class SearchSubscriber implements EventSubscriber
         $this->logger->info(sprintf('Indexing document %s (%s)', $page->getId(), $lang));
         if (!$page->getId()) {
             $this->logger->warning('Document has no id, skipping upsert.');
+
             return;
         }
 

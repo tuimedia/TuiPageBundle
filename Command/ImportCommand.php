@@ -56,16 +56,19 @@ class ImportCommand extends Command
         $destinationState = $input->getOption('state');
         if (is_array($destinationState)) {
             $io->error('Provide only one destination state');
+
             return 1;
         }
         if ($destinationState && !is_string($destinationState)) {
             $io->error('Invalid destination state name');
+
             return 1;
         }
 
         $argFile = (string) filter_var($input->getArgument('file'), FILTER_SANITIZE_STRING);
         if (!file_exists($argFile)) {
             $io->error('File not found');
+
             return 1;
         }
 
@@ -75,9 +78,10 @@ class ImportCommand extends Command
             if (!$this->hasZipSupport()) {
                 $this->logger->error('Zip file given but the PHP zip extension not installed or enabled');
                 $io->error('Zip file given but the PHP zip extension is not installed or enabled');
+
                 return 1;
             }
-            $zip = new \ZipArchive;
+            $zip = new \ZipArchive();
             $result = $zip->open($argFile, \ZipArchive::CHECKCONS);
             if ($result !== true) {
                 $this->logger->error('Failed to open zip archive', [
@@ -85,10 +89,11 @@ class ImportCommand extends Command
                     'message' => $this->getZipErrorMessage($result),
                 ]);
                 $io->error('Failed to create zip archive: ' . $this->getZipErrorMessage($result));
+
                 return (int) $result;
             }
 
-            for ($i = 0; $i < $zip->numFiles; $i++) {
+            for ($i = 0; $i < $zip->numFiles; ++$i) {
                 $innerFilename = $zip->getNameIndex($i);
                 if (preg_match('/\.(?:xlf|xliff)$/', (string) $innerFilename)) {
                     $files[] = sprintf('zip://%s#%s', $argFile, $innerFilename);
@@ -164,13 +169,13 @@ class ImportCommand extends Command
 
     private function getZipErrorMessage($code)
     {
-        switch($code) {
+        switch ($code) {
             case \ZipArchive::ER_INCONS: return 'Zip file is corrupted';
             case \ZipArchive::ER_INVAL: return 'Invalid filename';
             case \ZipArchive::ER_OPEN: return 'Unable to open file';
             case \ZipArchive::ER_MEMORY: return 'Memory error';
             default: return 'Unknown error';
-        };
+        }
     }
 
     private function parseOriginal(string $content): array
