@@ -6,9 +6,9 @@ An API for managing rich, versioned, multilingual content.
 
 ## Requirements
 
-* Symfony 4 or 5
+* Symfony 5 or 6
 * Doctrine ORM 2
-* Typesense 0.22.1
+* Typesense 0.22-0.24
 
 ## Installation
 

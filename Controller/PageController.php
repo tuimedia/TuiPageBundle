@@ -2,7 +2,6 @@
 
 namespace Tui\PageBundle\Controller;
 
-use Swagger\Annotations as SWG;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,21 +25,8 @@ class PageController extends AbstractController
 
     /**
      * List pages
-     *
-     * @Route("/pages", methods={"GET"}, name="tui_page_index")
-     * @SWG\Response(
-     *   response=200,
-     *   description="Returns a list of pages"
-     * )
-     * @SWG\Parameter(
-     *   in="query",
-     *   required=false,
-     *   default="live",
-     *   name="state",
-     *   type="string",
-     *   description="Page namespace to use"
-     * )
      */
+    #[Route("/pages", methods: ["GET"], name: "tui_page_index")]
     public function index(Request $request, PageRepository $pageRepository): Response
     {
         $state = preg_replace('/\W+/', '-', strip_tags($request->query->get('state', 'live')));
@@ -80,24 +66,8 @@ class PageController extends AbstractController
 
     /**
      * Create a new page
-     *
-     * @Route("/pages", methods={"POST"}, name="tui_page_create")
-     * @SWG\Response(
-     *   response=201,
-     *   description="Returns the created page"
-     * )
-     * @SWG\Response(
-     *   response=422,
-     *   description="Validation error(s) in application/problem+json format"
-     * )
-     * @SWG\Parameter(
-     *   in="body",
-     *   required=true,
-     *   name="request",
-     *   description="Page content",
-     *   @SWG\Schema(type="object")
-     * )
      */
+    #[Route("/pages", methods: ["POST"], name: "tui_page_create")]
     public function create(
         Request $request,
         SerializerInterface $serializer,
@@ -135,25 +105,8 @@ class PageController extends AbstractController
 
     /**
      * Get page
-     *
-     * @Route("/pages/{slug}", methods={"GET"}, name="tui_page_get")
-     * @SWG\Response(
-     *   response=200,
-     *   description="Success"
-     * )
-     * @SWG\Response(
-     *   response=404,
-     *   description="Page not found in the given state"
-     * )
-     * @SWG\Parameter(
-     *   in="query",
-     *   required=false,
-     *   type="string",
-     *   default="live",
-     *   name="state",
-     *   description="Page namespace"
-     * )
      */
+    #[Route("/pages/{slug}", methods: ["GET"], name: "tui_page_get")]
     public function retrieve(
         Request $request,
         SerializerInterface $serializer,
@@ -188,20 +141,8 @@ class PageController extends AbstractController
 
     /**
      * Returns a list of pagedata objects containing the previous versions of the requested page
-     * @Route("/pages/{slug}/history", methods={"GET"}, name="tui_page_history")
-     * @SWG\Response(
-     *   response=200,
-     *   description="Success"
-     * )
-     * @SWG\Parameter(
-     *   in="query",
-     *   required=false,
-     *   type="string",
-     *   default="live",
-     *   name="state",
-     *   description="Page namespace"
-     * )
      */
+    #[Route("/pages/{slug}/history", methods: ["GET"], name: "tui_page_history")]
     public function history(
         Request $request,
         PageRepository $pageRepository,
@@ -237,23 +178,8 @@ class PageController extends AbstractController
 
     /**
      * Edit a page
-     * @Route("/pages/{slug}", methods={"PUT"}, name="tui_page_edit")
-     * @SWG\Response(
-     *   response=200,
-     *   description="Returns the updated page"
-     * )
-     * @SWG\Response(
-     *   response=422,
-     *   description="Validation error(s) in application/problem+json format"
-     * )
-     * @SWG\Parameter(
-     *   in="body",
-     *   required=true,
-     *   name="request",
-     *   description="Page content",
-     *   @SWG\Schema(type="object")
-     * )
      */
+    #[Route("/pages/{slug}", methods: ["PUT"], name: "tui_page_edit")]
     public function edit(
         Request $request,
         SerializerInterface $serializer, PageRepository $pageRepository,
@@ -315,21 +241,8 @@ class PageController extends AbstractController
 
     /**
      * Delete a page from the given namespace
-     *
-     * @Route("/pages/{slug}", methods={"DELETE"}, name="tui_page_delete")
-     * @SWG\Response(
-     *   response=204,
-     *   description="Returns an empty response"
-     * )
-     * @SWG\Parameter(
-     *   in="query",
-     *   required=false,
-     *   type="string",
-     *   default="live",
-     *   name="state",
-     *   description="Page namespace"
-     * )
      */
+    #[Route("/pages/{slug}", methods: ["DELETE"], name: "tui_page_delete")]
     public function delete(Request $request, PageRepository $pageRepository, $slug): Response
     {
         $state = preg_replace('/\W+/', '-', strip_tags($request->query->get('state', 'live')));
