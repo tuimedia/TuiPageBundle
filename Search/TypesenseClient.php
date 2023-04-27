@@ -10,15 +10,13 @@ use Typesense\Client;
 class TypesenseClient
 {
     private Client $typesense;
-    private string $indexPrefix;
-    private LoggerInterface $log;
 
     /** @var TransformerInterface[] */
     private array $transformers = [];
 
     public function __construct(
-        LoggerInterface $log,
-        string $indexPrefix,
+        private LoggerInterface $log,
+        private string $indexPrefix,
         string $typesenseApiKey,
         array $searchHosts,
         array $componentTransformers = null,
@@ -26,9 +24,6 @@ class TypesenseClient
         if ($componentTransformers) {
             $this->transformers = $componentTransformers;
         }
-
-        $this->indexPrefix = $indexPrefix;
-        $this->log = $log;
         $this->typesense = new Client([
             'api_key' => $typesenseApiKey,
             'nodes' => $this->formatHosts($searchHosts),
@@ -38,13 +33,11 @@ class TypesenseClient
 
     private function formatHosts(array $searchHosts): array
     {
-        return array_map(function ($host) {
-            return [
-                'protocol' => parse_url($host, PHP_URL_SCHEME),
-                'host' => parse_url($host, PHP_URL_HOST),
-                'port' => parse_url($host, PHP_URL_PORT),
-            ];
-        }, $searchHosts);
+        return array_map(fn ($host) => [
+            'protocol' => parse_url($host, PHP_URL_SCHEME),
+            'host' => parse_url($host, PHP_URL_HOST),
+            'port' => parse_url($host, PHP_URL_PORT),
+        ], $searchHosts);
     }
 
     public function createSearchDocument(PageInterface $page, string $language): array
@@ -144,9 +137,7 @@ class TypesenseClient
         ]);
 
         // Look for errors in the responses
-        $errors = array_filter($result, function ($response): bool {
-            return $response['success'] !== true;
-        });
+        $errors = array_filter((array) $result, fn ($response): bool => $response['success'] !== true);
         if (count($errors)) {
             foreach ($errors as $docIdx => $error) {
                 $this->log->error(sprintf('Bulk import returned an error for document index %d', $docIdx), ['error' => $error]);
@@ -154,6 +145,6 @@ class TypesenseClient
             throw new BulkImportException(sprintf('Bulk import returned %d error(s)', count($errors)));
         }
 
-        return $result;
+        return (array) $result;
     }
 }

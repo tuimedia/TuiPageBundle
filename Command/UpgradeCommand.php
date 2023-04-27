@@ -6,29 +6,24 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Tui\PageBundle\Entity\PageInterface;
 use Tui\PageBundle\Repository\PageRepository;
 
 class UpgradeCommand extends Command
 {
     public const CURRENT_VERSION = 2;
     protected static $defaultName = 'pages:upgrade';
-    private LoggerInterface $logger;
-    private PageRepository $pageRepository;
+    protected static $defaultDescription = 'Upgrade page data to current version';
 
     public function __construct(
-        LoggerInterface $logger,
-        PageRepository $pageRepository
+        private LoggerInterface $logger,
+        private PageRepository $pageRepository
     ) {
-        $this->logger = $logger;
-        $this->pageRepository = $pageRepository;
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
-        $this
-            ->setDescription('Upgrade page data to current version')
-        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -40,7 +35,7 @@ class UpgradeCommand extends Command
         if (!count($pages)) {
             $this->logger->info('No pages found, exiting early');
 
-            return 0;
+            return Command::SUCCESS;
         }
 
         foreach ($pages as $page) {
@@ -63,10 +58,10 @@ class UpgradeCommand extends Command
             $this->pageRepository->save($page);
         }
 
-        return 0;
+        return Command::SUCCESS;
     }
 
-    private function migrateToVersion2($page)
+    private function migrateToVersion2(PageInterface $page): PageInterface
     {
         $content = $page->getPageData()->getContent();
 
@@ -83,7 +78,7 @@ class UpgradeCommand extends Command
         }, $content['layout'] ?? []);
 
         // Move rows to blocks
-        $newLayout = array_map(function ($row) { return $row['id']; }, $content['layout']);
+        $newLayout = array_map(fn ($row) => $row['id'], $content['layout']);
         foreach ($content['layout'] as $row) {
             $content['blocks'][$row['id']] = $row;
         }
@@ -105,7 +100,7 @@ class UpgradeCommand extends Command
         return $page;
     }
 
-    private function generateId()
+    private function generateId(): string
     {
         return base64_encode(random_bytes(8));
     }

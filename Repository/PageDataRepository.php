@@ -11,14 +11,20 @@ use Tui\PageBundle\Entity\PageData;
  * @method PageData|null findOneBy(array $criteria, array $orderBy = null)
  * @method PageData[]    findAll()
  * @method PageData[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ *
+ * @template T of object
+ *
+ * @template-extends ServiceEntityRepository<T>
  */
 class PageDataRepository extends ServiceEntityRepository
 {
-    private string $pageDataClass;
-
-    public function __construct(ManagerRegistry $registry, string $pageDataClass)
+    /**
+     * @param string $pageDataClass The class name of the entity this repository manages
+     *
+     * @psalm-param class-string<T> $pageDataClass
+     */
+    public function __construct(ManagerRegistry $registry, private string $pageDataClass)
     {
-        $this->pageDataClass = $pageDataClass;
         parent::__construct($registry, $pageDataClass);
     }
 
@@ -32,9 +38,7 @@ class PageDataRepository extends ServiceEntityRepository
             return [];
         }
 
-        $langs = array_values(array_unique(array_reduce($result, function ($langs, $pageData) {
-            return [...$langs, ...$pageData['availableLanguages']];
-        }, [])));
+        $langs = array_values(array_unique(array_reduce($result, fn ($langs, $pageData) => [...$langs, ...$pageData['availableLanguages']], [])));
 
         return $langs;
     }

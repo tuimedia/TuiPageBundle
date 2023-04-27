@@ -2,6 +2,7 @@
 namespace Tui\PageBundle;
 
 use Opis\JsonSchema\JsonPointer;
+use Opis\JsonSchema\MediaTypeContainer;
 use Opis\JsonSchema\MediaTypes\Text;
 use Opis\JsonSchema\Schema;
 use Opis\JsonSchema\ValidationError;
@@ -23,13 +24,13 @@ class PageSchema
 
     public function validate(string $data): ?array
     {
-        $data = json_decode($data);
+        $data = json_decode($data, null, 512, JSON_THROW_ON_ERROR);
         $schema = Schema::fromJsonString((string) file_get_contents($this->schemaPath));
 
         $validator = new Validator();
         // omg hax, just use the existing plain text type for html
         $mediaType = $validator->getMediaType();
-        if ($mediaType instanceof \Opis\JsonSchema\MediaTypeContainer) {
+        if ($mediaType instanceof MediaTypeContainer) {
             $mediaTypes = $mediaType->add('text/html', new Text());
         }
 
@@ -138,17 +139,13 @@ class PageSchema
             $error['component'] = $block;
         }
 
-        $error['errors'] = array_map(function ($error) {
-            return $error instanceof ValidationError ? [
-                'path' => implode('.', $error->dataPointer()),
-                'keyword' => $error->keyword(),
-                'keywordArgs' => $error->keywordArgs(),
-            ] : $error;
-        }, $errors);
+        $error['errors'] = array_map(fn ($error) => $error instanceof ValidationError ? [
+            'path' => implode('.', $error->dataPointer()),
+            'keyword' => $error->keyword(),
+            'keywordArgs' => $error->keywordArgs(),
+        ] : $error, $errors);
 
-        $error['detail'] = implode('. ', array_map(function ($error) {
-            return is_array($error) ? sprintf('[%s]: invalid %s.', $error['path'], $error['keyword']) : $error;
-        }, $error['errors']));
+        $error['detail'] = implode('. ', array_map(fn ($error) => is_array($error) ? sprintf('[%s]: invalid %s.', $error['path'], $error['keyword']) : $error, $error['errors']));
 
         return $error;
     }

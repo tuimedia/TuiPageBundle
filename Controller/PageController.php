@@ -17,11 +17,8 @@ class PageController extends AbstractController
 {
     use TuiPageResponseTrait;
 
-    protected $pageClass;
-
-    public function __construct(string $pageClass)
+    public function __construct(protected string $pageClass)
     {
-        $this->pageClass = $pageClass;
     }
 
     /**
@@ -30,7 +27,7 @@ class PageController extends AbstractController
     #[Route('/pages', methods: ['GET'], name: 'tui_page_index')]
     public function index(Request $request, PageRepository $pageRepository): Response
     {
-        $state = preg_replace('/\W+/', '-', strip_tags($request->query->get('state', 'live')));
+        $state = preg_replace('/\W+/', '-', strip_tags((string) $request->query->get('state', 'live')));
 
         $this->checkTuiPagePermissions('list');
 
@@ -92,7 +89,7 @@ class PageController extends AbstractController
         $page->getPageData()->setPageRef(rtrim(strtr(base64_encode(random_bytes(24)), '+/', '-_'), '='));
 
         $errors = $pageRepository->validate($page);
-        if (count($errors) > 0) {
+        if (($errors === null ? 0 : count($errors)) > 0) {
             return $this->json($errors, 422);
         }
 
@@ -112,9 +109,9 @@ class PageController extends AbstractController
         Request $request,
         SerializerInterface $serializer,
         PageRepository $pageRepository,
-        $slug
+        string $slug
     ): Response {
-        $state = preg_replace('/\W+/', '-', strip_tags($request->query->get('state', 'live')));
+        $state = preg_replace('/\W+/', '-', strip_tags((string) $request->query->get('state', 'live')));
 
         $page = $pageRepository->findOneBy([
             'slug' => $slug,
@@ -147,9 +144,9 @@ class PageController extends AbstractController
         Request $request,
         PageRepository $pageRepository,
         PageDataRepository $pageDataRepository,
-        $slug
+        string $slug
     ): Response {
-        $state = preg_replace('/\W+/', '-', strip_tags($request->query->get('state', 'live')));
+        $state = preg_replace('/\W+/', '-', strip_tags((string) $request->query->get('state', 'live')));
 
         $page = $pageRepository->findOneBy([
             'slug' => $slug,
@@ -185,9 +182,9 @@ class PageController extends AbstractController
         SerializerInterface $serializer, PageRepository $pageRepository,
         Sanitizer $sanitizer,
         PageSchema $pageSchema,
-        $slug
+        string $slug
     ): Response {
-        $state = preg_replace('/\W+/', '-', strip_tags($request->query->get('state', 'live')));
+        $state = preg_replace('/\W+/', '-', strip_tags((string) $request->query->get('state', 'live')));
         if (!$state) {
             throw new \InvalidArgumentException('Must specify state in query string');
         }
@@ -213,7 +210,7 @@ class PageController extends AbstractController
         $filteredContent = $sanitizer->cleanPage($request->getContent());
 
         $previousRevision = $page->getPageData()->getRevision();
-        $pageRef = $page->getPageData()->getPageRef();
+        $pageRef = (string) $page->getPageData()->getPageRef();
 
         // Apply the request data
         $groups = $this->getTuiPageSerializerGroups('update_request', ['pageCreate']);
@@ -227,7 +224,7 @@ class PageController extends AbstractController
 
         // Validation…
         $errors = $pageRepository->validate($page);
-        if (count($errors) > 0) {
+        if (($errors === null ? 0 : count($errors)) > 0) {
             return $this->json($errors, 422);
         }
 
@@ -243,9 +240,9 @@ class PageController extends AbstractController
      * Delete a page from the given namespace.
      */
     #[Route('/pages/{slug}', methods: ['DELETE'], name: 'tui_page_delete')]
-    public function delete(Request $request, PageRepository $pageRepository, $slug): Response
+    public function delete(Request $request, PageRepository $pageRepository, string $slug): Response
     {
-        $state = preg_replace('/\W+/', '-', strip_tags($request->query->get('state', 'live')));
+        $state = preg_replace('/\W+/', '-', strip_tags((string) $request->query->get('state', 'live')));
         if (!$state) {
             throw new \InvalidArgumentException('Must specify state in query string');
         }

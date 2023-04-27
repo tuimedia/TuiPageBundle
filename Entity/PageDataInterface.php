@@ -23,7 +23,7 @@ interface PageDataInterface
 
     public function getRevision(): ?string;
 
-    public function setRevision(string $revision): self;
+    public function setRevision(?string $revision): self;
 
     public function getPreviousRevision(): ?string;
 
@@ -35,5 +35,5 @@ interface PageDataInterface
 
     public function getMetadata(): array;
 
-    public function setMetadata($metadata): self;
+    public function setMetadata(array $metadata): self;
 }

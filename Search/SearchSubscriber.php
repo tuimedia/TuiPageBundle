@@ -10,22 +10,17 @@ use Tui\PageBundle\Entity\PageInterface;
 
 class SearchSubscriber implements EventSubscriber
 {
-    private $searcher;
-    private $logger;
-    private $enabled;
-    private $collections = null;
+    private bool $enabled;
+    private ?array $collections = null;
 
     public function __construct(
-        TypesenseClient $searcher,
-        LoggerInterface $logger,
+        private TypesenseClient $searcher,
+        private LoggerInterface $logger,
         bool $searchEnabled
     ) {
         if (!$searchEnabled) {
             return;
         }
-
-        $this->searcher = $searcher;
-        $this->logger = $logger;
         $this->enabled = $searchEnabled;
     }
 
@@ -181,9 +176,7 @@ class SearchSubscriber implements EventSubscriber
     {
         // Load the list of collections if we haven't already
         if (is_null($this->collections)) {
-            $this->collections = array_map(function ($collection) {
-                return $collection['name'];
-            }, $this->searcher->listCollections());
+            $this->collections = array_map(fn ($collection) => $collection['name'], $this->searcher->listCollections());
         }
 
         // Create the index if it's not in the list

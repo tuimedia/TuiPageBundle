@@ -13,6 +13,6 @@ class TuiPageBundle extends Bundle
     {
         parent::build($container);
 
-        $container->addCompilerPass(new TransformerPass());
+        $container->addCompilerPass(new TransformerPass(), \Symfony\Component\DependencyInjection\Compiler\PassConfig::TYPE_BEFORE_OPTIMIZATION, 0);
     }
 }
