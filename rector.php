@@ -11,10 +11,7 @@ use Rector\Symfony\Set\SymfonyLevelSetList;
 
 return static function (RectorConfig $rectorConfig): void {
     $rectorConfig->paths([
-        __DIR__,
-    ]);
-    $rectorConfig->skip([
-        __DIR__ . '/vendor',
+        __DIR__ . '/src',
     ]);
 
     $rectorConfig->parameters()->set(Option::IMPORT_SHORT_CLASSES, false);

@@ -49,13 +49,10 @@ abstract class AbstractPageData implements PageDataInterface
     #[Groups(['pageCreate', 'pageGet'])]
     private array $content = [];
 
-    /**
-     * @var array
-     */
     #[ORM\Column(type: 'json')]
     #[Assert\Type(type: 'array')]
     #[Groups(['pageList', 'pageCreate', 'pageGet'])]
-    private $metadata = [];
+    private array $metadata = [];
 
     public function __construct()
     {
