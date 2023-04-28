@@ -11,7 +11,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "Tui\\PageBundle\\": ""
+            "Tui\\PageBundle\\": "src/"
         }
     },
     "require": {

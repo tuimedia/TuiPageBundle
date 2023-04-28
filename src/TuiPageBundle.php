@@ -1,6 +1,7 @@
 <?php
 namespace Tui\PageBundle;
 
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Tui\PageBundle\DependencyInjection\TransformerPass;
@@ -13,6 +14,6 @@ class TuiPageBundle extends Bundle
     {
         parent::build($container);
 
-        $container->addCompilerPass(new TransformerPass(), \Symfony\Component\DependencyInjection\Compiler\PassConfig::TYPE_BEFORE_OPTIMIZATION, 0);
+        $container->addCompilerPass(new TransformerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 0);
     }
 }

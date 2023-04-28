@@ -1,5 +1,11 @@
 # Changes
 
+## 0.10.1
+
+### FIXED
+
+* Moved source into `src/` folder to resolve a composer autoloader issue with rector config file
+
 ## 0.10.0
 
 ### BREAKING
