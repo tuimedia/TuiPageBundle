@@ -4,5 +4,3 @@ parameters:
     checkGenericClassInNonGenericObjectType: false
     doctrine:
         allowNullablePropertyForRequiredField: true
-    excludePaths:
-        - vendor

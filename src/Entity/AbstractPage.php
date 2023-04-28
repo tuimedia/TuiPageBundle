@@ -18,7 +18,7 @@ class AbstractPage implements PageInterface, IsIndexableInterface
     #[ORM\CustomIdGenerator('doctrine.uuid_generator')]
     #[ORM\Column(type: 'guid')]
     #[Groups(['pageList', 'pageGet'])]
-    protected ?string $id;
+    protected ?string $id = null;
 
     /**
      * @var string
