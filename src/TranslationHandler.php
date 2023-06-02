@@ -7,7 +7,7 @@ use Tui\PageBundle\Entity\PageInterface;
 
 class TranslationHandler
 {
-    public function __construct(private UrlGeneratorInterface $router, private ?array $validLanguages = null)
+    public function __construct(private readonly UrlGeneratorInterface $router, private readonly ?array $validLanguages = null)
     {
     }
 

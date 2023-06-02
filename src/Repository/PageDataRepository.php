@@ -23,7 +23,7 @@ class PageDataRepository extends ServiceEntityRepository
      *
      * @psalm-param class-string<T> $pageDataClass
      */
-    public function __construct(ManagerRegistry $registry, private string $pageDataClass)
+    public function __construct(ManagerRegistry $registry, private readonly string $pageDataClass)
     {
         parent::__construct($registry, $pageDataClass);
     }

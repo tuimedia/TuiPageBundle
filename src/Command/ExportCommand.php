@@ -17,9 +17,9 @@ class ExportCommand extends Command
     protected static $defaultDescription = 'Create an XLIFF export for translation';
 
     public function __construct(
-        private LoggerInterface $logger,
-        private PageRepository $pageRepository,
-        private TranslationHandler $translationHandler
+        private readonly LoggerInterface $logger,
+        private readonly PageRepository $pageRepository,
+        private readonly TranslationHandler $translationHandler
     ) {
         parent::__construct();
     }
