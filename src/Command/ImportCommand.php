@@ -22,11 +22,11 @@ class ImportCommand extends Command
     protected static $defaultDescription = 'Import XLIFF translations';
 
     public function __construct(
-        private LoggerInterface $logger,
-        private PageRepository $pageRepository,
-        private PageSchema $pageSchema,
-        private SerializerInterface $serializer,
-        private TranslationHandler $translationHandler
+        private readonly LoggerInterface $logger,
+        private readonly PageRepository $pageRepository,
+        private readonly PageSchema $pageSchema,
+        private readonly SerializerInterface $serializer,
+        private readonly TranslationHandler $translationHandler
     ) {
         parent::__construct();
     }

@@ -9,14 +9,14 @@ use Typesense\Client;
 
 class TypesenseClient
 {
-    private Client $typesense;
+    private readonly Client $typesense;
 
     /** @var TransformerInterface[] */
     private array $transformers = [];
 
     public function __construct(
-        private LoggerInterface $log,
-        private string $indexPrefix,
+        private readonly LoggerInterface $log,
+        private readonly string $indexPrefix,
         string $typesenseApiKey,
         array $searchHosts,
         array $componentTransformers = null,
@@ -34,9 +34,9 @@ class TypesenseClient
     private function formatHosts(array $searchHosts): array
     {
         return array_map(fn ($host) => [
-            'protocol' => parse_url($host, PHP_URL_SCHEME),
-            'host' => parse_url($host, PHP_URL_HOST),
-            'port' => parse_url($host, PHP_URL_PORT),
+            'protocol' => parse_url((string) $host, PHP_URL_SCHEME),
+            'host' => parse_url((string) $host, PHP_URL_HOST),
+            'port' => parse_url((string) $host, PHP_URL_PORT),
         ], $searchHosts);
     }
 

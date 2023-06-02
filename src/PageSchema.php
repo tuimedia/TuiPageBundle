@@ -109,8 +109,8 @@ class PageSchema
         }
 
         if (
-            !isset($data->pageData->content->langData->$language) ||
-            !isset($data->pageData->content->langData->$language->$id)
+            !isset($data->pageData->content->langData->$language)
+            || !isset($data->pageData->content->langData->$language->$id)
         ) {
             return $resolvedBlock;
         }
@@ -166,7 +166,7 @@ class PageSchema
 
         foreach ((array) $schema as $prop => $value) {
             if (is_object($value) && isset($value->{'$ref'})) {
-                $schema->$prop = JsonPointer::getDataByPointer($rootSchema, substr($value->{'$ref'}, 1));
+                $schema->$prop = JsonPointer::getDataByPointer($rootSchema, substr((string) $value->{'$ref'}, 1));
             } elseif (is_object($value)) {
                 $schema->$prop = $this->deepResolveSchema($value, $rootSchema);
             }
