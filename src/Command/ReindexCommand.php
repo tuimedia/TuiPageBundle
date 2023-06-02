@@ -19,11 +19,11 @@ class ReindexCommand extends Command
     private array $indexingQueue = [];
 
     public function __construct(
-        private LoggerInterface $logger,
-        private TypesenseClient $searcher,
-        private PageRepository $pageRepository,
-        private PageDataRepository $pageDataRepository,
-        private int $bulkIndexThreshold = 40
+        private readonly LoggerInterface $logger,
+        private readonly TypesenseClient $searcher,
+        private readonly PageRepository $pageRepository,
+        private readonly PageDataRepository $pageDataRepository,
+        private readonly int $bulkIndexThreshold = 40
     ) {
         parent::__construct();
     }

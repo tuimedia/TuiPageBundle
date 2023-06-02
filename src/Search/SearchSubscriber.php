@@ -10,12 +10,12 @@ use Tui\PageBundle\Entity\PageInterface;
 
 class SearchSubscriber implements EventSubscriber
 {
-    private bool $enabled;
+    private readonly bool $enabled;
     private ?array $collections = null;
 
     public function __construct(
-        private TypesenseClient $searcher,
-        private LoggerInterface $logger,
+        private readonly TypesenseClient $searcher,
+        private readonly LoggerInterface $logger,
         bool $searchEnabled
     ) {
         if (!$searchEnabled) {

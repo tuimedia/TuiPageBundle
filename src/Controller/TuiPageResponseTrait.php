@@ -66,7 +66,7 @@ trait TuiPageResponseTrait
         return $groups;
     }
 
-    protected function checkTuiPagePermissions(string $check, ?PageInterface $page = null): void
+    protected function checkTuiPagePermissions(string $check, PageInterface $page = null): void
     {
         $roles = (array) $this->getParameter('tui_page.access_roles.' . $check);
         if (count($roles)) {

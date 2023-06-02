@@ -5,7 +5,7 @@ use voku\helper\AntiXSS;
 
 class Sanitizer
 {
-    public function __construct(private AntiXSS $antixss, private PageSchema $pageSchema)
+    public function __construct(private readonly AntiXSS $antixss, private readonly PageSchema $pageSchema)
     {
     }
 
@@ -122,7 +122,7 @@ class Sanitizer
             // Look for a matching patternProperty schema
             if (!$propSchema && isset($schema->patternProperties)) {
                 foreach ($schema->patternProperties as $pattern => $schema) {
-                    $pattern = sprintf('!%s!', str_replace('!', '\!', $pattern));
+                    $pattern = sprintf('!%s!', str_replace('!', '\!', (string) $pattern));
                     if (preg_match($pattern, $prop)) {
                         $propSchema = $schema;
                         break;

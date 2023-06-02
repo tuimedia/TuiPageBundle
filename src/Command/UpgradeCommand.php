@@ -11,13 +11,13 @@ use Tui\PageBundle\Repository\PageRepository;
 
 class UpgradeCommand extends Command
 {
-    public const CURRENT_VERSION = 2;
+    final public const CURRENT_VERSION = 2;
     protected static $defaultName = 'pages:upgrade';
     protected static $defaultDescription = 'Upgrade page data to current version';
 
     public function __construct(
-        private LoggerInterface $logger,
-        private PageRepository $pageRepository
+        private readonly LoggerInterface $logger,
+        private readonly PageRepository $pageRepository
     ) {
         parent::__construct();
     }

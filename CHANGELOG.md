@@ -10,7 +10,7 @@
 
 ### BREAKING
 
-* Minimum PHP version is now 8
+* Minimum PHP version is now 8.1
 * Minimum Symfony version is now 5.4
 * No longer includes Swagger annotations
 * Removed SchemaController
