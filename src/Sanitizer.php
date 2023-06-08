@@ -37,10 +37,18 @@ class Sanitizer
             $data->pageData->content->blocks->$blockId = $this->cleanBySchemaRecursive($block, $blockSchema);
 
             // Sanitize any language overrides
-            foreach ($data->pageData->content->langData as $languageCode => $langData) {
-                if (isset($langData->$blockId)) {
-                    $langData->$blockId = $this->cleanBySchemaRecursive($langData->$blockId, $blockSchema);
+            foreach ($data->pageData->content->langData as $langData) {
+                // Allow missing langData
+                if (!isset($langData->$blockId)) {
+                    continue;
                 }
+
+                // Special case: php serializes empty langdata object as array
+                if (is_array($langData->$blockId) && !count($langData->$blockId)) {
+                    continue;
+                }
+
+                $langData->$blockId = $this->cleanBySchemaRecursive($langData->$blockId, $blockSchema);
             }
         }
 
