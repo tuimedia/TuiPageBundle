@@ -1,5 +1,17 @@
 # Changes
 
+## 0.10.3
+
+### FIXED
+
+* Tolerate missing or empty block langdata
+
+## 0.10.2
+
+### BREAKING
+
+* Minimum PHP version is now 8.1
+
 ## 0.10.1
 
 ### FIXED
@@ -10,7 +22,7 @@
 
 ### BREAKING
 
-* Minimum PHP version is now 8.1
+* Minimum PHP version is now 8.0
 * Minimum Symfony version is now 5.4
 * No longer includes Swagger annotations
 * Removed SchemaController
