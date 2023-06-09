@@ -1,5 +1,11 @@
 # Changes
 
+## 0.10.4
+
+### FIXED
+
+* Fixed SearchSubscriber failing to unindex docs on entity deletion
+
 ## 0.10.3
 
 ### FIXED
