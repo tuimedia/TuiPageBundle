@@ -1,5 +1,17 @@
 # Changes
 
+## 0.10.5
+
+### FIXED
+
+* Bulk import could trigger with 0 documents, causing an error.
+
+## 0.10.4
+
+### FIXED
+
+* Fixed SearchSubscriber failing to unindex docs on entity deletion
+
 ## 0.10.3
 
 ### FIXED
