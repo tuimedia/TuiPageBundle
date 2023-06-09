@@ -108,7 +108,8 @@ class SearchSubscriber implements EventSubscriber
         $pageData = $entity->getPageData();
         foreach ($pageData->getAvailableLanguages() as $lang) {
             try {
-                $this->deleteFromIndex($entity, $lang);
+                $index = $this->searcher->getCollectionNameForLanguage($lang);
+                $this->deleteFromIndex($entity, $index);
             } catch (\Exception $e) {
                 $this->logger->error('Search index update failed', [
                     'exception' => $e->getMessage(),

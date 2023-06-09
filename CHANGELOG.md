@@ -1,5 +1,11 @@
 # Changes
 
+## 0.9.7
+
+### FIXED
+
+* Fix SearchSubscriber failing to delete documents from index on entity deletion
+
 ## 0.9.6
 
 ### CHANGED
