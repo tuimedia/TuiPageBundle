@@ -102,6 +102,10 @@ class ReindexCommand extends Command
 
     private function bulkIndex(string $language, array $docs): void
     {
+        if (!count($docs)) {
+            $this->logger->info('No remaining documents; skipping bulk import');
+            return;
+        }
         $this->logger->info('Performing bulk import');
         $collectionName = $this->searcher->getCollectionNameForLanguage($language);
         $this->searcher->bulkImport($collectionName, $docs);

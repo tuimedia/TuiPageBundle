@@ -1,5 +1,11 @@
 # Changes
 
+## 0.10.5
+
+### FIXED
+
+* Bulk import could trigger with 0 documents, causing an error.
+
 ## 0.10.4
 
 ### FIXED
@@ -37,6 +43,19 @@
 
 * Route annotations are now attributes
 
+* Fix SearchSubscriber failing to delete documents from index on entity deletion
+
+## 0.9.8
+
+### FIXED
+
+* Bulk import could trigger with 0 documents, causing an error.
+
+## 0.9.7
+
+### FIXED
+
+* Fix SearchSubscriber failing to delete documents from index on entity deletion
 
 ## 0.9.6
 
