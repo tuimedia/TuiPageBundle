@@ -1,5 +1,11 @@
 # Changes
 
+## 0.9.8
+
+### FIXED
+
+* Bulk import could trigger with 0 documents, causing an error.
+
 ## 0.9.7
 
 ### FIXED
