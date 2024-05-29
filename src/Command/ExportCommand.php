@@ -2,6 +2,7 @@
 namespace Tui\PageBundle\Command;
 
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -11,11 +12,9 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Tui\PageBundle\Repository\PageRepository;
 use Tui\PageBundle\TranslationHandler;
 
+#[AsCommand('pages:export-xliff', description: 'Create an XLIFF export for translation')]
 class ExportCommand extends Command
 {
-    protected static $defaultName = 'pages:export-xliff';
-    protected static $defaultDescription = 'Create an XLIFF export for translation';
-
     public function __construct(
         private readonly LoggerInterface $logger,
         private readonly PageRepository $pageRepository,
@@ -28,8 +27,7 @@ class ExportCommand extends Command
     {
         $this->addArgument('target_language', InputArgument::REQUIRED, 'Target language')
             ->addOption('state', null, InputOption::VALUE_REQUIRED, 'Page state', 'live')
-            ->addOption('file', null, InputOption::VALUE_REQUIRED, 'Output filename')
-        ;
+            ->addOption('file', null, InputOption::VALUE_REQUIRED, 'Output filename');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

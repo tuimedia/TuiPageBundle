@@ -1,13 +1,21 @@
 <?php
 namespace Tui\PageBundle\Search;
 
-use Doctrine\Common\EventSubscriber;
-use Doctrine\ORM\Event\LifecycleEventArgs;
+use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
+use Doctrine\ORM\Event\PostPersistEventArgs;
+use Doctrine\ORM\Event\PreRemoveEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
+use Doctrine\ORM\Events;
 use Psr\Log\LoggerInterface;
 use Tui\PageBundle\Entity\IsIndexableInterface;
 use Tui\PageBundle\Entity\PageInterface;
 
+// preUpdate - get diff of availableLanguages, ensure indexes exist, add/remove translated document from each
+// postPersist -- add new document to index
+// preRemove -- delete from indexes
+#[AsDoctrineListener(event: Events::postPersist)]
+#[AsDoctrineListener(event: Events::preUpdate)]
+#[AsDoctrineListener(event: Events::preRemove)]
 class SearchSubscriber implements EventSubscriber
 {
     private readonly bool $enabled;
@@ -24,22 +32,9 @@ class SearchSubscriber implements EventSubscriber
         $this->enabled = $searchEnabled;
     }
 
-    // preUpdate - get diff of availableLanguages, ensure indexes exist, add/remove translated document from each
-    // postPersist -- add new document to index
-    // preRemove -- delete from indexes
-
-    public function getSubscribedEvents(): array
-    {
-        return [
-            'postPersist',
-            'preUpdate',
-            'preRemove',
-        ];
-    }
-
     public function preUpdate(PreUpdateEventArgs $args): void
     {
-        if (!$this->enabled) {
+        if (!$this->searchEnabled) {
             return;
         }
 
@@ -61,9 +56,9 @@ class SearchSubscriber implements EventSubscriber
         }
     }
 
-    public function postPersist(LifecycleEventArgs $args): void
+    public function postPersist(PostPersistEventArgs $args): void
     {
-        if (!$this->enabled) {
+        if (!$this->searchEnabled) {
             return;
         }
 
@@ -88,9 +83,9 @@ class SearchSubscriber implements EventSubscriber
         }
     }
 
-    public function preRemove(LifecycleEventArgs $args): void
+    public function preRemove(PreRemoveEventArgs $args): void
     {
-        if (!$this->enabled) {
+        if (!$this->searchEnabled) {
             return;
         }
 

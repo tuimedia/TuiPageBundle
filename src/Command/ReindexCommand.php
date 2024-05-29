@@ -2,6 +2,7 @@
 namespace Tui\PageBundle\Command;
 
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -12,10 +13,10 @@ use Tui\PageBundle\Repository\PageDataRepository;
 use Tui\PageBundle\Repository\PageRepository;
 use Tui\PageBundle\Search\TypesenseClient;
 
+// https://typesense.org/docs/0.22.1/api/documents.html#configure-batch-size
+#[AsCommand('pages:reindex', description: 'Recreate search index')]
 class ReindexCommand extends Command
 {
-    protected static $defaultName = 'pages:reindex';
-    protected static $defaultDescription = 'Recreate search index'; // https://typesense.org/docs/0.22.1/api/documents.html#configure-batch-size
     private array $indexingQueue = [];
 
     public function __construct(
