@@ -10,13 +10,15 @@ use Psr\Log\LoggerInterface;
 use Tui\PageBundle\Entity\IsIndexableInterface;
 use Tui\PageBundle\Entity\PageInterface;
 
-// preUpdate - get diff of availableLanguages, ensure indexes exist, add/remove translated document from each
-// postPersist -- add new document to index
-// preRemove -- delete from indexes
+/**
+ * preUpdate -- get diff of availableLanguages, ensure indexes exist, add/remove translated document from each
+ * postPersist -- add new document to index
+ * preRemove -- delete from indexes
+ */
 #[AsDoctrineListener(event: Events::postPersist)]
 #[AsDoctrineListener(event: Events::preUpdate)]
 #[AsDoctrineListener(event: Events::preRemove)]
-class SearchSubscriber implements EventSubscriber
+class SearchSubscriber
 {
     private readonly bool $enabled;
     private ?array $collections = null;
@@ -34,7 +36,7 @@ class SearchSubscriber implements EventSubscriber
 
     public function preUpdate(PreUpdateEventArgs $args): void
     {
-        if (!$this->searchEnabled) {
+        if (!$this->enabled) {
             return;
         }
 
@@ -58,7 +60,7 @@ class SearchSubscriber implements EventSubscriber
 
     public function postPersist(PostPersistEventArgs $args): void
     {
-        if (!$this->searchEnabled) {
+        if (!$this->enabled) {
             return;
         }
 
@@ -85,7 +87,7 @@ class SearchSubscriber implements EventSubscriber
 
     public function preRemove(PreRemoveEventArgs $args): void
     {
-        if (!$this->searchEnabled) {
+        if (!$this->enabled) {
             return;
         }
 
