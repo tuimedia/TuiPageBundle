@@ -2,6 +2,7 @@
 namespace Tui\PageBundle\Command;
 
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -14,29 +15,18 @@ use Tui\PageBundle\PageSchema;
 use Tui\PageBundle\Repository\PageRepository;
 use Tui\PageBundle\TranslationHandler;
 
+#[AsCommand('pages:import-xliff', description: 'Import XLIFF translations')]
 class ImportCommand extends Command
 {
     use TuiPageResponseTrait;
 
-    protected static $defaultName = 'pages:import-xliff';
-    private LoggerInterface $logger;
-    private PageRepository $pageRepository;
-    private PageSchema $pageSchema;
-    private SerializerInterface $serializer;
-    private TranslationHandler $translationHandler;
-
     public function __construct(
-        LoggerInterface $logger,
-        PageRepository $pageRepository,
-        PageSchema $pageSchema,
-        SerializerInterface $serializer,
-        TranslationHandler $translationHandler
+        private readonly LoggerInterface     $logger,
+        private readonly PageRepository      $pageRepository,
+        private readonly PageSchema          $pageSchema,
+        private readonly SerializerInterface $serializer,
+        private readonly TranslationHandler  $translationHandler
     ) {
-        $this->logger = $logger;
-        $this->pageRepository = $pageRepository;
-        $this->translationHandler = $translationHandler;
-        $this->serializer = $serializer;
-        $this->pageSchema = $pageSchema;
         parent::__construct();
     }
 

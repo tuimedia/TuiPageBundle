@@ -2,6 +2,7 @@
 namespace Tui\PageBundle\Command;
 
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -12,28 +13,19 @@ use Tui\PageBundle\Repository\PageRepository;
 use Tui\PageBundle\Repository\PageDataRepository;
 use Tui\PageBundle\Search\TypesenseClient;
 
+// https://typesense.org/docs/0.22.1/api/documents.html#configure-batch-size
+#[AsCommand('pages:reindex', description: 'Recreate search index')]
 class ReindexCommand extends Command
 {
-    protected static $defaultName = 'pages:reindex';
-    private LoggerInterface $logger;
-    private PageRepository $pageRepository;
-    private PageDataRepository $pageDataRepository;
-    private TypesenseClient $searcher;
-    private $bulkIndexThreshold = 40; // https://typesense.org/docs/0.22.1/api/documents.html#configure-batch-size
-    private $indexingQueue = [];
+    private array $indexingQueue = [];
 
     public function __construct(
-        LoggerInterface $logger,
-        TypesenseClient $searcher,
-        PageRepository $pageRepository,
-        PageDataRepository $pageDataRepository,
-        int $bulkIndexThreshold = 40
+        private readonly LoggerInterface    $logger,
+        private readonly TypesenseClient    $searcher,
+        private readonly PageRepository     $pageRepository,
+        private readonly PageDataRepository $pageDataRepository,
+        private readonly int $bulkIndexThreshold = 40
     ) {
-        $this->logger = $logger;
-        $this->pageRepository = $pageRepository;
-        $this->pageDataRepository = $pageDataRepository;
-        $this->searcher = $searcher;
-        $this->bulkIndexThreshold = $bulkIndexThreshold;
         parent::__construct();
     }
 

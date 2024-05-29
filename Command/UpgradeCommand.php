@@ -2,6 +2,7 @@
 namespace Tui\PageBundle\Command;
 
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -10,19 +11,15 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Tui\PageBundle\Repository\PageRepository;
 
+#[AsCommand('pages:upgrade', description: 'Upgrade page data to current version')]
 class UpgradeCommand extends Command
 {
-    const CURRENT_VERSION = 2;
-    protected static $defaultName = 'pages:upgrade';
-    private LoggerInterface $logger;
-    private PageRepository $pageRepository;
+    final public const CURRENT_VERSION = 2;
 
     public function __construct(
-        LoggerInterface $logger,
-        PageRepository $pageRepository
+        private readonly LoggerInterface $logger,
+        private readonly PageRepository $pageRepository
     ) {
-        $this->logger = $logger;
-        $this->pageRepository = $pageRepository;
         parent::__construct();
     }
 
