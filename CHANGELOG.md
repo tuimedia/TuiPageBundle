@@ -1,5 +1,20 @@
 # Changes
 
+## 0.11.0
+
+### FIXED
+
+### BREAKING
+
+* Minimum PHP version is now 8.1
+
+### FIXED 
+
+* Using `[#AsCommand]` attributes instead of `$defaultName` / `$defaultDescription`
+* Using `#[AsDoctrineListener]` instead of `implements EventSubscriber` (introduced in
+  DoctrineBundle 2.7.2)
+* Using specific EventArgs classes instead of `LifecycleEventArgs` (deprecated in Doctrine ORM 2.14)
+
 ## 0.10.5
 
 ### FIXED
