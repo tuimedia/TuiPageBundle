@@ -1,5 +1,11 @@
 # Changes
 
+## 0.11.1
+
+### ADDED 
+
+- Add `getClient()` method to `TypesenseClient` to access underlying SDK
+
 ## 0.11.0
 
 ### FIXED

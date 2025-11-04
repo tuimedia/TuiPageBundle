@@ -31,6 +31,15 @@ class TypesenseClient
         ]);
     }
 
+    /**
+     * Expose the client for those who want to use features in the Typesense SDK that are not
+     * supported by this specific wrapper e.g. creating specific collections
+     */
+    public function getClient(): Client
+    {
+        return $this->typesense;
+    }
+
     private function formatHosts(array $searchHosts): array
     {
         return array_map(fn ($host) => [
