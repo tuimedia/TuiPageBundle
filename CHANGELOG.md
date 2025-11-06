@@ -1,5 +1,14 @@
 # Changes
 
+## 0.11.2
+
+### CHANGED
+
+- Pin `typesense/typesense-php` to `^4.7 | ^5.0` instead of just `^4.7`
+- Allows upgrading your Typesense server version from e.g. `0.24.0` to `29.0`. 
+- However, you can upgrade to `0.12.0` in your projects and use `^5.0` without upgrading your underlying Typesense server version
+- If you stay on Typesense `0.24.0`, new `v5` PHP SDK methods like Stopwords / Conversation AI will 404, and basic features will continue to work
+
 ## 0.11.1
 
 ### ADDED 
