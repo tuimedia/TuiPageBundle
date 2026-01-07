@@ -1,12 +1,19 @@
 <?php
+
 namespace Tui\PageBundle;
 
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use voku\helper\AntiXSS;
 
 class Sanitizer
 {
-    public function __construct(private readonly AntiXSS $antixss, private readonly PageSchema $pageSchema)
-    {
+    public function __construct(
+        private readonly AntiXSS $antixss,
+        private readonly PageSchema $pageSchema,
+        /** @var iterable<SanitizerInterface> $customSanitizers */
+        #[AutowireIterator('tui_page.sanitizer')]
+        private readonly iterable $customSanitizers = [],
+    ) {
     }
 
     /**
@@ -182,16 +189,27 @@ class Sanitizer
         }
 
         if ($type === 'string' && is_string($value)) {
-            // Look for a content type - run HTML fields through antiXSS and everything else through filter_var
-            if (isset($propSchema->contentMediaType) && $propSchema->contentMediaType === 'text/html') {
-                return $this->antixss->xss_clean($value);
+            // Strip unexpected HTML entities and tags from plain strings
+            if (!isset($propSchema->contentMediaType)) {
+                return html_entity_decode(
+                    (string) htmlspecialchars(strip_tags($value), ENT_NOQUOTES),
+                    ENT_QUOTES,
+                    'UTF-8'
+                );
             }
 
-            return html_entity_decode(
-                (string) htmlspecialchars(strip_tags($value), ENT_NOQUOTES),
-                ENT_QUOTES,
-                'UTF-8'
-            );
+            foreach ($this->customSanitizers as $sanitizer) {
+                if ($sanitizer->supports($propSchema->contentMediaType)) {
+                    $value = $sanitizer->sanitize($value);
+                }
+            }
+
+            if ($propSchema->contentMediaType === 'text/html') {
+                // Built-in HTML sanitizer
+                $value = $this->antixss->xss_clean($value);
+            }
+
+            return $value;
         }
 
         if ($type === 'object') {
