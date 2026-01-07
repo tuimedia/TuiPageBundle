@@ -1,4 +1,5 @@
 <?php
+
 namespace Tui\PageBundle;
 
 use Opis\JsonSchema\JsonPointer;
@@ -8,6 +9,7 @@ use Opis\JsonSchema\Schema;
 use Opis\JsonSchema\ValidationError;
 use Opis\JsonSchema\ValidationResult;
 use Opis\JsonSchema\Validator;
+use Symfony\Component\DependencyInjection\Attribute\TaggedIterator;
 
 class PageSchema
 {
@@ -17,8 +19,12 @@ class PageSchema
     /** @var string */
     protected $schemaPath = __DIR__ . '/Resources/schema/tui-page.schema.json';
 
-    public function __construct(array $componentSchemas)
-    {
+    public function __construct(
+        array $componentSchemas,
+        /** @var iterable<SanitizerInterface> $customSanitizers */
+        #[TaggedIterator('tui_page.sanitizer')]
+        private readonly iterable $customSanitizers = [],
+    ) {
         $this->schemas = $componentSchemas;
     }
 
@@ -31,7 +37,10 @@ class PageSchema
         // omg hax, just use the existing plain text type for html
         $mediaType = $validator->getMediaType();
         if ($mediaType instanceof MediaTypeContainer) {
-            $mediaTypes = $mediaType->add('text/html', new Text());
+            $mediaType->add('text/html', new Text());
+            foreach ($this->customSanitizers as $sanitizer) {
+                $mediaType->add($sanitizer->getMediaType(), new Text());
+            }
         }
 
         /** @var ValidationResult $result */
@@ -122,7 +131,7 @@ class PageSchema
         return $resolvedBlock;
     }
 
-    private function formatSchemaErrors(array $errors, object $block = null, string $language = null): array
+    private function formatSchemaErrors(array $errors, ?object $block = null, ?string $language = null): array
     {
         $error = [
             'type' => 'https://tuimedia.com/tui-page/errors/validation',
@@ -158,7 +167,7 @@ class PageSchema
         return $resolvedSchema;
     }
 
-    protected function deepResolveSchema(object $schema, object $rootSchema = null): object
+    protected function deepResolveSchema(object $schema, ?object $rootSchema = null): object
     {
         if (!$rootSchema) {
             $rootSchema = $schema;

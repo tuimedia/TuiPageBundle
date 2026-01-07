@@ -8,7 +8,7 @@ An API for managing rich, versioned, multilingual content.
 
 * Symfony 5 or 6
 * Doctrine ORM 2
-* Typesense 0.22-0.24
+* Typesense 0.22-29
 
 ## Installation
 
@@ -351,3 +351,82 @@ Validation and sanitising of your content blocks is applied using the JSON Schem
 The default string filter removes all HTML (it uses `strip_tags()` under the hood, so it might also remove HTML characters like < entirely). If you need HTML, set a `"contentMediaType": "text/html"` property in the schema for the desired field and an anti-xss filter will be applied instead.
 
 There's no schema for the metadata section, so it's all recursively cleaned by the default string filter.
+
+### Custom Sanitizers
+
+You can register custom sanitisers to handle specific content media types. This is useful when you need different sanitisation rules than the built-in text/html filter provides, such as using Symfony's HTML Sanitiser component with custom configurations.
+
+To create a custom sanitizer, implement the `Tui\PageBundle\SanitizerInterface` and tag it with `tui_page.sanitizer`:
+
+```php
+<?php
+
+namespace App\Service;
+
+use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
+use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
+use Tui\PageBundle\SanitizerInterface;
+
+#[AutoconfigureTag('tui_page.sanitizer')]
+class HtmlSanitizer implements SanitizerInterface
+{
+    public function __construct(
+        private readonly HtmlSanitizerInterface $appHtmlSanitizer,
+    ) {
+    }
+
+    public function sanitize(string $html): string
+    {
+        return $this->appHtmlSanitizer->sanitize($html);
+    }
+
+    public function supports(string $mediaType): bool
+    {
+        return $mediaType === 'text/html;filter=app';
+    }
+
+    public function getMediaType(): string
+    {
+        return 'text/html;filter=app';
+    }
+}
+```
+
+Then reference the custom media type in your component schema:
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://api.example.com/CompassPageText.schema.json#",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "maxLength": 1024
+    },
+    "copy": {
+      "type": "string",
+      "contentMediaType": "text/html;filter=app",
+      "maxLength": 1048576
+    },
+    "background": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "default",
+        "alternate"
+      ]
+    }
+  },
+  "required": [
+    "copy"
+  ]
+}
+```
+
+When the sanitizer encounters a field with `contentMediaType: "text/html;filter=app"`, it will call your custom sanitizer's `sanitize()` method. The `supports()` method determines if your sanitizer handles a given media type, and `getMediaType()` registers the media type with the schema validator.
+
+You can declare multiple sanitisers for the same media type, but their running order is undefined.
+
