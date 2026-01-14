@@ -16,14 +16,14 @@ An API for managing rich, versioned, multilingual content.
 
 ```json
 {
-    "type": "project",
+  "type": "project",
     "repositories": [{
       "type": "vcs",
       "url": "https://bitbucket.org/tui/tuipagebundle.git"
     }],
-    "require": {
-      "…": "etc"
-    }
+  "require": {
+    "…": "etc"
+  }
 }
 ```
 
@@ -37,18 +37,18 @@ composer require tuimedia/page-bundle
 
 ```yaml
 page_controllers:
-    resource: "@TuiPageBundle/Controller/"
-    type: annotation
-    prefix: api
+  resource: "@TuiPageBundle/Controller/"
+  type: annotation
+  prefix: api
 ```
 
 * Enable the property-info component in `config\packages\framework.yaml`:
 
 ```yaml
 framework:
-    #…
-    property_info:
-        enabled: true
+  #…
+  property_info:
+    enabled: true
 ```
 
 * Set up access control. By default the edit, create, delete, history, and import routes require ROLE_ADMIN. See below for how to change this or provide secure fallbacks.
@@ -79,8 +79,8 @@ You can also use `access_control` rules in your `config/packages/security.yaml` 
 
 ```yaml
 security:
-    access_control:
-        - { path: ^/api/pages, methods: [PUT, POST, DELETE], roles: [ROLE_ADMIN] }
+  access_control:
+    - { path: ^/api/pages, methods: [PUT, POST, DELETE], roles: [ROLE_ADMIN] }
         - { path: ^/api/translations, methods: [PUT, POST, DELETE], roles: [ROLE_ADMIN] }
 ```
 
@@ -122,10 +122,10 @@ class PageData extends AbstractPageData {}
 
 ```yaml
 doctrine:
-    orm:
-        # ...
-        resolve_target_entities:
-            Tui\PageBundle\Entity\PageDataInterface: App\Entity\PageData
+  orm:
+    # ...
+    resolve_target_entities:
+      Tui\PageBundle\Entity\PageDataInterface: App\Entity\PageData
 ```
 
 * If you name your entities anything other than `App\Entity\Page` and `App\Entity\PageData`, then name them in the configuration:
@@ -168,7 +168,7 @@ You can provide additional serializer groups that TuiPageBundle uses for seriali
 
 ```yaml
 tui_page:
-    serializer_groups:
+  serializer_groups:
         list_response: ['myPageList']
         search_response: ['myPageSearch']
         get_response: ['myPageGet']
@@ -237,9 +237,9 @@ Transformers must implement `Tui\PageBundle\Search\TransformerInterface`, and be
 
 ```yaml
 services:
-    # this config only applies to the services created by this file
-    _instanceof:
-        Tui\PageBundle\Search\TransformerInterface:
+  # this config only applies to the services created by this file
+  _instanceof:
+    Tui\PageBundle\Search\TransformerInterface:
             tags: ['tui_page.transformer']
 ```
 
@@ -308,9 +308,9 @@ To have your class provided to the indexer, override the bundle's repository ser
 # app/config/services.yaml
 services:
   # ...
-      Tui\PageBundle\Repository\PageRepository:
-        class: App\Repository\PageRepository
-        arguments:
+  Tui\PageBundle\Repository\PageRepository:
+    class: App\Repository\PageRepository
+    arguments:
             $pageClass: '%tui_page.page_class%'
 ```
 
@@ -430,3 +430,23 @@ When the sanitizer encounters a field with `contentMediaType: "text/html;filter=
 
 You can declare multiple sanitisers for the same media type, but their running order is undefined.
 
+### Metadata Sanitizers
+
+You can also create custom sanitizers specifically for metadata objects by implementing the `Tui\PageBundle\MetadataSanitizerInterface` and tagging them with `tui_page.metadata_sanitizer`. These sanitizers will be applied to the metadata of pages during the sanitization process.
+
+```php
+<?php
+namespace App\Service;
+use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
+use Tui\PageBundle\MetadataSanitizerInterface;
+
+#[AutoconfigureTag('tui_page.metadata_sanitizer')]
+class CustomMetadataSanitizer implements MetadataSanitizerInterface
+{
+    public function sanitize(object $metadata): object
+    {
+        // Implement your custom sanitization logic here
+        return $metadata;
+    }
+}
+```

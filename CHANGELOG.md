@@ -1,11 +1,16 @@
 # Changes
 
+## 0.11.4
+
+### ADDED
+
+- Added `Tui\PageBundle\MetadataSanitizerInterface` to allow custom sanitisation of page & langData metadata. Create a class that implements this interface, tag it with `tui_page.metadata_sanitizer` service tag, and it will be applied to all metadata objects before saving.
+
 ## 0.11.3
 
 ### ADDED
 
 - Apply custom sanitisers to block fields by creating a class that implements `Tui\PageBundle\Sanitizer\SanitizerInterface` and tagging it with `tui_page.sanitizer` service tag, then adding `contentMediaType` to the block field definition in the component schema.
-
 
 ## 0.11.2
 

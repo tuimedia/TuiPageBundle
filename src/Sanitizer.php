@@ -13,6 +13,9 @@ class Sanitizer
         /** @var iterable<SanitizerInterface> $customSanitizers */
         #[AutowireIterator('tui_page.sanitizer')]
         private readonly iterable $customSanitizers = [],
+        /** @var iterable<MetadataSanitizerInterface> $metadataSanitizers */
+        #[AutowireIterator('tui_page.metadata_sanitizer')]
+        private readonly iterable $metadataSanitizers = [],
     ) {
     }
 
@@ -60,9 +63,17 @@ class Sanitizer
         }
 
         // Clean metadata
+        foreach ($this->metadataSanitizers as $sanitizer) {
+            $data->pageData->metadata = $sanitizer->sanitize($data->pageData->metadata);
+        }
+
         $data->pageData->metadata = $this->stringCleanRecursive($data->pageData->metadata);
+
         foreach ($data->pageData->content->langData as $languageCode => $langData) {
             if (isset($langData->metadata)) {
+                foreach ($this->metadataSanitizers as $sanitizer) {
+                    $langData->metadata = $sanitizer->sanitize($langData->metadata);
+                }
                 $langData->metadata = $this->stringCleanRecursive($langData->metadata);
             }
         }
@@ -93,7 +104,7 @@ class Sanitizer
      * Simple recursive string cleaner - recurses through arrays & objects, applies filtering to strings only
      * Only good for, say, metadata.
      */
-    private function stringCleanRecursive(mixed $data): mixed
+    public function stringCleanRecursive(mixed $data): mixed
     {
         $dataIsArray = is_array($data);
         $dataIsObject = is_object($data);
