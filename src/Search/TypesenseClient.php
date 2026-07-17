@@ -19,7 +19,7 @@ class TypesenseClient
         private readonly string $indexPrefix,
         string $typesenseApiKey,
         array $searchHosts,
-        array $componentTransformers = null,
+        ?array $componentTransformers = null,
     ) {
         if ($componentTransformers) {
             $this->transformers = $componentTransformers;

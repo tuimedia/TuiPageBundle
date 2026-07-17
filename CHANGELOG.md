@@ -1,5 +1,11 @@
 # Changes
 
+## 0.11.5
+
+### FIXED
+
+- Fixed some PHP 8.4 deprecations
+
 ## 0.11.4
 
 ### ADDED
