@@ -1,0 +1,81 @@
+# Keeps the Bitbucket repo in step with this one.
+#
+# GitHub is the canonical repository; Bitbucket (tui/TuiPageBundle) is a
+# read-only mirror. Every push of a branch or tag here is replayed there, so
+# anything still pointing Composer at Bitbucket carries on working.
+#
+# Setup (one-off):
+#   1. On Bitbucket, create a Repository Access Token for tui/TuiPageBundle
+#      with the `repository:write` scope.
+#      Repository settings -> Security -> Access tokens.
+#   2. On GitHub, add it as the `BITBUCKET_TOKEN` repository secret.
+#      Settings -> Secrets and variables -> Actions.
+#
+# Without that secret the job skips with a notice rather than failing, so
+# forks and unconfigured checkouts don't spew red crosses.
+
+name: Mirror to Bitbucket
+
+on:
+  push:
+    branches: ['**']
+    tags: ['**']
+  workflow_dispatch:
+
+# Never let two mirror pushes race each other.
+concurrency:
+  group: mirror-to-bitbucket
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  mirror:
+    name: Push branches and tags to Bitbucket
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the token is configured
+        id: guard
+        env:
+          BITBUCKET_TOKEN: ${{ secrets.BITBUCKET_TOKEN }}
+        run: |
+          if [ -z "$BITBUCKET_TOKEN" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Mirror skipped::BITBUCKET_TOKEN is not set, so nothing was pushed to Bitbucket."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check out the full history
+        if: steps.guard.outputs.configured == 'true'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Mirror to Bitbucket
+        if: steps.guard.outputs.configured == 'true'
+        env:
+          BITBUCKET_TOKEN: ${{ secrets.BITBUCKET_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # actions/checkout only tracks the ref that triggered the run, even
+          # at fetch-depth 0, so pull down every branch and tag explicitly.
+          git fetch --prune --no-recurse-submodules origin \
+            '+refs/heads/*:refs/remotes/origin/*' \
+            '+refs/tags/*:refs/tags/*'
+
+          # x-token-auth is the fixed username for Bitbucket access tokens.
+          git remote add bitbucket \
+            "https://x-token-auth:${BITBUCKET_TOKEN}@bitbucket.org/tui/TuiPageBundle.git"
+
+          # --prune keeps Bitbucket a true mirror: refs deleted here go there
+          # too. --force lets it accept history GitHub has rewritten.
+          git push --force --prune bitbucket \
+            'refs/remotes/origin/*:refs/heads/*' \
+            'refs/tags/*:refs/tags/*'
+
+      - name: Scrub credentials
+        if: always() && steps.guard.outputs.configured == 'true'
+        run: git remote remove bitbucket 2>/dev/null || true
