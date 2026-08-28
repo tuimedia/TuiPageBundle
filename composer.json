@@ -2,6 +2,7 @@
     "name": "tuimedia/page-bundle",
     "description": "An API for managing rich, versioned, multilingual content.",
     "type": "symfony-bundle",
+    "homepage": "https://github.com/tuimedia/TuiPageBundle",
     "license": "MIT",
     "authors": [
         {
@@ -9,6 +10,10 @@
             "email": "matt@tuimedia.com"
         }
     ],
+    "support": {
+        "issues": "https://github.com/tuimedia/TuiPageBundle/issues",
+        "source": "https://github.com/tuimedia/TuiPageBundle"
+    },
     "autoload": {
         "psr-4": {
             "Tui\\PageBundle\\": "src/"

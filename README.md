@@ -2,6 +2,9 @@
 
 An API for managing rich, versioned, multilingual content.
 
+> **Where this lives:** <https://github.com/tuimedia/TuiPageBundle> is the canonical repository — raise issues and open pull requests there.
+> The Bitbucket repo at `tui/TuiPageBundle` is now a read-only mirror, kept in step automatically. Don't push to it.
+
 [TOC]
 
 ## Requirements
@@ -12,20 +15,22 @@ An API for managing rich, versioned, multilingual content.
 
 ## Installation
 
-* Add & enable the bundle. This isn't (yet?) available on packagist, so you'll have to add our satis repository to your `composer.json`:
+* Add & enable the bundle. This isn't (yet?) on Packagist, so point Composer at the GitHub repository in your `composer.json`:
 
 ```json
 {
   "type": "project",
-    "repositories": [{
-      "type": "vcs",
-      "url": "https://bitbucket.org/tui/tuipagebundle.git"
-    }],
+  "repositories": [{
+    "type": "vcs",
+    "url": "https://github.com/tuimedia/TuiPageBundle.git"
+  }],
   "require": {
     "…": "etc"
   }
 }
 ```
+
+If you're upgrading from an older install that pointed at `bitbucket.org/tui/tuipagebundle`, swap the URL for the one above and run `composer update tuimedia/page-bundle`. Same package, same tags, far friendlier rate limits.
 
 Then:
 
