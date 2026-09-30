@@ -28,9 +28,6 @@ class SearchSubscriber
         private readonly LoggerInterface $logger,
         bool $searchEnabled
     ) {
-        if (!$searchEnabled) {
-            return;
-        }
         $this->enabled = $searchEnabled;
     }
 

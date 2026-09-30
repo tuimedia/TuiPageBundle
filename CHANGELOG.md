@@ -1,5 +1,35 @@
 # Changes
 
+## 0.12.0
+
+Read [UPGRADE-0.12.md](UPGRADE-0.12.md) before upgrading: there's a data conversion to run before your migrations.
+
+### BREAKING
+
+- Supports Symfony 6.4, 7.x and 8.x. Symfony 5.4 is no longer supported.
+- Supports Doctrine ORM 2.20+ and 3.x, DBAL 3.8+ and 4.x, and DoctrineBundle 2.12+ and 3.x. DBAL 2 is no longer supported.
+- `PageData::$availableLanguages` is now stored as JSON instead of with Doctrine's `array` type (removed in DBAL 4). Existing rows must be converted with `pages:convert-available-languages` before running the schema migration.
+- `doctrine/doctrine-bundle`, `symfony/yaml`, `psr/http-client` and the Symfony components the bundle uses directly are now declared requirements.
+- Minimum versions raised to `opis/json-schema` ^1.2 and `voku/anti-xss` ^4.1.43.
+
+### ADDED
+
+- `pages:convert-available-languages` command, which rewrites stored `availableLanguages` values from PHP-serialised arrays to JSON. Supports `--dry-run` and is safe to run more than once.
+
+### FIXED
+
+- PHP 8.4 and 8.5 deprecations, including every use of the deprecated `FILTER_SANITIZE_STRING` filter.
+- Symfony 7 and 8 deprecations: uses the `Attribute` namespaces for `Route` and `Groups`, and `AutowireIterator` instead of `TaggedIterator`.
+- Saving a page failed when search was disabled (no `search_hosts`), because the Typesense client was built with no nodes. The client is now created on first use.
+- Leaving `valid_languages` unset rejected every language on translation export and import. An empty list now allows all languages, as documented.
+- Leaving `serializer_groups` out of the config raised "Undefined array key" warnings on every container build.
+- `PageDataRepository::getAllLanguages()` no longer uses `SELECT DISTINCT` on a JSON column, which PostgreSQL can't compare.
+- Removed the `doctrine.event_subscriber` tag on `SearchSubscriber`. Its `#[AsDoctrineListener]` attributes already register it.
+
+### CHANGED
+
+- Dev tooling updated to PHPStan 2 (now at level 6) and Rector 2.
+
 ## 0.11.5
 
 ### FIXED

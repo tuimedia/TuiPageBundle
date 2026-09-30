@@ -207,7 +207,8 @@ class TranslationHandler
 
     private function validateTargetLanguage(string $language): bool
     {
-        if (!is_array($this->validLanguages)) {
+        // No configured languages means every language is allowed
+        if (!$this->validLanguages) {
             return true;
         }
 

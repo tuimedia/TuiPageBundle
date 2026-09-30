@@ -111,6 +111,7 @@ class Configuration implements ConfigurationInterface
                 ->end()
                 ->arrayNode('serializer_groups')
                     ->info('Serializer configuration')
+                    ->addDefaultsIfNotSet()
                     ->children()
                         ->arrayNode('get_response')
                             ->defaultValue([])

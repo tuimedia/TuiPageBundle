@@ -4,13 +4,13 @@ namespace Tui\PageBundle\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use Tui\PageBundle\Entity\PageData;
+use Tui\PageBundle\Entity\PageDataInterface;
 
 /**
- * @method PageData|null find($id, $lockMode = null, $lockVersion = null)
- * @method PageData|null findOneBy(array $criteria, array $orderBy = null)
- * @method PageData[]    findAll()
- * @method PageData[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method PageDataInterface|null find($id, $lockMode = null, $lockVersion = null)
+ * @method PageDataInterface|null findOneBy(array $criteria, array $orderBy = null)
+ * @method PageDataInterface[]    findAll()
+ * @method PageDataInterface[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  *
  * @template T of object
  *
@@ -30,7 +30,7 @@ class PageDataRepository extends ServiceEntityRepository
 
     public function getAllLanguages(): array
     {
-        $result = $this->getEntityManager()->createQuery(vsprintf('SELECT DISTINCT pd.availableLanguages FROM %s pd', [
+        $result = $this->getEntityManager()->createQuery(vsprintf('SELECT pd.availableLanguages FROM %s pd', [
             $this->pageDataClass,
         ]))->getResult();
 

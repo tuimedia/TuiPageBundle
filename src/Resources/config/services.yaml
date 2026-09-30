@@ -46,8 +46,3 @@ services:
         class: voku\helper\AntiXSS
         calls:
             - [ 'removeEvilHtmlTags', [['iframe']]]
-
-    Tui\PageBundle\Search\SearchSubscriber:
-        class: Tui\PageBundle\Search\SearchSubscriber
-        tags:
-          - { name: doctrine.event_subscriber, connection: default }

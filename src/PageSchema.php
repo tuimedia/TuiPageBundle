@@ -9,7 +9,7 @@ use Opis\JsonSchema\Schema;
 use Opis\JsonSchema\ValidationError;
 use Opis\JsonSchema\ValidationResult;
 use Opis\JsonSchema\Validator;
-use Symfony\Component\DependencyInjection\Attribute\TaggedIterator;
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 
 class PageSchema
 {
@@ -22,7 +22,7 @@ class PageSchema
     public function __construct(
         array $componentSchemas,
         /** @var iterable<SanitizerInterface> $customSanitizers */
-        #[TaggedIterator('tui_page.sanitizer')]
+        #[AutowireIterator('tui_page.sanitizer')]
         private readonly iterable $customSanitizers = [],
     ) {
         $this->schemas = $componentSchemas;

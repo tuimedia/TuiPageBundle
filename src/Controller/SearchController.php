@@ -5,7 +5,8 @@ namespace Tui\PageBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
+use Tui\PageBundle\InputFilter;
 use Tui\PageBundle\Repository\PageRepository;
 use Tui\PageBundle\Search\TypesenseClient;
 
@@ -28,9 +29,9 @@ class SearchController extends AbstractController
 
         $this->checkTuiPagePermissions('search');
 
-        $terms = substr((string) filter_var($request->query->get('q', ''), FILTER_SANITIZE_STRING), 0, 128);
-        $language = substr((string) filter_var($request->query->get('language', 'en_GB'), FILTER_SANITIZE_STRING), 0, 32);
-        $state = substr((string) filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING), 0, 32);
+        $terms = substr(InputFilter::string($request->query->get('q', '')), 0, 128);
+        $language = substr(InputFilter::string($request->query->get('language', 'en_GB')), 0, 32);
+        $state = substr(InputFilter::string($request->query->get('state', 'live')), 0, 32);
         $index = $searcher->getCollectionNameForLanguage($language);
 
         $size = $request->query->getInt('size', 50) ?: 1;

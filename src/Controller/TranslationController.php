@@ -7,8 +7,9 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use Tui\PageBundle\InputFilter;
 use Tui\PageBundle\PageSchema;
 use Tui\PageBundle\Repository\PageRepository;
 use Tui\PageBundle\TranslationHandler;
@@ -28,8 +29,8 @@ class TranslationController extends AbstractController
         string $slug,
         string $lang
     ): Response {
-        $state = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
-        $lang = filter_var($lang, FILTER_SANITIZE_STRING);
+        $state = InputFilter::string($request->query->get('state', 'live'));
+        $lang = InputFilter::string($lang);
 
         $page = $pageRepository->findOneBy([
             'slug' => $slug,
@@ -80,7 +81,7 @@ class TranslationController extends AbstractController
         PageSchema $pageSchema,
         string $slug
     ): Response {
-        $state = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
+        $state = InputFilter::string($request->query->get('state', 'live'));
 
         $page = $pageRepository->findOneBy([
             'slug' => $slug,
@@ -93,9 +94,9 @@ class TranslationController extends AbstractController
 
         $this->checkTuiPagePermissions('import', $page);
 
-        $destination = filter_var($request->query->get('destination', 'original'), FILTER_SANITIZE_STRING);
-        $destinationState = filter_var($request->query->get('destinationState', 'live'), FILTER_SANITIZE_STRING);
-        $destinationSlug = filter_var($request->query->get('destinationSlug', $page->getSlug()), FILTER_SANITIZE_STRING);
+        $destination = InputFilter::string($request->query->get('destination', 'original'));
+        $destinationState = InputFilter::string($request->query->get('destinationState', 'live'));
+        $destinationSlug = InputFilter::string($request->query->get('destinationSlug', $page->getSlug()));
         if (!in_array($destination, ['new', 'original'])) {
             return $this->json([
                 'type' => 'https://tuimedia.com/page-bundle/validation',

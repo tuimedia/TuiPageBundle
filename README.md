@@ -9,9 +9,12 @@ An API for managing rich, versioned, multilingual content.
 
 ## Requirements
 
-* Symfony 5 or 6
-* Doctrine ORM 2
+* PHP 8.1 or later (tested on 8.4 and 8.5)
+* Symfony 6.4, 7 or 8
+* Doctrine ORM 2.20+ or 3, with DBAL 3.8+ or 4
 * Typesense 0.22-29
+
+Upgrading from 0.11? Read [UPGRADE-0.12.md](UPGRADE-0.12.md) first: there is a data conversion to run.
 
 ## Installation
 
@@ -43,7 +46,7 @@ composer require tuimedia/page-bundle
 ```yaml
 page_controllers:
   resource: "@TuiPageBundle/Controller/"
-  type: annotation
+  type: attribute
   prefix: api
 ```
 
@@ -66,7 +69,7 @@ The default configuration requires that the user have the ROLE_ADMIN role to acc
 
 ```yaml
 tui_page:
-  access_control:
+  access_roles:
     list: []
     retrieve: []
     export: []
@@ -98,13 +101,12 @@ TuiPageBundle uses two Doctrine ORM entities to represent your pages. A `PageDat
 ```php
 namespace App\Entity;
 
-use Tui\PageBundle\Entity\AbstractPage;
 use Doctrine\ORM\Mapping as ORM;
+use Tui\PageBundle\Entity\AbstractPage;
+use Tui\PageBundle\Repository\PageRepository;
 
-/**
- * @ORM\Entity(repositoryClass="Tui\PageBundle\Repository\PageRepository")
- * @ORM\Table(name="page")
- */
+#[ORM\Entity(repositoryClass: PageRepository::class)]
+#[ORM\Table(name: "page")]
 class Page extends AbstractPage {}
 ```
 
@@ -113,13 +115,12 @@ class Page extends AbstractPage {}
 ```php
 namespace App\Entity;
 
-use Tui\PageBundle\Entity\AbstractPageData;
 use Doctrine\ORM\Mapping as ORM;
+use Tui\PageBundle\Entity\AbstractPageData;
+use Tui\PageBundle\Repository\PageDataRepository;
 
-/**
- * @ORM\Entity(repositoryClass="Tui\PageBundle\Repository\PageDataRepository")
- * @ORM\Table(name="page_data")
- */
+#[ORM\Entity(repositoryClass: PageDataRepository::class)]
+#[ORM\Table(name: "page_data")]
 class PageData extends AbstractPageData {}
 ```
 
@@ -150,7 +151,7 @@ bin/console doctrine:migrations:migrate
 
 ## Exposing your custom properties in API calls
 
-The advantage of extending the `AbstractPage` and `AbstractPageData` is that you can add your own properties and methods. If you want these to appear in the serialized output of the bundle API calls, annotate the properties or methods you want to serialize with the `@Groups()` annotation. Each kind of view has its own serializer group so you can decide what to show and when.
+The advantage of extending the `AbstractPage` and `AbstractPageData` is that you can add your own properties and methods. If you want these to appear in the serialized output of the bundle API calls, mark the properties or methods you want to serialise with the `#[Groups]` attribute (`Symfony\Component\Serializer\Attribute\Groups`). Each kind of view has its own serializer group so you can decide what to show and when.
 
 Available serializer groups:
 
@@ -349,7 +350,7 @@ tui_page:
 
 ## Filtering & Validation
 
-Page input (add/edit) is validated through a JSON Schema defined in `Resources/schema/tui-page.schema.json`. There are *also* Symfony validation rules applied as `@Assert/…` annotations on the `Page` and `PageData` entities.
+Page input (add/edit) is validated through a JSON Schema defined in `Resources/schema/tui-page.schema.json`. There are *also* Symfony validation rules applied as `#[Assert\…]` attributes on the `Page` and `PageData` entities.
 
 Validation and sanitising of your content blocks is applied using the JSON Schema files from your configuration. Make sure you define all the properties on your content components EXCEPT for those already checked by the overall page schema: `id`, `component`, `languages` and `styles`.
 

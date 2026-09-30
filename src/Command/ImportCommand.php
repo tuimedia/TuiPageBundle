@@ -11,6 +11,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Serializer\SerializerInterface;
 use Tui\PageBundle\Controller\TuiPageResponseTrait;
+use Tui\PageBundle\InputFilter;
 use Tui\PageBundle\PageSchema;
 use Tui\PageBundle\Repository\PageRepository;
 use Tui\PageBundle\TranslationHandler;
@@ -53,7 +54,7 @@ class ImportCommand extends Command
             return Command::FAILURE;
         }
 
-        $argFile = (string) filter_var($input->getArgument('file'), FILTER_SANITIZE_STRING);
+        $argFile = InputFilter::string($input->getArgument('file'));
         if (!file_exists($argFile)) {
             $io->error('File not found');
 

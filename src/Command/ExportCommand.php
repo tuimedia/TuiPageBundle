@@ -9,6 +9,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Tui\PageBundle\InputFilter;
 use Tui\PageBundle\Repository\PageRepository;
 use Tui\PageBundle\TranslationHandler;
 
@@ -58,7 +59,7 @@ class ExportCommand extends Command
             ]);
         }
         $zip = new \ZipArchive();
-        $result = $zip->open((string) filter_var($filename, FILTER_SANITIZE_STRING), \ZipArchive::CREATE | \ZipArchive::EXCL);
+        $result = $zip->open(InputFilter::string($filename), \ZipArchive::CREATE | \ZipArchive::EXCL);
         if ($result !== true) {
             $this->logger->error('Failed to create zip archive', [
                 'errorCode' => $result,

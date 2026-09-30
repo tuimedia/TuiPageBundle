@@ -9,6 +9,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Tui\PageBundle\Entity\PageInterface;
+use Tui\PageBundle\InputFilter;
 
 /**
  * @method PageInterface|null find($id, $lockMode = null, $lockVersion = null)
@@ -59,8 +60,8 @@ class PageRepository extends ServiceEntityRepository
     public function getBySlugAndState(string $slug, string $state = 'live'): ?PageInterface
     {
         return $this->findOneBy([
-            'slug' => filter_var($slug, FILTER_SANITIZE_STRING),
-            'state' => filter_var($state, FILTER_SANITIZE_STRING),
+            'slug' => InputFilter::string($slug),
+            'state' => InputFilter::string($state),
         ]);
     }
 
