@@ -28,6 +28,7 @@ class Configuration implements ConfigurationInterface
                 ->end()
                 ->scalarNode('search_api_key')
                     ->info('Typesense API key')
+                    ->defaultNull()
                 ->end()
                 ->scalarNode('bulk_index_threshold')
                     ->info('Maximum number of documents to index at once')

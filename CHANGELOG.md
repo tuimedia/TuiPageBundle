@@ -22,7 +22,7 @@ Read [UPGRADE-0.12.md](UPGRADE-0.12.md) before upgrading: there's a data convers
 - Symfony 7 and 8 deprecations: uses the `Attribute` namespaces for `Route` and `Groups`, and `AutowireIterator` instead of `TaggedIterator`.
 - Saving a page failed when search was disabled (no `search_hosts`), because the Typesense client was built with no nodes. The client is now created on first use.
 - Leaving `valid_languages` unset rejected every language on translation export and import. An empty list now allows all languages, as documented.
-- Leaving `serializer_groups` out of the config raised "Undefined array key" warnings on every container build.
+- Leaving `serializer_groups` or `search_api_key` out of the config raised "Undefined array key" warnings on every container build.
 - `PageDataRepository::getAllLanguages()` no longer uses `SELECT DISTINCT` on a JSON column, which PostgreSQL can't compare.
 - Removed the `doctrine.event_subscriber` tag on `SearchSubscriber`. Its `#[AsDoctrineListener]` attributes already register it.
 

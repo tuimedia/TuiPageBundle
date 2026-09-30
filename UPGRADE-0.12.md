@@ -27,7 +27,7 @@ bin/console pages:convert-available-languages --dry-run
 bin/console pages:convert-available-languages
 ```
 
-It works on raw rows through DBAL rather than loading entities, so it runs fine while the data is still in the old format. It runs in a single transaction, skips values that are already JSON (so running it twice is harmless), and fails loudly, listing the row IDs, if it finds anything it can't read.
+It works on raw rows through DBAL rather than loading entities, so it runs fine while the data is still in the old format. It runs in a single transaction, skips values that are already JSON (so running it twice is harmless), and fails loudly, listing the row IDs, if it finds anything it can't read. Rows it did convert stay converted, so fix the listed rows and run it again.
 
 ### Deploy order matters
 
