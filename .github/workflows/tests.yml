@@ -17,17 +17,20 @@ jobs:
   static:
     name: Static analysis
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - uses: shivammathur/setup-php@v2
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
         with:
           php-version: '8.5'
           coverage: none
 
       - run: composer validate --strict --no-check-lock
 
-      - uses: ramsey/composer-install@v3
+      - uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # 4.0.0
 
       - name: PHPStan
         run: vendor/bin/phpstan analyse --no-progress
@@ -38,6 +41,7 @@ jobs:
   tests:
     name: PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}, ORM ${{ matrix.orm }}, DBAL ${{ matrix.dbal }}, ${{ matrix.db }}${{ matrix.label && format(', {0}', matrix.label) || '' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     strategy:
       fail-fast: false
@@ -45,7 +49,7 @@ jobs:
         include:
           - { php: '8.3', symfony: '7.4.*', orm: '^3.3', dbal: '^3.8', db: sqlite }
           - { php: '8.3', symfony: '7.4.*', orm: '^3.3', dbal: '^4.0', db: sqlite }
-          - { php: '8.4', symfony: '6.4.*', orm: '^2.20', dbal: '^3.8', db: sqlite, typesense: '0.25.2', typesense-php: '^4.7', label: 'Typesense 0.25 + SDK v4' }
+          - { php: '8.4', symfony: '6.4.*', orm: '^2.20', dbal: '^3.8', db: sqlite, typesense: '0.25.2@sha256:1ddbb28a52b0b8be31237ec718df1c9bc895c5626b26c10fa3f340f684e81488', typesense-php: '^4.7', label: 'Typesense 0.25 + SDK v4' }
           - { php: '8.4', symfony: '8.*', orm: '^3.3', dbal: '^4.0', db: sqlite }
           - { php: '8.5', symfony: '6.4.*', orm: '^2.20', dbal: '^3.8', db: sqlite }
           - { php: '8.5', symfony: '7.4.*', orm: '^3.3', dbal: '^3.8', db: sqlite }
@@ -71,16 +75,18 @@ jobs:
             # flags as risky on every functional test; later 6.4 releases clean it up
             phpunit-args: --do-not-fail-on-risky
 
+    # Images are pinned by digest. Dependabot doesn't update service images, so refresh them by hand with
+    #   docker buildx imagetools inspect <image>:<tag> --format '{{json .Manifest}}'
     services:
       typesense:
-        image: typesense/typesense:${{ matrix.typesense || '29.0' }}
+        image: typesense/typesense:${{ matrix.typesense || '29.0@sha256:316b7e71c21f7e5e5caa8daa150e1b3f2be8c876081ee1f77bc2d92cd7f137d0' }}
         env:
           TYPESENSE_API_KEY: tui-page-test
           TYPESENSE_DATA_DIR: /tmp
         ports: ['8108:8108']
 
       postgres:
-        image: ${{ matrix.db == 'postgres' && 'postgres:17-alpine' || '' }}
+        image: ${{ matrix.db == 'postgres' && 'postgres:17-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24' || '' }}
         env:
           POSTGRES_PASSWORD: pw
           POSTGRES_DB: app
@@ -88,7 +94,7 @@ jobs:
         options: --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 20
 
       mysql:
-        image: ${{ matrix.db == 'mysql' && 'mysql:8.4' || '' }}
+        image: ${{ matrix.db == 'mysql' && 'mysql:8.4@sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242' || '' }}
         env:
           MYSQL_ROOT_PASSWORD: pw
           MYSQL_DATABASE: app
@@ -96,7 +102,7 @@ jobs:
         options: --health-cmd "mysqladmin ping -ppw" --health-interval 5s --health-timeout 5s --health-retries 20
 
       mariadb:
-        image: ${{ matrix.db == 'mariadb' && 'mariadb:11.8' || '' }}
+        image: ${{ matrix.db == 'mariadb' && 'mariadb:11.8@sha256:79d59758afc91b89b120b0a8904d637f5a3b3e1c4900f29b740d6d46c72fef68' || '' }}
         env:
           MARIADB_ROOT_PASSWORD: pw
           MARIADB_DATABASE: app
@@ -114,9 +120,11 @@ jobs:
         || '' }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - uses: shivammathur/setup-php@v2
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
         with:
           php-version: ${{ matrix.php }}
           extensions: zip, pdo_sqlite, pdo_mysql, pdo_pgsql
@@ -124,18 +132,25 @@ jobs:
           tools: flex
 
       - name: Pin Doctrine and other versions for this job
+        env:
+          ORM: ${{ matrix.orm }}
+          DBAL: ${{ matrix.dbal }}
+          TYPESENSE_PHP: ${{ matrix.typesense-php }}
+          FLOOR: ${{ matrix.floor }}
+        # FLOOR is a space-separated list of package:version pairs, so it's left unquoted to split
         run: |
+          # shellcheck disable=SC2086
           composer require --no-update --no-interaction \
-            "doctrine/orm:${{ matrix.orm }}" "doctrine/dbal:${{ matrix.dbal }}" \
-            ${{ matrix.typesense-php && format('"typesense/typesense-php:{0}"', matrix.typesense-php) || '' }} \
-            ${{ matrix.floor }}
+            "doctrine/orm:$ORM" "doctrine/dbal:$DBAL" \
+            ${TYPESENSE_PHP:+"typesense/typesense-php:$TYPESENSE_PHP"} \
+            $FLOOR
 
       # Symfony 6.4.0 has published security advisories; it's only installed to prove the floor works
       - name: Allow insecure versions for the floor job
         if: matrix.floor
         run: composer config audit.block-insecure false
 
-      - uses: ramsey/composer-install@v3
+      - uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # 4.0.0
         with:
           dependency-versions: highest
 
@@ -144,11 +159,15 @@ jobs:
 
       - name: Wait for Typesense
         run: |
-          for i in $(seq 1 60); do
+          for _ in $(seq 1 60); do
             curl -sf "$TYPESENSE_URL/health" && exit 0
             sleep 1
           done
           echo "Typesense didn't come up"; exit 1
 
       - name: PHPUnit
-        run: vendor/bin/phpunit ${{ matrix.phpunit-args }}
+        env:
+          PHPUNIT_ARGS: ${{ matrix.phpunit-args }}
+        run: |
+          # shellcheck disable=SC2086
+          vendor/bin/phpunit $PHPUNIT_ARGS
