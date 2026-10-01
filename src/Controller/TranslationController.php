@@ -94,8 +94,9 @@ class TranslationController extends AbstractController
         $this->checkTuiPagePermissions('import', $page);
 
         $destination = InputFilter::string($request->query->get('destination', 'original'));
-        $destinationState = InputFilter::string($request->query->get('destinationState', 'live'));
-        $destinationSlug = InputFilter::string($request->query->get('destinationSlug', $page->getSlug()));
+        // Normalised the way they'll be saved, so the existence check below tests the real destination
+        $destinationState = trim((string) preg_replace('/[^\w-]+/', '-', InputFilter::string($request->query->get('destinationState', 'live'))), '-');
+        $destinationSlug = trim((string) preg_replace('/[^\w-]+/', '-', InputFilter::string($request->query->get('destinationSlug', $page->getSlug()))), '-');
         if (!in_array($destination, ['new', 'original'])) {
             return $this->json([
                 'type' => 'https://tuimedia.com/page-bundle/validation',
@@ -104,11 +105,11 @@ class TranslationController extends AbstractController
             ], 422);
         }
 
-        if ($destination === 'new' && !($destinationSlug || $destinationState)) {
+        if ($destination === 'new' && !($destinationSlug && $destinationState)) {
             return $this->json([
                 'type' => 'https://tuimedia.com/page-bundle/validation',
                 'title' => 'Missing or invalid destination slug/state',
-                'detail' => 'When saving to a new page, you must provide a destinationSlug and/or a destinationState',
+                'detail' => 'When saving to a new page, destinationSlug and destinationState can\'t be empty. They default to the original page\'s slug and live',
             ], 409);
         }
 
@@ -129,13 +130,8 @@ class TranslationController extends AbstractController
             $page = clone $page;
             // Set a temporary revision so the page will validate
             $page->getPageData()->setRevision('ffffffff-ffff-ffff-ffff-ffffffffffff');
-            if ($destinationSlug) {
-                $page->setSlug((string) preg_replace('/[^\w]+/', '-', $slug));
-            }
-
-            if ($destinationState) {
-                $page->setState($destinationState);
-            }
+            $page->setSlug($destinationSlug);
+            $page->setState($destinationState);
         }
 
         if ($destination === 'original') {
