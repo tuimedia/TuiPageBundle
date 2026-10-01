@@ -12,6 +12,7 @@ Read [UPGRADE-0.12.md](UPGRADE-0.12.md) before upgrading: there's a data convers
 - `PageData::$availableLanguages` is now stored as JSON instead of with Doctrine's `array` type (removed in DBAL 4). Existing rows must be converted with `pages:convert-available-languages` before running the schema migration.
 - `doctrine/doctrine-bundle`, `symfony/yaml`, `psr/http-client` and the Symfony components the bundle uses directly are now declared requirements.
 - Minimum versions raised to `opis/json-schema` ^1.2 and `voku/anti-xss` ^4.1.43.
+- The `access_roles` defaults now apply when the block is left out of your config, and `history` defaults to `[ROLE_ADMIN]` as documented. Before, leaving the block out meant no role checks at all, and `history` was open unless you set it. Writes and history now need `ROLE_ADMIN` (and SecurityBundle) unless you configure otherwise. See the upgrade guide to keep the old behaviour.
 
 ### ADDED
 
@@ -25,6 +26,7 @@ Read [UPGRADE-0.12.md](UPGRADE-0.12.md) before upgrading: there's a data convers
 - Leaving `valid_languages` unset rejected every language on translation export and import. An empty list now allows all languages, as documented.
 - Leaving `serializer_groups` or `search_api_key` out of the config raised "Undefined array key" warnings on every container build.
 - `PageDataRepository::getAllLanguages()` no longer uses `SELECT DISTINCT` on a JSON column, which PostgreSQL can't compare.
+- The translation import endpoint (`PUT /translations/{slug}`) returned the temporary placeholder revision `ffffffff-ffff-ffff-ffff-ffffffffffff` in its response. It now returns the saved page, with its real revision.
 - Removed the `doctrine.event_subscriber` tag on `SearchSubscriber`. Its `#[AsDoctrineListener]` attributes already register it.
 
 ### CHANGED

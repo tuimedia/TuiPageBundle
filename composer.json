@@ -57,5 +57,8 @@
         "phpstan/phpstan": "^2.1",
         "phpstan/phpstan-doctrine": "^2.0",
         "rector/rector": "^2.2"
+    },
+    "suggest": {
+        "symfony/security-bundle": "Needed for the default access_roles, which require ROLE_ADMIN for writes and history"
     }
 }
