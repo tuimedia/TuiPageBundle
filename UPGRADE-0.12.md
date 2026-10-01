@@ -125,3 +125,4 @@ tui_page:
 * Leaving `valid_languages` unset (or empty) now allows every language, as the documentation always said. Before, it rejected every language on translation export and import.
 * An app with no `search_hosts` configured no longer fails when saving a page. The Typesense client is now only created when something actually uses search.
 * The translation import endpoint (`PUT /translations/{slug}`) now returns the saved page. Before, the response carried the placeholder revision `ffffffff-ffff-ffff-ffff-ffffffffffff` instead of the real one.
+* Importing a translation with `destination=new&destinationSlug=…` now saves the new page under that slug. Before, it kept the original slug, so the import only worked when `destinationState` was different too.

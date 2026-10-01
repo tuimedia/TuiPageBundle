@@ -27,6 +27,7 @@ Read [UPGRADE-0.12.md](UPGRADE-0.12.md) before upgrading: there's a data convers
 - Leaving `serializer_groups` or `search_api_key` out of the config raised "Undefined array key" warnings on every container build.
 - `PageDataRepository::getAllLanguages()` no longer uses `SELECT DISTINCT` on a JSON column, which PostgreSQL can't compare.
 - The translation import endpoint (`PUT /translations/{slug}`) returned the temporary placeholder revision `ffffffff-ffff-ffff-ffff-ffffffffffff` in its response. It now returns the saved page, with its real revision.
+- Importing a translation into a new page (`destination=new`) ignored `destinationSlug` and kept the original slug, while the duplicate-page check looked at the requested one. Asking for a new slug in the same state failed on the database's unique constraint. The new page now gets the requested slug, and the check tests it.
 - Removed the `doctrine.event_subscriber` tag on `SearchSubscriber`. Its `#[AsDoctrineListener]` attributes already register it.
 
 ### CHANGED
