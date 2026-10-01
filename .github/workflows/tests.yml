@@ -43,7 +43,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { php: '8.2', symfony: '7.4.*', orm: '^3.3', dbal: '^3.8', db: sqlite }
+          - { php: '8.3', symfony: '7.4.*', orm: '^3.3', dbal: '^3.8', db: sqlite }
           - { php: '8.3', symfony: '7.4.*', orm: '^3.3', dbal: '^4.0', db: sqlite }
           - { php: '8.4', symfony: '6.4.*', orm: '^2.20', dbal: '^3.8', db: sqlite, typesense: '0.25.2', typesense-php: '^4.7', label: 'Typesense 0.25 + SDK v4' }
           - { php: '8.4', symfony: '8.*', orm: '^3.3', dbal: '^4.0', db: sqlite }
@@ -60,14 +60,14 @@ jobs:
           - { php: '8.4', symfony: '6.4.*', orm: '^2.20', dbal: '^3.8', db: mariadb }
 
           # Every direct dependency at the lowest version composer.json allows
-          - php: '8.2'
+          - php: '8.3'
             symfony: '6.4.0'
             orm: '2.20.0'
             dbal: '3.8.0'
             db: sqlite
             label: 'lowest direct dependencies'
             floor: 'doctrine/doctrine-bundle:2.12.0 opis/json-schema:1.2.0 voku/anti-xss:4.1.43 typesense/typesense-php:4.7.0 psr/http-client:1.0.1'
-            # Symfony 6.4.0's debug kernel leaves an exception handler registered, which PHPUnit 11
+            # Symfony 6.4.0's debug kernel leaves an exception handler registered, which PHPUnit
             # flags as risky on every functional test; later 6.4 releases clean it up
             phpunit-args: --do-not-fail-on-risky
 

@@ -73,7 +73,7 @@ custom sanitisers. Fixtures are in `tests/fixtures`. `extended-page.json` is a r
 page with its text swapped for lorem ipsum, and `extended-page.response.json` is what
 0.11.5 returned for it, so the API output can be checked byte for byte.
 
-CI (`.github/workflows/tests.yml`) runs the suite across PHP 8.2 to 8.5, Symfony 6.4, 7.4
+CI (`.github/workflows/tests.yml`) runs the suite across PHP 8.3 to 8.5, Symfony 6.4, 7.4
 and 8, Doctrine ORM 2 and 3, DBAL 3 and 4, SQLite, PostgreSQL, MySQL and MariaDB, and with
 every direct dependency at its lowest allowed version.
 

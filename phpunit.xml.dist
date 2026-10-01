@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    PHPUnit 11.5 and 12. Fails on any deprecation raised by the bundle's own code, or by a
+    PHPUnit 12. Fails on any deprecation raised by the bundle's own code, or by a
     library because the bundle called it in a deprecated way. Deprecations libraries raise
     among themselves are ignored.
 -->

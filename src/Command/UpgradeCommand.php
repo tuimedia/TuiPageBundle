@@ -13,7 +13,7 @@ use Tui\PageBundle\Repository\PageRepository;
 #[AsCommand('pages:upgrade', description: 'Upgrade page data to current version')]
 class UpgradeCommand extends Command
 {
-    final public const CURRENT_VERSION = 2;
+    final public const int CURRENT_VERSION = 2;
 
     public function __construct(
         private readonly LoggerInterface $logger,
