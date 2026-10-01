@@ -130,8 +130,6 @@ class TranslationController extends AbstractController
             $page = clone $page;
             // Set a temporary revision so the page will validate
             $page->getPageData()->setRevision('ffffffff-ffff-ffff-ffff-ffffffffffff');
-            $page->setSlug($destinationSlug);
-            $page->setState($destinationState);
         }
 
         if ($destination === 'original') {
@@ -151,6 +149,12 @@ class TranslationController extends AbstractController
                 'title' => 'Unable to process XLIFF file',
                 'detail' => $e->getMessage(),
             ], 422);
+        }
+
+        // Only after importing, which checks the file was exported from the original slug
+        if ($destination === 'new') {
+            $page->setSlug($destinationSlug);
+            $page->setState($destinationState);
         }
         $groups = $this->getTuiPageSerializerGroups('import_response', ['pageGet']);
 
