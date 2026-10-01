@@ -11,7 +11,7 @@ Read [UPGRADE-0.12.md](UPGRADE-0.12.md) before upgrading: there's a data convers
 - Supports Doctrine ORM 2.20+ and 3.x, DBAL 3.8+ and 4.x, and DoctrineBundle 2.12+ and 3.x. DBAL 2 is no longer supported.
 - `PageData::$availableLanguages` is now stored as JSON instead of with Doctrine's `array` type (removed in DBAL 4). Existing rows must be converted with `pages:convert-available-languages` before running the schema migration.
 - `doctrine/doctrine-bundle`, `symfony/yaml`, `psr/http-client` and the Symfony components the bundle uses directly are now declared requirements.
-- Requires `opis/json-schema` ^2.6 (was ^1.2), and `voku/anti-xss` ^4.1.43. If your app requires `opis/json-schema` ^1 itself, it needs to move to 2 as well.
+- Requires `opis/json-schema` ^2.6 (0.11 allowed 1.x), and `voku/anti-xss` ^4.1.43. If your app requires `opis/json-schema` ^1 itself, it needs to move to 2 as well.
 - `PageSchema::getSchemaObjectForBlock()` now returns the decoded schema as a plain `object`, as opis 2 has no `Schema::fromJsonString()`. `getSchemaForBlock()` is unchanged.
 - The `access_roles` defaults now apply when the block is left out of your config, and `history` defaults to `[ROLE_ADMIN]` as documented. Before, leaving the block out meant no role checks at all, and `history` was open unless you set it. Writes and history now need `ROLE_ADMIN` (and SecurityBundle) unless you configure otherwise. See the upgrade guide to keep the old behaviour.
 

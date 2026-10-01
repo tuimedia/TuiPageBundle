@@ -132,4 +132,5 @@ tui_page:
 * `patternProperties` in component schemas now sanitise every matching property. Before, only the first match was cleaned, so markup may now be stripped from properties that used to keep it.
 * Translation imports are now sanitised like page create and edit. Plain-text fields lose any markup and HTML fields are cleaned, so a translator can no longer slip a `<script>` into a page through an XLIFF file.
 * Validation errors (422) look the same as before. The `path`, `keyword` and `keywordArgs` are unchanged, except that `additionalProperties` errors now name the offending properties in `keywordArgs.properties`.
+* A `contentMediaType` that isn't `text/html` and has no custom sanitiser used to throw (a 500). opis 2 checks it by sniffing the content instead, so a mismatch is now a 422 `contentMediaType` validation error.
 * Importing a translation with `destination=new&destinationSlug=…` now saves the new page under that slug. Before, it kept the original slug, so the import only worked when `destinationState` was different too.
