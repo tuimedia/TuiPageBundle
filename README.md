@@ -9,7 +9,7 @@ An API for managing rich, versioned, multilingual content.
 
 ## Requirements
 
-* PHP 8.1 or later (tested on 8.4 and 8.5)
+* PHP 8.2 or later
 * Symfony 6.4, 7 or 8
 * Doctrine ORM 2.20+ or 3, with DBAL 3.8+ or 4
 * Typesense 0.22-29

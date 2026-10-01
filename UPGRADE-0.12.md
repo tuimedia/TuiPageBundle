@@ -1,10 +1,10 @@
 # Upgrading from 0.11 to 0.12
 
-0.12 brings support for PHP 8.4 and 8.5, Symfony 7 and 8, Doctrine ORM 3 and DBAL 4, and drops Symfony 5.4 and DBAL 2. Most of that is just a `composer update`, but one column changes storage format, and that needs a short data conversion before you run your migrations.
+0.12 brings support for PHP 8.4 and 8.5, Symfony 7 and 8, Doctrine ORM 3 and DBAL 4, and drops PHP 8.1, Symfony 5.4 and DBAL 2. Most of that is just a `composer update`, but one column changes storage format, and that needs a short data conversion before you run your migrations.
 
 ## TL;DR checklist
 
-* Check your app is on Symfony 6.4 or later, Doctrine ORM 2.20 or later, and DBAL 3.8 or later.
+* Check your app is on PHP 8.2 or later, Symfony 6.4 or later, Doctrine ORM 2.20 or later, and DBAL 3.8 or later.
 * Back up your `PageData` table (`tui_page_data`, or whatever your entity maps to).
 * `composer update tuimedia/page-bundle` (plus any Symfony or Doctrine upgrades you're doing at the same time).
 * Run `bin/console pages:convert-available-languages` **before** running any migrations. Try it with `--dry-run` first.
@@ -62,6 +62,7 @@ If you're moving to DBAL 4 at the same time, the diff will probably also drop th
 
 ## Dependencies
 
+* PHP 8.2 or later. PHP 8.1 reached end of life on 31 December 2025.
 * Symfony 6.4, 7.x or 8.x. Symfony 5.4 is no longer supported.
 * Doctrine ORM 2.20+ or 3.x, DBAL 3.8+ or 4.x, DoctrineBundle 2.12+ or 3.x. DBAL 2 is no longer supported.
 * `doctrine/doctrine-bundle`, `symfony/yaml` and `psr/http-client` are now declared requirements. The bundle always needed them; they were just assumed to be installed.
