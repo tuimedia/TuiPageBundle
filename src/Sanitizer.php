@@ -147,10 +147,10 @@ class Sanitizer
 
             // Look for a matching patternProperty schema
             if (!$propSchema && isset($schema->patternProperties)) {
-                foreach ($schema->patternProperties as $pattern => $schema) {
+                foreach ($schema->patternProperties as $pattern => $patternSchema) {
                     $pattern = sprintf('!%s!', str_replace('!', '\!', (string) $pattern));
                     if (preg_match($pattern, $prop)) {
-                        $propSchema = $schema;
+                        $propSchema = $patternSchema;
                         break;
                     }
                 }
@@ -188,7 +188,11 @@ class Sanitizer
         }
 
         if ($type === 'number') {
-            return filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+            if (is_int($value) || is_float($value)) {
+                return $value;
+            }
+
+            return (float) filter_var($value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
         }
 
         if ($type === 'integer') {

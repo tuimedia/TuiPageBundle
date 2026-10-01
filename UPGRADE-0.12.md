@@ -125,4 +125,6 @@ tui_page:
 * Leaving `valid_languages` unset (or empty) now allows every language, as the documentation always said. Before, it rejected every language on translation export and import.
 * An app with no `search_hosts` configured no longer fails when saving a page. The Typesense client is now only created when something actually uses search.
 * The translation import endpoint (`PUT /translations/{slug}`) now returns the saved page. Before, the response carried the placeholder revision `ffffffff-ffff-ffff-ffff-ffffffffffff` instead of the real one.
+* Component properties with `"type": "number"` are now saved as numbers. 0.11 saved them as strings (`"4.5"`), and pages saved before the upgrade keep the string until they're next saved, so front ends should accept both for a while.
+* `patternProperties` in component schemas now sanitise every matching property. Before, only the first match was cleaned, so markup may now be stripped from properties that used to keep it.
 * Importing a translation with `destination=new&destinationSlug=…` now saves the new page under that slug. Before, it kept the original slug, so the import only worked when `destinationState` was different too.

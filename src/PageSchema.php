@@ -154,7 +154,7 @@ class PageSchema
             'keywordArgs' => $error->keywordArgs(),
         ] : $error, $errors);
 
-        $error['detail'] = implode('. ', array_map(fn ($error) => is_array($error) ? sprintf('[%s]: invalid %s.', $error['path'], $error['keyword']) : $error, $error['errors']));
+        $error['detail'] .= implode('. ', array_map(fn ($error) => is_array($error) ? sprintf('[%s]: invalid %s.', $error['path'], $error['keyword']) : $error, $error['errors']));
 
         return $error;
     }
