@@ -11,7 +11,8 @@ Read [UPGRADE-0.12.md](UPGRADE-0.12.md) before upgrading: there's a data convers
 - Supports Doctrine ORM 2.20+ and 3.x, DBAL 3.8+ and 4.x, and DoctrineBundle 2.12+ and 3.x. DBAL 2 is no longer supported.
 - `PageData::$availableLanguages` is now stored as JSON instead of with Doctrine's `array` type (removed in DBAL 4). Existing rows must be converted with `pages:convert-available-languages` before running the schema migration.
 - `doctrine/doctrine-bundle`, `symfony/yaml`, `psr/http-client` and the Symfony components the bundle uses directly are now declared requirements.
-- Minimum versions raised to `opis/json-schema` ^1.2 and `voku/anti-xss` ^4.1.43.
+- Requires `opis/json-schema` ^2.6 (was ^1.2), and `voku/anti-xss` ^4.1.43. If your app requires `opis/json-schema` ^1 itself, it needs to move to 2 as well.
+- `PageSchema::getSchemaObjectForBlock()` now returns the decoded schema as a plain `object`, as opis 2 has no `Schema::fromJsonString()`. `getSchemaForBlock()` is unchanged.
 - The `access_roles` defaults now apply when the block is left out of your config, and `history` defaults to `[ROLE_ADMIN]` as documented. Before, leaving the block out meant no role checks at all, and `history` was open unless you set it. Writes and history now need `ROLE_ADMIN` (and SecurityBundle) unless you configure otherwise. See the upgrade guide to keep the old behaviour.
 
 ### ADDED
@@ -31,10 +32,12 @@ Read [UPGRADE-0.12.md](UPGRADE-0.12.md) before upgrading: there's a data convers
 - In a component schema with `patternProperties`, only the first matching property was sanitised. The sanitiser reused the schema variable as its loop variable, so every later property in that object was checked against the wrong schema and usually left as it was.
 - Properties with `"type": "number"` were saved as strings (`4.5` became `"4.5"`). They now stay numbers.
 - Validation errors for a component lost their 'Component … in language …' prefix, so a failure in a translation didn't say which language it was in.
+- Translation imports weren't sanitised. Imported text was validated against the schemas and saved as it was, and validation treats `text/html` as plain text, so a translator's `<script>` went straight into the page. Imports now go through the same sanitiser as page create and edit.
 - Removed the `doctrine.event_subscriber` tag on `SearchSubscriber`. Its `#[AsDoctrineListener]` attributes already register it.
 
 ### CHANGED
 
+- Validation errors keep the same `path`, `keyword` and `keywordArgs` as before the opis 2 upgrade. The one addition: `additionalProperties` errors now list the offending properties in `keywordArgs.properties`.
 - Dev tooling updated to PHPStan 2 (now at level 6) and Rector 2.
 - Added a PHPUnit test suite and a GitHub Actions matrix covering PHP 8.3 to 8.5, Symfony 6.4 to 8, Doctrine ORM 2 and 3, DBAL 3 and 4, and SQLite, PostgreSQL, MySQL and MariaDB. It fails on any deprecation the bundle causes.
 
