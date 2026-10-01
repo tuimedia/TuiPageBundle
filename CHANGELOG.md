@@ -28,6 +28,9 @@ Read [UPGRADE-0.12.md](UPGRADE-0.12.md) before upgrading: there's a data convers
 - `PageDataRepository::getAllLanguages()` no longer uses `SELECT DISTINCT` on a JSON column, which PostgreSQL can't compare.
 - The translation import endpoint (`PUT /translations/{slug}`) returned the temporary placeholder revision `ffffffff-ffff-ffff-ffff-ffffffffffff` in its response. It now returns the saved page, with its real revision.
 - Importing a translation into a new page (`destination=new`) ignored `destinationSlug` and kept the original slug, while the duplicate-page check looked at the requested one. Asking for a new slug in the same state failed on the database's unique constraint. The new page now gets the requested slug, and the check tests it.
+- In a component schema with `patternProperties`, only the first matching property was sanitised. The sanitiser reused the schema variable as its loop variable, so every later property in that object was checked against the wrong schema and usually left as it was.
+- Properties with `"type": "number"` were saved as strings (`4.5` became `"4.5"`). They now stay numbers.
+- Validation errors for a component lost their 'Component … in language …' prefix, so a failure in a translation didn't say which language it was in.
 - Removed the `doctrine.event_subscriber` tag on `SearchSubscriber`. Its `#[AsDoctrineListener]` attributes already register it.
 
 ### CHANGED
