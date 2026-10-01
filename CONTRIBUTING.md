@@ -65,7 +65,10 @@ DATABASE_URL="postgresql://postgres:pw@127.0.0.1:5432/app?serverVersion=17&chars
 
 The suite fails on any deprecation the bundle causes, whether it's raised in `src/` or
 in a library the bundle called. Deprecations libraries raise among themselves are
-ignored. If a test fails with a deprecation, the report names the file and line.
+ignored. If a test fails with a deprecation, the report names the file and line. That needs
+PHPUnit 11.5 or later; on PHP 8.1, which only gets PHPUnit 10, run
+`vendor/bin/phpunit -c tests/phpunit-10.xml` instead, which runs the same tests without the
+deprecation check.
 
 The test app lives in `tests/App`: a small kernel, entities that extend the bundle's
 (with an extra `tagData` property, as real apps tend to have), a search transformer and
