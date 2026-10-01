@@ -39,6 +39,7 @@ Read [UPGRADE-0.12.md](UPGRADE-0.12.md) before upgrading: there's a data convers
 
 - Validation errors keep the same `path`, `keyword` and `keywordArgs` as before the opis 2 upgrade. The one addition: `additionalProperties` errors now list the offending properties in `keywordArgs.properties`.
 - Dev tooling updated to PHPStan 2 (now at level 6) and Rector 2.
+- Added a PHPUnit test suite and a GitHub Actions matrix covering PHP 8.3 to 8.5, Symfony 6.4 to 8, Doctrine ORM 2 and 3, DBAL 3 and 4, and SQLite, PostgreSQL, MySQL and MariaDB. It fails on any deprecation the bundle causes.
 
 ## 0.11.5
 

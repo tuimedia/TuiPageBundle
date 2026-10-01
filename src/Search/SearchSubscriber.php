@@ -169,9 +169,7 @@ class SearchSubscriber
     private function createCollectionIfNotExists(string $name): void
     {
         // Load the list of collections if we haven't already
-        if (is_null($this->collections)) {
-            $this->collections = array_map(fn ($collection) => $collection['name'], $this->searcher->listCollections());
-        }
+        $this->collections ??= array_map(fn ($collection) => $collection['name'], $this->searcher->listCollections());
 
         // Create the index if it's not in the list
         if (!in_array($name, $this->collections)) {

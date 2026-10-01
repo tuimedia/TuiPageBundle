@@ -1,0 +1,26 @@
+{
+  "id": null,
+  "slug": "hello-world",
+  "state": "live",
+  "tagData": [{"id": "tag-1", "title": "Example tag"}],
+  "pageData": {
+    "defaultLanguage": "en_GB",
+    "availableLanguages": ["en_GB"],
+    "metadata": {"title": "Hello <b>world</b>", "nested": {"x": "<i>y</i>"}},
+    "content": {
+      "schemaVersion": 2,
+      "layout": ["row1"],
+      "blocks": {
+        "row1": {"id": "row1", "component": "Text", "languages": ["en_GB"], "blocks": ["blk1"]},
+        "blk1": {"id": "blk1", "component": "Text", "languages": ["en_GB"]}
+      },
+      "langData": {
+        "en_GB": {
+          "metadata": {"title": "English title"},
+          "row1": {"title": "Row title <script>x</script>"},
+          "blk1": {"title": "Block title", "copy": "<p>Hello <strong>there</strong><script>alert(1)</script></p>", "count": 3}
+        }
+      }
+    }
+  }
+}

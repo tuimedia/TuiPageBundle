@@ -34,6 +34,7 @@ jobs:
   mirror:
     name: Push branches and tags to Bitbucket
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Check the token is configured
         id: guard
@@ -49,8 +50,9 @@ jobs:
 
       - name: Check out the full history
         if: steps.guard.outputs.configured == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 0
 
       - name: Mirror to Bitbucket
