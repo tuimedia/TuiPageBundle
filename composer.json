@@ -24,7 +24,7 @@
         "doctrine/dbal": "^3.8|^4.0",
         "doctrine/doctrine-bundle": "^2.12|^3.0",
         "doctrine/orm": "^2.20|^3.3",
-        "opis/json-schema": "^1.2",
+        "opis/json-schema": "^2.6",
         "psr/http-client": "^1.0",
         "symfony/cache": "^6.4|^7.0|^8.0",
         "symfony/config": "^6.4|^7.0|^8.0",

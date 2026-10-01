@@ -2,12 +2,7 @@
 
 namespace Tui\PageBundle;
 
-use Opis\JsonSchema\JsonPointer;
-use Opis\JsonSchema\MediaTypeContainer;
-use Opis\JsonSchema\MediaTypes\Text;
-use Opis\JsonSchema\Schema;
-use Opis\JsonSchema\ValidationError;
-use Opis\JsonSchema\ValidationResult;
+use Opis\JsonSchema\Errors\ValidationError;
 use Opis\JsonSchema\Validator;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 
@@ -31,26 +26,17 @@ class PageSchema
     public function validate(string $data): ?array
     {
         $data = json_decode($data, null, 512, JSON_THROW_ON_ERROR);
-        $schema = Schema::fromJsonString((string) file_get_contents($this->schemaPath));
 
-        $validator = new Validator();
-        // omg hax, just use the existing plain text type for html
-        $mediaType = $validator->getMediaType();
-        if ($mediaType instanceof MediaTypeContainer) {
-            $mediaType->add('text/html', new Text());
-            foreach ($this->customSanitizers as $sanitizer) {
-                $mediaType->add($sanitizer->getMediaType(), new Text());
-            }
+        $result = $this->createValidator()->validate($data, $this->decodeSchema($this->schemaPath));
+
+        if ($result->hasError()) {
+            return $this->formatSchemaErrors([$result->error()]);
         }
 
-        /** @var ValidationResult $result */
-        $result = $validator->schemaValidation($data, $schema);
-
-        if ($result->hasErrors()) {
-            return $this->formatSchemaErrors($result->getErrors());
-        }
-
-        // Validate components against their schemas
+        // Validate components against their schemas. Each file gets its own validator, because opis
+        // caches schemas by $id and would check a copy-pasted schema against the original
+        /** @var array<string, array{Validator, object}> $componentValidators */
+        $componentValidators = [];
         foreach ($data->pageData->content->blocks as $block) {
             if (!array_key_exists($block->component, $this->schemas)) {
                 return $this->formatSchemaErrors([
@@ -64,13 +50,16 @@ class PageSchema
 
                 // Check resulting object against the component schema
                 try {
-                    $schema = $this->getSchemaObjectForBlock($resolvedBlock);
+                    [$validator, $schema] = $componentValidators[$this->schemas[$block->component]] ??= [
+                        $this->createValidator(),
+                        $this->getSchemaObjectForBlock($resolvedBlock),
+                    ];
                 } catch (\Exception $e) {
                     return $this->formatSchemaErrors([$e->getMessage()]);
                 }
-                $result = $validator->schemaValidation($resolvedBlock, $schema);
-                if ($result->hasErrors()) {
-                    return $this->formatSchemaErrors($result->getErrors(), $resolvedBlock, $language);
+                $result = $validator->validate($resolvedBlock, $schema);
+                if ($result->hasError()) {
+                    return $this->formatSchemaErrors([$result->error()], $resolvedBlock, $language);
                 }
             }
         }
@@ -78,7 +67,23 @@ class PageSchema
         return null;
     }
 
-    public function getSchemaObjectForBlock(\stdClass $block): Schema
+    private function createValidator(): Validator
+    {
+        $validator = new Validator();
+
+        // Sanitising handles these, so for validation they're just strings
+        $mediaTypes = $validator->parser()->getMediaTypeResolver();
+        if ($mediaTypes) {
+            $mediaTypes->registerCallable('text/html', static fn (): bool => true);
+            foreach ($this->customSanitizers as $sanitizer) {
+                $mediaTypes->registerCallable($sanitizer->getMediaType(), static fn (): bool => true);
+            }
+        }
+
+        return $validator;
+    }
+
+    public function getSchemaObjectForBlock(\stdClass $block): object
     {
         if (!array_key_exists($block->component, $this->schemas)) {
             throw new \Exception(vsprintf('No schema defined for component %s', [$block->component]));
@@ -88,14 +93,12 @@ class PageSchema
             throw new \Exception(vsprintf('Component schema for %s defined but not found', [$block->component]));
         }
 
-        return Schema::fromJsonString((string) file_get_contents($this->schemas[$block->component]));
+        return $this->decodeSchema($this->schemas[$block->component]);
     }
 
     public function getSchemaForBlock(\stdClass $block): object
     {
-        $schema = $this->getSchemaObjectForBlock($block);
-
-        return $this->deepResolveSchema($schema->resolve());
+        return $this->deepResolveSchema($this->getSchemaObjectForBlock($block));
     }
 
     protected function resolveBlockForLanguage(\stdClass $data, string $id, string $language): \stdClass
@@ -148,23 +151,46 @@ class PageSchema
             $error['component'] = $block;
         }
 
-        $error['errors'] = array_map(fn ($error) => $error instanceof ValidationError ? [
-            'path' => implode('.', $error->dataPointer()),
-            'keyword' => $error->keyword(),
-            'keywordArgs' => $error->keywordArgs(),
-        ] : $error, $errors);
+        $error['errors'] = array_map(function ($error) {
+            if (!$error instanceof ValidationError) {
+                return $error;
+            }
+
+            // opis nests the failure under the keywords that led to it (properties, items, $ref…), so report the innermost one
+            while ($error->subErrors()) {
+                $error = $error->subErrors()[0];
+            }
+
+            return [
+                'path' => implode('.', $error->data()->fullPath()),
+                'keyword' => $error->keyword(),
+                'keywordArgs' => $this->formatKeywordArgs($error),
+            ];
+        }, $errors);
 
         $error['detail'] .= implode('. ', array_map(fn ($error) => is_array($error) ? sprintf('[%s]: invalid %s.', $error['path'], $error['keyword']) : $error, $error['errors']));
 
         return $error;
     }
 
+    /**
+     * Keep the keywordArgs API clients already read, adding anything new opis reports.
+     */
+    private function formatKeywordArgs(ValidationError $error): array
+    {
+        $args = $error->args();
+
+        return match ($error->keyword()) {
+            'enum' => ['expected' => $error->schema()->info()->data()->enum ?? []] + $args,
+            'type' => ['expected' => $args['expected'] ?? null, 'used' => $args['type'] ?? null],
+            'required' => ['missing' => $args['missing'][0] ?? null],
+            default => $args,
+        };
+    }
+
     public function getResolvedPageSchema(): object
     {
-        $schema = Schema::fromJsonString((string) file_get_contents($this->schemaPath));
-        $resolvedSchema = $this->deepResolveSchema($schema->resolve());
-
-        return $resolvedSchema;
+        return $this->deepResolveSchema($this->decodeSchema($this->schemaPath));
     }
 
     protected function deepResolveSchema(object $schema, ?object $rootSchema = null): object
@@ -175,10 +201,44 @@ class PageSchema
 
         foreach ((array) $schema as $prop => $value) {
             if (is_object($value) && isset($value->{'$ref'})) {
-                $schema->$prop = JsonPointer::getDataByPointer($rootSchema, substr((string) $value->{'$ref'}, 1));
+                $schema->$prop = $this->resolvePointer($rootSchema, (string) $value->{'$ref'});
             } elseif (is_object($value)) {
                 $schema->$prop = $this->deepResolveSchema($value, $rootSchema);
             }
+        }
+
+        return $schema;
+    }
+
+    /**
+     * Follow a local reference such as #/definitions/link.
+     */
+    private function resolvePointer(object $rootSchema, string $ref): mixed
+    {
+        if (!str_starts_with($ref, '#')) {
+            throw new \RuntimeException(sprintf('Only local schema references are supported, got %s', $ref));
+        }
+
+        $value = $rootSchema;
+        foreach (array_filter(explode('/', substr($ref, 1)), static fn (string $part): bool => $part !== '') as $part) {
+            $part = strtr(rawurldecode($part), ['~1' => '/', '~0' => '~']);
+            if (is_object($value) && property_exists($value, $part)) {
+                $value = $value->$part;
+            } elseif (is_array($value) && array_key_exists($part, $value)) {
+                $value = $value[$part];
+            } else {
+                throw new \RuntimeException(sprintf('Unable to resolve schema reference %s', $ref));
+            }
+        }
+
+        return $value;
+    }
+
+    private function decodeSchema(string $path): object
+    {
+        $schema = json_decode((string) file_get_contents($path), null, 512, JSON_THROW_ON_ERROR);
+        if (!is_object($schema)) {
+            throw new \RuntimeException(sprintf('Schema %s is not a JSON object', $path));
         }
 
         return $schema;

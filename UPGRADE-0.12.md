@@ -10,6 +10,7 @@
 * Run `bin/console pages:convert-available-languages` **before** running any migrations. Try it with `--dry-run` first.
 * Run `bin/console doctrine:migrations:diff`, check the migration (Postgres needs one line edited, see below), then run it.
 * If your routes import the bundle's controllers with `type: annotation`, change it to `type: attribute`.
+* If your app requires `opis/json-schema` ^1 directly, bump it to ^2.6.
 * Check your `access_roles` config. If it's missing or incomplete, endpoints that used to be open now need `ROLE_ADMIN` (see below).
 
 ## `availableLanguages` is now stored as JSON
@@ -67,7 +68,9 @@ If you're moving to DBAL 4 at the same time, the diff will probably also drop th
 * Symfony 6.4, 7.x or 8.x. Symfony 5.4 is no longer supported.
 * Doctrine ORM 2.20+ or 3.x, DBAL 3.8+ or 4.x, DoctrineBundle 2.12+ or 3.x. DBAL 2 is no longer supported.
 * `doctrine/doctrine-bundle`, `symfony/yaml` and `psr/http-client` are now declared requirements. The bundle always needed them; they were just assumed to be installed.
-* The minimum versions of `opis/json-schema` (now ^1.2) and `voku/anti-xss` (now ^4.1.43) have gone up. Older releases either lack methods the bundle calls or raise deprecation notices on PHP 8.4.
+* `opis/json-schema` 2.6 or later. 1.x is replaced: if your app requires `opis/json-schema` ^1 directly, bump it to ^2.6. Your component schemas don't need changing.
+* `voku/anti-xss` 4.1.43 or later. Older releases raise deprecation notices on PHP 8.4.
+* If you call `PageSchema::getSchemaObjectForBlock()` yourself, it now returns the decoded schema as a plain `object` instead of an opis 1 `Schema`.
 
 If you're upgrading to ORM 3 as well, bear in mind it only reads mapping from PHP attributes (or XML), not docblock annotations. The README's entity examples now use attributes.
 
@@ -127,4 +130,6 @@ tui_page:
 * The translation import endpoint (`PUT /translations/{slug}`) now returns the saved page. Before, the response carried the placeholder revision `ffffffff-ffff-ffff-ffff-ffffffffffff` instead of the real one.
 * Component properties with `"type": "number"` are now saved as numbers. 0.11 saved them as strings (`"4.5"`), and pages saved before the upgrade keep the string until they're next saved, so front ends should accept both for a while.
 * `patternProperties` in component schemas now sanitise every matching property. Before, only the first match was cleaned, so markup may now be stripped from properties that used to keep it.
+* Translation imports are now sanitised like page create and edit. Plain-text fields lose any markup and HTML fields are cleaned, so a translator can no longer slip a `<script>` into a page through an XLIFF file.
+* Validation errors (422) look the same as before. The `path`, `keyword` and `keywordArgs` are unchanged, except that `additionalProperties` errors now name the offending properties in `keywordArgs.properties`.
 * Importing a translation with `destination=new&destinationSlug=…` now saves the new page under that slug. Before, it kept the original slug, so the import only worked when `destinationState` was different too.
