@@ -1,5 +1,11 @@
 # Changes
 
+## 0.12.1
+
+### CHANGED
+
+- Allows `typesense/typesense-php` 6. The bundle only uses collections and documents, which v6 leaves alone. v6 does change `$client->analytics` to Typesense 30's new analytics API (the old one is now `$client->analyticsV1`), so if your app calls the analytics API and only gets the SDK through this bundle, require the version you've tested with, e.g. `"typesense/typesense-php": "^5.0"`, before running `composer update`.
+
 ## 0.12.0
 
 Read [UPGRADE-0.12.md](UPGRADE-0.12.md) before upgrading: there's a data conversion to run before your migrations.
