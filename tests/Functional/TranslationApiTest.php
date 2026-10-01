@@ -28,7 +28,7 @@ class TranslationApiTest extends FunctionalTestCase
     public function testImportIntoTheOriginalPageAddsTheLanguage(): void
     {
         $this->bootApp();
-        $this->createPage(self::fixture('page.json'));
+        $original = $this->createPage(self::fixture('page.json'));
 
         [$status, $page] = $this->request('PUT', '/api/translations/hello-world?state=live&destination=original', self::translate($this->exportXliff('fr')));
         self::assertSame(201, $status, self::describe($page));
@@ -40,6 +40,8 @@ class TranslationApiTest extends FunctionalTestCase
         self::assertSame('Traduit', $reloaded['pageData']['content']['langData']['fr']['blk1']['title']);
         self::assertMatchesRegularExpression('/^[0-9a-f-]{36}$/', $reloaded['pageData']['revision']);
         self::assertNotSame('ffffffff-ffff-ffff-ffff-ffffffffffff', $reloaded['pageData']['revision'], 'The placeholder revision used during validation is not stored');
+        self::assertSame($reloaded['pageData']['revision'], $page['pageData']['revision'], 'The import response describes the saved revision');
+        self::assertSame($original['pageData']['revision'], $page['pageData']['previousRevision']);
     }
 
     public function testImportIntoANewState(): void
@@ -53,6 +55,8 @@ class TranslationApiTest extends FunctionalTestCase
         [$status, $draft] = $this->request('GET', '/api/pages/hello-world?state=draft');
         self::assertSame(200, $status);
         self::assertSame('Traduit', $draft['pageData']['content']['langData']['fr']['blk1']['title']);
+        self::assertSame($draft['pageData']['revision'], $body['pageData']['revision'], 'The import response describes the saved revision');
+        self::assertSame('draft', $body['state']);
 
         [, $live] = $this->request('GET', '/api/pages/hello-world?state=live');
         self::assertSame(['en_GB'], $live['pageData']['availableLanguages'], 'The original page is untouched');

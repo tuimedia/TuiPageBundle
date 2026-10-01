@@ -69,7 +69,10 @@ ignored. If a test fails with a deprecation, the report names the file and line.
 
 The test app lives in `tests/App`: a small kernel, entities that extend the bundle's
 (with an extra `tagData` property, as real apps tend to have), a search transformer and
-custom sanitisers. Fixtures are in `tests/fixtures`. `extended-page.json` is a real
+custom sanitisers. Every endpoint is open unless a test boots it with
+`default_access_roles`, which uses the bundle's defaults and two HTTP basic users,
+`admin` and `editor` (password `pw`). Pass `as: 'admin'` to `request()` to authenticate.
+Fixtures are in `tests/fixtures`. `extended-page.json` is a real
 page with its text swapped for lorem ipsum, and `extended-page.response.json` is what
 0.11.5 returned for it, so the API output can be checked byte for byte.
 

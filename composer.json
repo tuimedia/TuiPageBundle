@@ -63,7 +63,11 @@
         "phpstan/phpstan-doctrine": "^2.0",
         "rector/rector": "^2.2",
         "phpunit/phpunit": "^12.2",
-        "symfony/browser-kit": "^6.4|^7.0|^8.0"
+        "symfony/browser-kit": "^6.4|^7.0|^8.0",
+        "symfony/security-bundle": "^6.4|^7.0|^8.0"
+    },
+    "suggest": {
+        "symfony/security-bundle": "Needed for the default access_roles, which require ROLE_ADMIN for writes and history"
     },
     "scripts": {
         "test": "phpunit",

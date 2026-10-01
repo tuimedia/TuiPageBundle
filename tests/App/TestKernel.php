@@ -6,6 +6,7 @@ use Composer\InstalledVersions;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
+use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
@@ -20,6 +21,8 @@ use Tui\PageBundle\TuiPageBundle;
  *  - search: bool, index into the Typesense server at TYPESENSE_URL
  *  - search_index: string, collection prefix (lets each test use its own collections)
  *  - valid_languages: string[]
+ *  - default_access_roles: bool, leave access_roles out of the config so the bundle's defaults apply
+ *    (otherwise every endpoint is open)
  *  - cache_salt: string, forces a freshly compiled container
  */
 class TestKernel extends Kernel
@@ -28,11 +31,11 @@ class TestKernel extends Kernel
 
     public const COMPONENTS = ['Text', 'ArticleGrid', 'PageHero', 'PageText', 'PageNumberedList', 'PageQuote', 'PageAccordionItem', 'PageBanner', 'PageDownloads', 'PageTable'];
 
-    /** @var array{search?: bool, search_index?: string, valid_languages?: string[], cache_salt?: string} */
+    /** @var array{search?: bool, search_index?: string, valid_languages?: string[], default_access_roles?: bool, cache_salt?: string} */
     private array $options;
 
     /**
-     * @param array{search?: bool, search_index?: string, valid_languages?: string[], cache_salt?: string} $options
+     * @param array{search?: bool, search_index?: string, valid_languages?: string[], default_access_roles?: bool, cache_salt?: string} $options
      */
     public function __construct(string $environment, bool $debug, array $options = [])
     {
@@ -50,6 +53,7 @@ class TestKernel extends Kernel
     {
         yield new FrameworkBundle();
         yield new DoctrineBundle();
+        yield new SecurityBundle();
         yield new TuiPageBundle();
     }
 
@@ -78,13 +82,16 @@ class TestKernel extends Kernel
     {
         $container->extension('framework', $this->frameworkConfig());
         $container->extension('doctrine', $this->doctrineConfig());
+        $container->extension('security', $this->securityConfig());
 
         $tuiPage = [
             'page_class' => Entity\Page::class,
             'page_data_class' => Entity\PageData::class,
             'components' => array_fill_keys(self::COMPONENTS, ['schema' => '%kernel.project_dir%/schemas/Generic.schema.json']),
-            'access_roles' => array_fill_keys(['list', 'delete', 'edit', 'create', 'import', 'export', 'history', 'retrieve', 'search'], []),
         ];
+        if (!($this->options['default_access_roles'] ?? false)) {
+            $tuiPage['access_roles'] = array_fill_keys(['list', 'delete', 'edit', 'create', 'import', 'export', 'history', 'retrieve', 'search'], []);
+        }
         $tuiPage['components']['Text'] = ['schema' => '%kernel.project_dir%/schemas/Text.schema.json'];
         if ($this->options['search'] ?? false) {
             $tuiPage['search_hosts'] = [(string) (getenv('TYPESENSE_URL') ?: 'http://127.0.0.1:8108')];
@@ -109,6 +116,22 @@ class TestKernel extends Kernel
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
         $routes->import('@TuiPageBundle/Controller/', 'attribute')->prefix('api');
+    }
+
+    /**
+     * HTTP basic auth against two in-memory users, `admin` and `editor` (password `pw`). Stateless, so
+     * tests authenticate per request with PHP_AUTH_USER/PHP_AUTH_PW and no session is needed.
+     */
+    private function securityConfig(): array
+    {
+        return [
+            'password_hashers' => [\Symfony\Component\Security\Core\User\InMemoryUser::class => 'plaintext'],
+            'providers' => ['users' => ['memory' => ['users' => [
+                'admin' => ['password' => 'pw', 'roles' => ['ROLE_ADMIN']],
+                'editor' => ['password' => 'pw', 'roles' => ['ROLE_USER']],
+            ]]]],
+            'firewalls' => ['main' => ['stateless' => true, 'http_basic' => null]],
+        ];
     }
 
     /**

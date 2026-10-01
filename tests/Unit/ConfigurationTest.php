@@ -43,6 +43,30 @@ class ConfigurationTest extends TestCase
         self::assertSame(['Text' => '/schemas/Text.schema.json'], $container->getParameter('tui_page.schemas'));
     }
 
+    public function testAccessRolesDefaultWhenOmitted(): void
+    {
+        $container = new ContainerBuilder();
+        (new TuiPageExtension())->load([self::MINIMAL], $container);
+
+        foreach (['list', 'retrieve', 'export', 'search'] as $check) {
+            self::assertSame([], $container->getParameter('tui_page.access_roles.' . $check), $check);
+        }
+        foreach (['create', 'edit', 'delete', 'import', 'history'] as $check) {
+            self::assertSame(['ROLE_ADMIN'], $container->getParameter('tui_page.access_roles.' . $check), $check);
+        }
+    }
+
+    public function testAccessRolesFillInKeysLeftOut(): void
+    {
+        $container = new ContainerBuilder();
+        (new TuiPageExtension())->load([self::MINIMAL + ['access_roles' => ['edit' => 'ROLE_EDITOR', 'delete' => []]]], $container);
+
+        self::assertSame(['ROLE_EDITOR'], $container->getParameter('tui_page.access_roles.edit'));
+        self::assertSame([], $container->getParameter('tui_page.access_roles.delete'));
+        self::assertSame(['ROLE_ADMIN'], $container->getParameter('tui_page.access_roles.history'));
+        self::assertSame([], $container->getParameter('tui_page.access_roles.list'));
+    }
+
     public function testSearchIsEnabledByConfiguringAHost(): void
     {
         $container = new ContainerBuilder();

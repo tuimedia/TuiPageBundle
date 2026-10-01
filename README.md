@@ -65,7 +65,7 @@ framework:
 
 ## Securing endpoints
 
-The default configuration requires that the user have the ROLE_ADMIN role to access any of the write endpoints. You can configure different role (or roles) for each endpoint in `config/packages/tui_page.yaml`. The default parameters are shown below:
+The default configuration requires that the user have the ROLE_ADMIN role to access any of the write endpoints. You can configure different role (or roles) for each endpoint in `config/packages/tui_page.yaml`. These defaults apply even if you leave `access_roles` out, so you need SecurityBundle installed unless you set the role lists to `[]`. The default parameters are shown below:
 
 ```yaml
 tui_page:

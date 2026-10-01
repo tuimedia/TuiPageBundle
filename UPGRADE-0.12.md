@@ -10,6 +10,7 @@
 * Run `bin/console pages:convert-available-languages` **before** running any migrations. Try it with `--dry-run` first.
 * Run `bin/console doctrine:migrations:diff`, check the migration (Postgres needs one line edited, see below), then run it.
 * If your routes import the bundle's controllers with `type: annotation`, change it to `type: attribute`.
+* Check your `access_roles` config. If it's missing or incomplete, endpoints that used to be open now need `ROLE_ADMIN` (see below).
 
 ## `availableLanguages` is now stored as JSON
 
@@ -82,7 +83,45 @@ page_controllers:
 
 change `type: annotation` to `type: attribute`. That works on Symfony 6.4 too, so you can do it before upgrading.
 
+## Access roles now default to locked down
+
+The README always said the write endpoints and history need `ROLE_ADMIN` by default, but that only held if your config had an `access_roles` block. Leave the block out and the bundle did no role checks at all. And even with the block, `history` was open unless you set it yourself.
+
+0.12 applies the documented defaults either way:
+
+```yaml
+tui_page:
+  access_roles:
+    list: []
+    retrieve: []
+    export: []
+    search: []
+    edit: [ROLE_ADMIN]
+    history: [ROLE_ADMIN]
+    create: [ROLE_ADMIN]
+    import: [ROLE_ADMIN]
+    delete: [ROLE_ADMIN]
+```
+
+If your config sets every key, nothing changes. Otherwise:
+
+* **No `access_roles` block:** creating, editing, deleting and importing pages, and reading history, now need `ROLE_ADMIN`. If SecurityBundle isn't installed, those requests fail with a 500 ('The SecurityBundle is not registered…') rather than going through unchecked.
+* **A block that leaves out `history`:** page history now needs `ROLE_ADMIN`.
+
+If you really were relying on open endpoints (because your firewall's `access_control` rules already guard them, say), set the keys back to empty lists:
+
+```yaml
+tui_page:
+  access_roles:
+    edit: []
+    history: []
+    create: []
+    import: []
+    delete: []
+```
+
 ## Behaviour changes
 
 * Leaving `valid_languages` unset (or empty) now allows every language, as the documentation always said. Before, it rejected every language on translation export and import.
 * An app with no `search_hosts` configured no longer fails when saving a page. The Typesense client is now only created when something actually uses search.
+* The translation import endpoint (`PUT /translations/{slug}`) now returns the saved page. Before, the response carried the placeholder revision `ffffffff-ffff-ffff-ffff-ffffffffffff` instead of the real one.

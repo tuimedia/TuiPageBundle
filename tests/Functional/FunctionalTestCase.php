@@ -24,7 +24,7 @@ abstract class FunctionalTestCase extends WebTestCase
     /**
      * Boot the app with the given TestKernel options and an empty database.
      *
-     * @param array{search?: bool, search_index?: string, valid_languages?: string[]} $options
+     * @param array{search?: bool, search_index?: string, valid_languages?: string[], default_access_roles?: bool} $options
      */
     protected function bootApp(array $options = []): void
     {
@@ -49,11 +49,17 @@ abstract class FunctionalTestCase extends WebTestCase
     }
 
     /**
+     * @param string|null $as a TestKernel user to authenticate as (`admin` or `editor`), or null for anonymous
+     *
      * @return array{int, mixed} status code and decoded JSON body (or the raw body if it isn't JSON)
      */
-    protected function request(string $method, string $uri, string|array|null $body = null): array
+    protected function request(string $method, string $uri, string|array|null $body = null, ?string $as = null): array
     {
-        $this->client->request($method, $uri, [], [], ['CONTENT_TYPE' => 'application/json'], is_array($body) ? json_encode($body, JSON_THROW_ON_ERROR) : $body);
+        $server = ['CONTENT_TYPE' => 'application/json'];
+        if ($as !== null) {
+            $server += ['PHP_AUTH_USER' => $as, 'PHP_AUTH_PW' => 'pw'];
+        }
+        $this->client->request($method, $uri, [], [], $server, is_array($body) ? json_encode($body, JSON_THROW_ON_ERROR) : $body);
         $response = $this->client->getResponse();
         $content = (string) $response->getContent();
 

@@ -3,7 +3,6 @@
 namespace Tui\PageBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
@@ -158,10 +157,9 @@ class TranslationController extends AbstractController
             ], 422);
         }
         $groups = $this->getTuiPageSerializerGroups('import_response', ['pageGet']);
-        $pageJson = $this->generateTuiPageJson($page, $serializer, $groups);
 
         // Validate input
-        $errors = $pageSchema->validate($pageJson);
+        $errors = $pageSchema->validate($this->generateTuiPageJson($page, $serializer, $groups));
         if ($errors) {
             return $this->json($errors, 422);
         }
@@ -172,6 +170,6 @@ class TranslationController extends AbstractController
 
         $pageRepository->save($page);
 
-        return new JsonResponse($pageJson, 201, [], true);
+        return $this->generateTuiPageResponse($page, $serializer, $groups, 201);
     }
 }
