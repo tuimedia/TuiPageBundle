@@ -92,6 +92,25 @@ class TranslationApiTest extends FunctionalTestCase
         self::assertSame(409, $status, 'A slug that normalises to nothing is refused');
     }
 
+    public function testImportedTranslationsAreSanitised(): void
+    {
+        $this->bootApp();
+        $this->createPage(self::fixture('page.json'));
+        $xliff = self::translate($this->exportXliff('fr'), '<script>alert(1)</script>Traduit <b onclick="x()">gras</b>');
+
+        [$status, $body] = $this->request('PUT', '/api/translations/hello-world?state=live&destination=original', $xliff);
+        self::assertSame(201, $status, self::describe($body));
+
+        [, $page] = $this->request('GET', '/api/pages/hello-world?state=live');
+        $fr = $page['pageData']['content']['langData']['fr'];
+        self::assertSame('alert(1)Traduit gras', $fr['blk1']['title'], 'Plain text loses all markup');
+        self::assertSame('alert(1)Traduit gras', $fr['metadata']['title'], 'So does metadata');
+        self::assertStringContainsString('<b', $fr['blk1']['copy'], 'HTML keeps safe tags');
+        self::assertStringNotContainsString('<script', $fr['blk1']['copy']);
+        self::assertStringNotContainsString('onclick', $fr['blk1']['copy']);
+        self::assertSame($page['pageData']['content'], $body['pageData']['content'], 'The response shows what was saved');
+    }
+
     public function testImportRejectsAFileForADifferentPage(): void
     {
         $this->bootApp();
@@ -137,8 +156,10 @@ class TranslationApiTest extends FunctionalTestCase
     /**
      * Fill in every target, the way a translator would.
      */
-    private static function translate(string $xliff): string
+    private static function translate(string $xliff, string $translation = 'Traduit'): string
     {
-        return (string) preg_replace('#<target(?:\s[^>]*)?(?:/>|>.*?</target>)#s', '<target>Traduit</target>', $xliff);
+        $target = '<target>' . htmlspecialchars($translation, ENT_XML1) . '</target>';
+
+        return (string) preg_replace('#<target(?:\s[^>]*)?(?:/>|>.*?</target>)#s', $target, $xliff);
     }
 }
