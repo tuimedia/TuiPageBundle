@@ -71,7 +71,7 @@ The test app lives in `tests/App`: a small kernel, entities that extend the bund
 (with an extra `tagData` property, as real apps tend to have), a search transformer and
 custom sanitisers. `schemas/ResourceList.schema.json` is a realistic component schema
 that goes down every validator and sanitiser path (`CustomSchemaTest`), so extend it
-when you teach the sanitiser something new. Every endpoint is open unless a test boots it with
+when you teach the sanitiser something new. `Quote.schema.json` deliberately reuses the `Text` schema's `$id`, the way a copied schema often does. Every endpoint is open unless a test boots it with
 `default_access_roles`, which uses the bundle's defaults and two HTTP basic users,
 `admin` and `editor` (password `pw`). Pass `as: 'admin'` to `request()` to authenticate.
 Fixtures are in `tests/fixtures`. `extended-page.json` is a real

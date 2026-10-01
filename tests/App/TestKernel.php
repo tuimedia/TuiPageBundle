@@ -94,6 +94,7 @@ class TestKernel extends Kernel
         }
         $tuiPage['components']['Text'] = ['schema' => '%kernel.project_dir%/schemas/Text.schema.json'];
         $tuiPage['components']['ResourceList'] = ['schema' => '%kernel.project_dir%/schemas/ResourceList.schema.json'];
+        $tuiPage['components']['Quote'] = ['schema' => '%kernel.project_dir%/schemas/Quote.schema.json'];
         if ($this->options['search'] ?? false) {
             $tuiPage['search_hosts'] = [(string) (getenv('TYPESENSE_URL') ?: 'http://127.0.0.1:8108')];
             $tuiPage['search_api_key'] = (string) (getenv('TYPESENSE_API_KEY') ?: 'tui-page-test');

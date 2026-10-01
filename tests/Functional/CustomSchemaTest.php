@@ -72,7 +72,7 @@ class CustomSchemaTest extends FunctionalTestCase
     }
 
     /**
-     * @return iterable<string, array{callable(array<string, mixed>): array<string, mixed>, string}>
+     * @return iterable<string, array{callable(array<string, mixed>): array<string, mixed>, string, string, array<string, mixed>}>
      */
     public static function invalidBlocks(): iterable
     {
@@ -80,56 +80,58 @@ class CustomSchemaTest extends FunctionalTestCase
             $page['pageData']['content']['blocks']['res1']['variant'] = 'carousel';
 
             return $page;
-        }, 'variant'];
+        }, 'variant', 'enum', ['expected' => ['grid', 'list']]];
 
         yield 'integer range' => [static function (array $page) {
             $page['pageData']['content']['blocks']['res1']['columns'] = 9;
 
             return $page;
-        }, 'columns'];
+        }, 'columns', 'maximum', ['max' => 4]];
 
         yield 'wrong type' => [static function (array $page) {
             $page['pageData']['content']['langData']['en_GB']['res1']['resources'][0]['fileSize'] = 'big';
 
             return $page;
-        }, 'resources.0.fileSize'];
+        }, 'resources.0.fileSize', 'type', ['expected' => 'integer', 'used' => 'string']];
 
         yield 'required property of an array item' => [static function (array $page) {
             unset($page['pageData']['content']['langData']['en_GB']['res1']['resources'][1]['link']);
 
             return $page;
-        }, 'resources.1'];
+        }, 'resources.1', 'required', ['missing' => 'link']];
 
         yield 'required property inside a $ref' => [static function (array $page) {
             unset($page['pageData']['content']['langData']['en_GB']['res1']['cta']['url']);
 
             return $page;
-        }, 'cta'];
+        }, 'cta', 'required', ['missing' => 'url']];
 
         yield 'property not matching patternProperties' => [static function (array $page) {
             $page['pageData']['content']['langData']['en_GB']['res1']['labels']['colour'] = 'red';
 
             return $page;
-        }, 'labels'];
+        }, 'labels', 'additionalProperties', ['properties' => ['colour']]];
 
         yield 'only the French translation is invalid' => [static function (array $page) {
             $page['pageData']['content']['langData']['fr']['res1']['title'] = str_repeat('x', 201);
 
             return $page;
-        }, 'title'];
+        }, 'title', 'maxLength', ['max' => 200, 'length' => 201]];
     }
 
     /**
      * @param callable(array<string, mixed>): array<string, mixed> $break
+     * @param array<string, mixed> $keywordArgs  What clients get in the 422, so a validator upgrade can't quietly change it
      */
     #[DataProvider('invalidBlocks')]
-    public function testInvalidBlocksAreRejected(callable $break, string $path): void
+    public function testInvalidBlocksAreRejected(callable $break, string $path, string $keyword, array $keywordArgs): void
     {
         [$status, $body] = $this->request('POST', '/api/pages', $break(self::fixture('resource-list-page.json')));
 
         self::assertSame(422, $status, self::describe($body));
         self::assertSame('res1', $body['component']['id']);
-        self::assertSame($path, $body['errors'][0]['path'], self::describe($body));
+        self::assertSame(['path' => $path, 'keyword' => $keyword, 'keywordArgs' => $keywordArgs], $body['errors'][0], self::describe($body));
+        self::assertStringEndsWith(sprintf('[%s]: invalid %s.', $path, $keyword), $body['detail']);
     }
 
     public function testFrenchErrorsNameTheLanguage(): void

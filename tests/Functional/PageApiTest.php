@@ -109,6 +109,18 @@ class PageApiTest extends FunctionalTestCase
         self::assertSame('title', $body['errors'][0]['path']);
     }
 
+    public function testComponentsSharingASchemaIdAreCheckedAgainstTheirOwnSchema(): void
+    {
+        $page = self::fixture('page.json');
+        $page['pageData']['content']['blocks']['blk1']['component'] = 'Quote';
+        $page['pageData']['content']['langData']['en_GB']['blk1'] = ['title' => str_repeat('x', 21)];
+
+        [$status, $body] = $this->request('POST', '/api/pages', $page);
+        self::assertSame(422, $status, 'Quote.schema.json has the same $id as the Text schema row1 used first');
+        self::assertSame('blk1', $body['component']['id']);
+        self::assertSame(['path' => 'title', 'keyword' => 'maxLength', 'keywordArgs' => ['max' => 20, 'length' => 21]], $body['errors'][0]);
+    }
+
     public function testSlugMustBeUniqueWithinState(): void
     {
         $this->createPage(self::fixture('page.json'));
