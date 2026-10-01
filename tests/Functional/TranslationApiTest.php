@@ -108,7 +108,7 @@ class TranslationApiTest extends FunctionalTestCase
         self::assertStringContainsString('<b', $fr['blk1']['copy'], 'HTML keeps safe tags');
         self::assertStringNotContainsString('<script', $fr['blk1']['copy']);
         self::assertStringNotContainsString('onclick', $fr['blk1']['copy']);
-        self::assertSame($page['pageData']['content'], $body['pageData']['content'], 'The response shows what was saved');
+        self::assertEquals($page['pageData']['content'], $body['pageData']['content'], 'The response shows what was saved (MySQL reorders the keys)');
     }
 
     public function testImportRejectsAFileForADifferentPage(): void

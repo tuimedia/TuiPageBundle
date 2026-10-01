@@ -70,7 +70,7 @@ jobs:
             dbal: '3.8.0'
             db: sqlite
             label: 'lowest direct dependencies'
-            floor: 'doctrine/doctrine-bundle:2.12.0 opis/json-schema:1.2.0 voku/anti-xss:4.1.43 typesense/typesense-php:4.7.0 psr/http-client:1.0.1'
+            floor: 'doctrine/doctrine-bundle:2.12.0 opis/json-schema:2.6.0 voku/anti-xss:4.1.43 typesense/typesense-php:4.7.0 psr/http-client:1.0.1'
             # Symfony 6.4.0's debug kernel leaves an exception handler registered, which PHPUnit
             # flags as risky on every functional test; later 6.4 releases clean it up
             phpunit-args: --do-not-fail-on-risky
