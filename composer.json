@@ -48,7 +48,7 @@
         "symfony/uid": "^6.4|^7.0|^8.0",
         "symfony/validator": "^6.4|^7.0|^8.0",
         "symfony/yaml": "^6.4|^7.0|^8.0",
-        "typesense/typesense-php": "^4.7 | ^5.0",
+        "typesense/typesense-php": "^4.7 | ^5.0 | ^6.0",
         "voku/anti-xss": "^4.1.43"
     },
     "config": {
