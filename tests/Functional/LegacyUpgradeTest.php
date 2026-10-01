@@ -137,9 +137,10 @@ class LegacyUpgradeTest extends FunctionalTestCase
         $sql = $tool->getUpdateSchemaSql($metadata);
 
         if ($this->connection()->getDatabasePlatform() instanceof PostgreSQLPlatform) {
-            $generated = 'ALTER TABLE page_data ALTER availableLanguages TYPE JSON';
-            self::assertContains($generated, $sql, 'UPGRADE-0.12.md quotes this statement; update the doc if it changes');
-            $sql = array_map(fn (string $statement) => $statement === $generated ? $generated . ' USING availableLanguages::json' : $statement, $sql);
+            // DBAL 3 writes the column name in lower case; Postgres folds unquoted names, so it's the same statement
+            $isGenerated = static fn (string $statement): bool => strcasecmp($statement, 'ALTER TABLE page_data ALTER availableLanguages TYPE JSON') === 0;
+            self::assertNotEmpty(array_filter($sql, $isGenerated), 'UPGRADE-0.12.md quotes this statement; update the doc if it changes');
+            $sql = array_map(static fn (string $statement) => $isGenerated($statement) ? 'ALTER TABLE page_data ALTER availableLanguages TYPE JSON USING availableLanguages::json' : $statement, $sql);
         }
 
         foreach ($sql as $statement) {

@@ -74,9 +74,7 @@ class ReindexCommand extends Command
                 }
                 foreach ($page->getPageData()->getAvailableLanguages() as $language) {
                     $translatedPage = $this->searcher->createSearchDocument($page, $language);
-                    if (!isset($batch[$language])) {
-                        $batch[$language] = [];
-                    }
+                    $batch[$language] ??= [];
                     $this->queueIndex($language, $translatedPage);
                 }
             }

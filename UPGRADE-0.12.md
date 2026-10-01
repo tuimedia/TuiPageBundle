@@ -50,7 +50,7 @@ bin/console doctrine:migrations:diff
 What you get depends on your database:
 
 * **MySQL and MariaDB**: the diff changes the column to `JSON`. MySQL validates every row as it alters the column, which is why the conversion has to come first. Run the migration as generated.
-* **PostgreSQL**: the diff generates `ALTER TABLE page_data ALTER availableLanguages TYPE JSON`, which Postgres rejects with 'cannot be cast automatically to type json'. Edit that line of the migration to add a `USING` clause (swap in your table name):
+* **PostgreSQL**: the diff generates `ALTER TABLE page_data ALTER availableLanguages TYPE JSON`, which Postgres rejects with 'cannot be cast automatically to type json'. (On DBAL 3 the column name comes out in lower case, `availablelanguages`; it's the same column.) Edit that line of the migration to add a `USING` clause (swap in your table name):
 
   ```sql
   ALTER TABLE page_data ALTER availableLanguages TYPE JSON USING availableLanguages::json

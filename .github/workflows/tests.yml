@@ -70,6 +70,9 @@ jobs:
             db: sqlite
             label: 'lowest direct dependencies'
             floor: 'doctrine/doctrine-bundle:2.12.0 opis/json-schema:1.2.0 voku/anti-xss:4.1.43 typesense/typesense-php:4.7.0 psr/http-client:1.0.1'
+            # Symfony 6.4.0's debug kernel leaves an exception handler registered, which PHPUnit 11
+            # flags as risky on every functional test; later 6.4 releases clean it up
+            phpunit-args: --do-not-fail-on-risky
 
     services:
       typesense:
@@ -151,4 +154,4 @@ jobs:
           echo "Typesense didn't come up"; exit 1
 
       - name: PHPUnit
-        run: vendor/bin/phpunit --configuration ${{ matrix.phpunit-config || 'phpunit.xml.dist' }}
+        run: vendor/bin/phpunit --configuration ${{ matrix.phpunit-config || 'phpunit.xml.dist' }} ${{ matrix.phpunit-args }}
