@@ -19,7 +19,8 @@ class CustomSchemaTest extends FunctionalTestCase
     {
         $created = $this->createPage(self::fixture('resource-list-page.json'));
         [, $page] = $this->request('GET', '/api/pages/annual-reports?state=live');
-        self::assertSame($created['pageData']['content'], $page['pageData']['content'], 'What was saved is what was returned');
+        // assertEquals, not assertSame, for objects: MySQL's JSON type reorders their keys
+        self::assertEquals($created['pageData']['content'], $page['pageData']['content'], 'What was saved is what was returned');
 
         $block = $page['pageData']['content']['blocks']['res1'];
         $en = $page['pageData']['content']['langData']['en_GB']['res1'];
@@ -52,10 +53,10 @@ class CustomSchemaTest extends FunctionalTestCase
         self::assertSame('Rapports annuels', $fr['title']);
 
         // $ref definitions are resolved before cleaning
-        self::assertSame(['label' => 'Get them all', 'url' => 'https://example.com/all.zip', 'newWindow' => true], $en['cta']);
+        self::assertEquals(['label' => 'Get them all', 'url' => 'https://example.com/all.zip', 'newWindow' => true], $en['cta']);
 
         // An object with properties but no type is still treated as an object
-        self::assertSame(['src' => '/images/chart.png', 'alt' => 'Bar chart'], $en['image']);
+        self::assertEquals(['src' => '/images/chart.png', 'alt' => 'Bar chart'], $en['image']);
 
         // Arrays are cleaned item by item, whether the items are strings or objects
         self::assertSame(['finance', '2025'], $en['tags']);
@@ -67,7 +68,7 @@ class CustomSchemaTest extends FunctionalTestCase
         self::assertSame(['url' => 'https://example.com/2024.pdf'], $en['resources'][1]['link']);
 
         // Every property matching a patternProperties schema is cleaned, not just the first
-        self::assertSame(['downloadLabel' => 'Download file', 'sizeLabel' => 'Size on disk'], $en['labels']);
+        self::assertEquals(['downloadLabel' => 'Download file', 'sizeLabel' => 'Size on disk'], $en['labels']);
     }
 
     /**
