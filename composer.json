@@ -19,6 +19,11 @@
             "Tui\\PageBundle\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tui\\PageBundle\\Tests\\": "tests/"
+        }
+    },
     "require": {
         "php": "^8.1",
         "doctrine/dbal": "^3.8|^4.0",
@@ -56,6 +61,13 @@
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "^2.1",
         "phpstan/phpstan-doctrine": "^2.0",
-        "rector/rector": "^2.2"
+        "rector/rector": "^2.2",
+        "phpunit/phpunit": "^10.5.46 || ^11.5.20 || ^12.2",
+        "symfony/browser-kit": "^6.4|^7.0|^8.0"
+    },
+    "scripts": {
+        "test": "phpunit",
+        "phpstan": "phpstan analyse",
+        "rector": "rector process --dry-run"
     }
 }

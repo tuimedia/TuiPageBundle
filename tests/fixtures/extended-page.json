@@ -1,0 +1,370 @@
+{
+    "id": "00000000-0000-4000-8000-000000000001",
+    "capability": null,
+    "compassCapability": null,
+    "slug": "extended-example-page",
+    "state": "live",
+    "pageData": {
+        "revision": "00000000-0000-4000-8000-000000000002",
+        "previousRevision": "00000000-0000-4000-8000-000000000003",
+        "defaultLanguage": "en_GB",
+        "availableLanguages": [
+            "en_GB"
+        ],
+        "created": "2026-09-08T04:52:14+00:00",
+        "content": {
+            "schemaVersion": 2,
+            "blocks": {
+                "kyh0KPN0ebzy": {
+                    "id": "kyh0KPN0ebzy",
+                    "blocks": [
+                        "eWqeznqdGCbF",
+                        "WZmGze4kJLM1",
+                        "yXJaIl87qNli",
+                        "ON08N-_6GmVu",
+                        "CPo7mF5Ksp5P",
+                        "QbxnM9MMzEkQ",
+                        "Ns_-yHAtJPBZ",
+                        "xoKKvmKeTR74"
+                    ],
+                    "component": "ArticleGrid",
+                    "languages": [
+                        "en_GB"
+                    ]
+                },
+                "eWqeznqdGCbF": {
+                    "id": "eWqeznqdGCbF",
+                    "styles": [],
+                    "component": "PageHero",
+                    "languages": [
+                        "en_GB"
+                    ]
+                },
+                "WZmGze4kJLM1": {
+                    "id": "WZmGze4kJLM1",
+                    "styles": [],
+                    "component": "PageText",
+                    "languages": [
+                        "en_GB"
+                    ],
+                    "background": "ipsum"
+                },
+                "ON08N-_6GmVu": {
+                    "id": "ON08N-_6GmVu",
+                    "styles": [],
+                    "component": "PageNumberedList",
+                    "languages": [
+                        "en_GB"
+                    ],
+                    "background": "dolor"
+                },
+                "yXJaIl87qNli": {
+                    "id": "yXJaIl87qNli",
+                    "styles": [],
+                    "component": "PageQuote",
+                    "languages": [
+                        "en_GB"
+                    ],
+                    "inverted": true
+                },
+                "Vr447mWzG92W": {
+                    "id": "Vr447mWzG92W",
+                    "styles": [],
+                    "component": "PageAccordionItem",
+                    "languages": [
+                        "en_GB"
+                    ]
+                },
+                "c61DAQCFy-e9": {
+                    "id": "c61DAQCFy-e9",
+                    "styles": [],
+                    "component": "PageAccordionItem",
+                    "languages": [
+                        "en_GB"
+                    ]
+                },
+                "-i6ReNjK0Nrc": {
+                    "id": "-i6ReNjK0Nrc",
+                    "styles": [],
+                    "component": "PageAccordionItem",
+                    "languages": [
+                        "en_GB"
+                    ]
+                },
+                "St73RPPgb6Mr": {
+                    "id": "St73RPPgb6Mr",
+                    "styles": [],
+                    "component": "PageAccordionItem",
+                    "languages": [
+                        "en_GB"
+                    ]
+                },
+                "xg3-_x7SH6nb": {
+                    "id": "xg3-_x7SH6nb",
+                    "styles": [],
+                    "component": "PageAccordionItem",
+                    "languages": [
+                        "en_GB"
+                    ]
+                },
+                "siF91dW0pcQi": {
+                    "id": "siF91dW0pcQi",
+                    "styles": [],
+                    "component": "PageAccordionItem",
+                    "languages": [
+                        "en_GB"
+                    ]
+                },
+                "CPo7mF5Ksp5P": {
+                    "id": "CPo7mF5Ksp5P",
+                    "styles": [],
+                    "component": "PageText",
+                    "languages": [
+                        "en_GB"
+                    ],
+                    "background": "sit"
+                },
+                "QbxnM9MMzEkQ": {
+                    "id": "QbxnM9MMzEkQ",
+                    "styles": [],
+                    "url": "/images/example-1.png",
+                    "bannerPreload": "data:image/gif;base64,R0lGODlhAQABAAAAACw=",
+                    "layout": "left",
+                    "textcolor": "white",
+                    "component": "PageBanner",
+                    "languages": [
+                        "en_GB"
+                    ],
+                    "buttontext": "",
+                    "href": ""
+                },
+                "Ns_-yHAtJPBZ": {
+                    "id": "Ns_-yHAtJPBZ",
+                    "styles": [],
+                    "component": "PageDownloads",
+                    "languages": [
+                        "en_GB"
+                    ],
+                    "blocks": [],
+                    "bookmark": false
+                },
+                "xoKKvmKeTR74": {
+                    "id": "xoKKvmKeTR74",
+                    "styles": [],
+                    "component": "PageTable",
+                    "languages": [
+                        "en_GB"
+                    ],
+                    "bookmark": true
+                }
+            },
+            "langData": {
+                "en_GB": {
+                    "metadata": {
+                        "title": "Amet Consectetur Adipiscing elit Sed do Eiusmod tempor incididunt ut"
+                    },
+                    "eWqeznqdGCbF": {
+                        "title": "",
+                        "standfirst": "<p>Labore et dolore magna aliqua enim Ad minim veniam quis nostrud exercitation</p><p></p>"
+                    },
+                    "WZmGze4kJLM1": {
+                        "title": "Ullamco laboris nisi aliquip ex ea ",
+                        "copy": "<p>Commodo consequat lorem ipsum dolor sit amet consectetur adipiscing Elit sed Do eiusmod tempor Incididunt Ut labore et dolore magna aliqua Enim Ad Minim Veniam quis nostrud exercitation ullamco laboris nisi aliquip ex ea commodo consequat lorem Ipsum dolor sit amet consectetur adipiscing elit sed do Eiusmod tempor incididunt ut labore et dolore magna aliqua enim ad minim veniam quis nostrud exercitation ullamco laboris nisi aliquip ex Ea commodo consequat lorem ipsum dolor sit amet consectetur Adipiscing elit Sed do eiusmod tempor incididunt ut labore et </p><h3><em>Dolore magna aliqua enim ad minim veniam quis nostrud exercitation ullamco laboris nisi aliquip ex ea commodo consequat lorem ipsum dolor sit amet consectetur adipiscing elit</em></h3>"
+                    },
+                    "MAxQkTtbhyUQ": {
+                        "title": "",
+                        "intro": "",
+                        "items": [
+                            "Sed do eiusmod tempor incididunt",
+                            "Ut labore et dolore magna aliqua enim ad minim veniam quis nostrud exercitation ullamco laboris nisi aliquip",
+                            "Ex ea commodo",
+                            "Consequat lorem ipsum dolor sit amet consectetur adipiscing elit sed do"
+                        ]
+                    },
+                    "ON08N-_6GmVu": {
+                        "title": "Eiusmod tempor Incididunt ut labore et  Dolore Magna Aliqua",
+                        "intro": "",
+                        "items": [
+                            {
+                                "id": "Qwj68D3x",
+                                "title": "Enim ad minim veniam quis nostrud",
+                                "copy": "<p>Exercitation ullamco laboris nisi aliquip ex ea commodo consequat lorem ipsum dolor sit amet consectetur adipiscing elit sed do</p>"
+                            },
+                            {
+                                "id": "hVAgRcJk",
+                                "title": "Eiusmod tempor incididunt ut labore et dolore magna",
+                                "copy": "<p>Aliqua enim  ad minim veniam quis nostrud exercitation Ullamco laboris nisi aliquip ex ea commodo consequat lorem ipsum dolor sit amet consectetur adipiscing </p><p></p><p>Elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua enim ad minim veniam quis nostrud exercitation ullamco laboris nisi aliquip Ex ea commodo consequat lorem ipsum dolor sit amet consectetur adipiscing elit sed do</p>"
+                            },
+                            {
+                                "id": "ANFjJ-Wa",
+                                "title": "Eiusmod tempor incididunt",
+                                "copy": "<p>Ut labore et dolore magna aliqua enim ad minim veniam quis Nostrud exercitation ullamco laboris nisi aliquip ex ea commodo consequat lorem ipsum dolor sit amet consectetur adipiscing elit sed Do eiusmod tempor incididunt ut labore et dolore magna aliqua Enim ad minim veniam quis nostrud exercitation ullamco laboris nisi aliquip ex ea commodo consequat Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore</p>"
+                            },
+                            {
+                                "id": "ROw7vkVD",
+                                "title": "Et Dolore magna",
+                                "copy": "<ul><li><p>Aliqua enim ad minim veniam quis nostrud exercitation ullamco laboris</p></li><li><p>Nisi aliquip ex ea commodo consequat lorem ipsum dolor sit amet consectetur adipiscing elit sed do Eiusmod Tempor incididunt ut labore et dolore magna aliqua enim ad</p></li></ul>"
+                            }
+                        ]
+                    },
+                    "yXJaIl87qNli": {
+                        "copy": "<p><em>Minim veniam quis nostrud exercitation ullamco laboris nisi aliquip ex ea commodo consequat lorem ipsum</em> </p>",
+                        "author": "Dolor Sit"
+                    },
+                    "JSkUzqbBkAhZ": {
+                        "title": "Amet consectetur adipiscing elit sed",
+                        "intro": "<p>do</p>"
+                    },
+                    "Vr447mWzG92W": {
+                        "title": "",
+                        "leftTitle": "",
+                        "leftText": "",
+                        "rightTitle": "",
+                        "rightText": ""
+                    },
+                    "c61DAQCFy-e9": {
+                        "title": "",
+                        "leftTitle": "",
+                        "leftText": "",
+                        "rightTitle": "",
+                        "rightText": ""
+                    },
+                    "mU-10Ruklnir": {
+                        "title": "Eiusmod tempor incididunt ut labore et",
+                        "intro": ""
+                    },
+                    "-i6ReNjK0Nrc": {
+                        "title": "",
+                        "leftTitle": "dolore",
+                        "leftText": "",
+                        "rightTitle": "magna",
+                        "rightText": ""
+                    },
+                    "St73RPPgb6Mr": {
+                        "title": "",
+                        "leftTitle": "",
+                        "leftText": "",
+                        "rightTitle": "",
+                        "rightText": ""
+                    },
+                    "xg3-_x7SH6nb": {
+                        "title": "",
+                        "leftTitle": "",
+                        "leftText": "",
+                        "rightTitle": "",
+                        "rightText": ""
+                    },
+                    "siF91dW0pcQi": {
+                        "title": "",
+                        "leftTitle": "",
+                        "leftText": "",
+                        "rightTitle": "",
+                        "rightText": ""
+                    },
+                    "CPo7mF5Ksp5P": {
+                        "title": "Aliqua enim ad minim veniam",
+                        "copy": "<ul><li><p>Quis nostrud exercitation Ullamco laboris nisi aliquip ex ea commodo consequat</p></li><li><p>Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt</p></li><li><p>Ut labore et dolore magna aliqua enim ad minim veniam quis nostrud exercitation ullamco laboris nisi aliquip</p><p></p></li></ul>"
+                    },
+                    "BTzzAjaBAPIg": {
+                        "title": "Ex ea commodo",
+                        "copy": "<p>Consequat lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna Aliqua enim ad minim veniam quis nostrud exercitation ullamco laboris nisi aliquip ex ea commodo consequat lorem </p>",
+                        "altText": ""
+                    },
+                    "qnnuOCbzZ5SF": {
+                        "title": "Ipsum dolor sit",
+                        "copy": "<p>Amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua enim ad minim veniam Quis nostrud exercitation ullamco laboris nisi aliquip ex ea commodo consequat lorem ipsum dolor sit amet consectetur </p>",
+                        "altText": ""
+                    },
+                    "QbxnM9MMzEkQ": {
+                        "bannertitle": "Adipiscing elit ",
+                        "standfirst": "<p>Sed do eiusmod tempor incididunt <em>Ut labore et dolore magna aliqua enim</em></p>"
+                    },
+                    "Ns_-yHAtJPBZ": {
+                        "title": "Ad Minim Veniam",
+                        "intro": "<p>Quis nostrud exercitation ullamco laboris nisi aliquip <a target=\"_blank\" rel=\"noopener nofollow noreferrer\" href=\"https://example.com/link\">ex ea</a> commodo consequat lorem ipsum Dolor sit amet Consectetur adipiscing</p>"
+                    },
+                    "xoKKvmKeTR74": {
+                        "title": "Elit Sed Do Eiusmod",
+                        "intro": "<p>Tempor incididunt ut labore et dolore magna Aliqua enim Ad minim veniam quis Nostrud exercitation ullamco laboris nisi aliquip Ex ea commodo consequat lorem ipsum dolor sit amet consectetur adipiscing elit Sed Do eiusmod tempor incididunt ut labore et dolore magna aliqua enim ad minim</p><p></p><p>Veniam Quis nostrud exercitation ullamco laboris nisi aliquip ex ea commodo consequat lorem ipsum dolor Sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore</p><p></p><p></p><p>Magna aliqua enim Ad minim veniam quis nostrud exercitation ullamco laboris nisi aliquip ex Ea commodo consequat lorem </p><p></p><p></p><p></p><p>Ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua Enim ad</p>",
+                        "bordered": true,
+                        "dense": false,
+                        "highlight": true,
+                        "headers": true,
+                        "columns": [
+                            "Minim",
+                            "Veniam Quis",
+                            "Nostrud"
+                        ],
+                        "rows": [
+                            [
+                                "<p>Exercitation Ullamco</p>",
+                                "<p>Laboris nisi aliquip ex ea commodo consequat lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor Incididunt ut labore</p>",
+                                "<p><a target=\"_blank\" rel=\"noopener nofollow noreferrer\" href=\"https://example.com/link\">Et dolore Magna Aliqua</a></p>"
+                            ],
+                            [
+                                "<p>Enim Ad Minim</p>",
+                                "<p>Veniam quis nostrud exercitation ullamco laboris nisi aliquip ex ea commodo consequat lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor Incididunt ut</p>",
+                                "<p><a target=\"_blank\" rel=\"noopener nofollow noreferrer\" href=\"https://example.com/link\"> Labore et Dolore Magna</a></p>"
+                            ],
+                            [
+                                "<p>Aliqua enim Ad</p>",
+                                "<p>Minim veniam quis nostrud exercitation ullamco laboris nisi aliquip ex ea commodo consequat lorem ipsum dolor</p>",
+                                "<p><a target=\"_blank\" rel=\"noopener nofollow noreferrer\" href=\"https://example.com/link\">Sit amet Consectetur adipiscing elit</a></p>"
+                            ]
+                        ]
+                    }
+                }
+            },
+            "layout": [
+                "kyh0KPN0ebzy"
+            ]
+        },
+        "metadata": {
+            "type": "",
+            "url": "",
+            "thumbnail": "",
+            "accessRole": "ROLE_USER",
+            "readingTime": "5",
+            "articleQuality": 1,
+            "heroImage": "/images/example-2.png",
+            "heroPreload": "data:image/gif;base64,R0lGODlhAQABAAAAACw="
+        },
+        "translatedMetadata": {
+            "en_GB": {
+                "type": "",
+                "url": "",
+                "thumbnail": "",
+                "accessRole": "ROLE_USER",
+                "readingTime": "5",
+                "articleQuality": 1,
+                "heroImage": "/images/example-3.png",
+                "heroPreload": "data:image/gif;base64,R0lGODlhAQABAAAAACw=",
+                "title": "Sed Do Eiusmod tempor Incididunt ut Labore et dolore magna"
+            }
+        }
+    },
+    "tagData": [
+        {
+            "id": "00000000-0000-4000-8000-000000000004",
+            "title": "Aliqua Enim Ad Minim",
+            "slug": "example-tag",
+            "color": "green1",
+            "type": "collection",
+            "data": {
+                "layout": ""
+            },
+            "isOwner": true
+        }
+    ],
+    "channelData": [
+        {
+            "id": "00000000-0000-4000-8000-000000000005",
+            "slug": "example-channel",
+            "title": "Nostrud Exercitation Ullamco Laboris",
+            "image": "/images/example-4.png",
+            "state": "published",
+            "description": "Nisi Aliquip Ex Ea Commodo Consequat lorem ipsum dolor sit amet consectetur Adipiscing Elit Sed Do eiusmod tempor incididunt ut labore et dolore Magna Aliqua Enim Ad",
+            "isPageOwner": true
+        }
+    ]
+}

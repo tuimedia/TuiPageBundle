@@ -1,0 +1,154 @@
+name: Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    name: Static analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+
+      - run: composer validate --strict --no-check-lock
+
+      - uses: ramsey/composer-install@v3
+
+      - name: PHPStan
+        run: vendor/bin/phpstan analyse --no-progress
+
+      - name: Rector (dry run)
+        run: vendor/bin/rector process --dry-run --no-progress-bar
+
+  tests:
+    name: PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}, ORM ${{ matrix.orm }}, DBAL ${{ matrix.dbal }}, ${{ matrix.db }}${{ matrix.label && format(', {0}', matrix.label) || '' }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # PHPUnit 10 is the only one for PHP 8.1, and it can't separate the bundle's
+          # deprecations from libraries', so this job runs without the deprecation gate
+          - { php: '8.1', symfony: '6.4.*', orm: '^2.20', dbal: '^3.8', db: sqlite, phpunit-config: tests/phpunit-10.xml }
+          - { php: '8.2', symfony: '7.4.*', orm: '^3.3', dbal: '^3.8', db: sqlite }
+          - { php: '8.3', symfony: '7.4.*', orm: '^3.3', dbal: '^4.0', db: sqlite }
+          - { php: '8.4', symfony: '6.4.*', orm: '^2.20', dbal: '^3.8', db: sqlite, typesense: '0.25.2', typesense-php: '^4.7', label: 'Typesense 0.25 + SDK v4' }
+          - { php: '8.4', symfony: '8.*', orm: '^3.3', dbal: '^4.0', db: sqlite }
+          - { php: '8.5', symfony: '6.4.*', orm: '^2.20', dbal: '^3.8', db: sqlite }
+          - { php: '8.5', symfony: '7.4.*', orm: '^3.3', dbal: '^3.8', db: sqlite }
+          - { php: '8.5', symfony: '8.*', orm: '^3.3', dbal: '^4.0', db: sqlite }
+
+          # Database servers, on both DBAL majors
+          - { php: '8.5', symfony: '8.*', orm: '^3.3', dbal: '^4.0', db: postgres }
+          - { php: '8.5', symfony: '8.*', orm: '^3.3', dbal: '^4.0', db: mysql }
+          - { php: '8.5', symfony: '8.*', orm: '^3.3', dbal: '^4.0', db: mariadb }
+          - { php: '8.4', symfony: '6.4.*', orm: '^2.20', dbal: '^3.8', db: postgres }
+          - { php: '8.4', symfony: '6.4.*', orm: '^2.20', dbal: '^3.8', db: mysql }
+          - { php: '8.4', symfony: '6.4.*', orm: '^2.20', dbal: '^3.8', db: mariadb }
+
+          # Every direct dependency at the lowest version composer.json allows
+          - php: '8.2'
+            symfony: '6.4.0'
+            orm: '2.20.0'
+            dbal: '3.8.0'
+            db: sqlite
+            label: 'lowest direct dependencies'
+            floor: 'doctrine/doctrine-bundle:2.12.0 opis/json-schema:1.2.0 voku/anti-xss:4.1.43 typesense/typesense-php:4.7.0 psr/http-client:1.0.1'
+
+    services:
+      typesense:
+        image: typesense/typesense:${{ matrix.typesense || '29.0' }}
+        env:
+          TYPESENSE_API_KEY: tui-page-test
+          TYPESENSE_DATA_DIR: /tmp
+        ports: ['8108:8108']
+
+      postgres:
+        image: ${{ matrix.db == 'postgres' && 'postgres:17-alpine' || '' }}
+        env:
+          POSTGRES_PASSWORD: pw
+          POSTGRES_DB: app
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 20
+
+      mysql:
+        image: ${{ matrix.db == 'mysql' && 'mysql:8.4' || '' }}
+        env:
+          MYSQL_ROOT_PASSWORD: pw
+          MYSQL_DATABASE: app
+        ports: ['3306:3306']
+        options: --health-cmd "mysqladmin ping -ppw" --health-interval 5s --health-timeout 5s --health-retries 20
+
+      mariadb:
+        image: ${{ matrix.db == 'mariadb' && 'mariadb:11.8' || '' }}
+        env:
+          MARIADB_ROOT_PASSWORD: pw
+          MARIADB_DATABASE: app
+        ports: ['3307:3306']
+        options: --health-cmd "healthcheck.sh --connect --innodb_initialized" --health-interval 5s --health-timeout 5s --health-retries 20
+
+    env:
+      SYMFONY_REQUIRE: ${{ matrix.symfony }}
+      TYPESENSE_URL: http://127.0.0.1:8108
+      TYPESENSE_API_KEY: tui-page-test
+      DATABASE_URL: >-
+        ${{ matrix.db == 'postgres' && 'postgresql://postgres:pw@127.0.0.1:5432/app?serverVersion=17&charset=utf8'
+        || matrix.db == 'mysql' && 'mysql://root:pw@127.0.0.1:3306/app?serverVersion=8.4.0&charset=utf8mb4'
+        || matrix.db == 'mariadb' && 'mysql://root:pw@127.0.0.1:3307/app?serverVersion=11.8.0-MariaDB&charset=utf8mb4'
+        || '' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: zip, pdo_sqlite, pdo_mysql, pdo_pgsql
+          coverage: none
+          tools: flex
+
+      - name: Pin Doctrine and other versions for this job
+        run: |
+          composer require --no-update --no-interaction \
+            "doctrine/orm:${{ matrix.orm }}" "doctrine/dbal:${{ matrix.dbal }}" \
+            ${{ matrix.typesense-php && format('"typesense/typesense-php:{0}"', matrix.typesense-php) || '' }} \
+            ${{ matrix.floor }}
+
+      # Symfony 6.4.0 has published security advisories; it's only installed to prove the floor works
+      - name: Allow insecure versions for the floor job
+        if: matrix.floor
+        run: composer config audit.block-insecure false
+
+      - uses: ramsey/composer-install@v3
+        with:
+          dependency-versions: highest
+
+      - name: Show resolved versions
+        run: composer show | grep -E '^(symfony/framework-bundle|doctrine/(orm|dbal|doctrine-bundle)|phpunit/phpunit|typesense/typesense-php|opis/json-schema|voku/anti-xss) '
+
+      - name: Wait for Typesense
+        run: |
+          for i in $(seq 1 60); do
+            curl -sf "$TYPESENSE_URL/health" && exit 0
+            sleep 1
+          done
+          echo "Typesense didn't come up"; exit 1
+
+      - name: PHPUnit
+        run: vendor/bin/phpunit --configuration ${{ matrix.phpunit-config || 'phpunit.xml.dist' }}

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    PHPUnit 10, for PHP 8.1. It can't tell the bundle's deprecations apart from ones libraries
+    raise among themselves, so it runs the same tests without failing on deprecations; the
+    PHP 8.2+ jobs in CI cover that.
+-->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="bootstrap.php"
+         cacheDirectory="../.phpunit.cache"
+         colors="true"
+         beStrictAboutOutputDuringTests="true"
+         failOnWarning="true"
+         failOnRisky="true"
+         displayDetailsOnTestsThatTriggerWarnings="true"
+         displayDetailsOnTestsThatTriggerErrors="true"
+         displayDetailsOnSkippedTests="true">
+    <php>
+        <ini name="error_reporting" value="-1"/>
+        <server name="KERNEL_CLASS" value="Tui\PageBundle\Tests\App\TestKernel"/>
+    </php>
+
+    <testsuites>
+        <testsuite name="TuiPageBundle">
+            <directory>.</directory>
+        </testsuite>
+    </testsuites>
+
+    <source restrictNotices="true" restrictWarnings="true">
+        <include>
+            <directory>../src</directory>
+        </include>
+    </source>
+</phpunit>
