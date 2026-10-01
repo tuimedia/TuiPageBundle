@@ -69,7 +69,9 @@ ignored. If a test fails with a deprecation, the report names the file and line.
 
 The test app lives in `tests/App`: a small kernel, entities that extend the bundle's
 (with an extra `tagData` property, as real apps tend to have), a search transformer and
-custom sanitisers. Every endpoint is open unless a test boots it with
+custom sanitisers. `schemas/ResourceList.schema.json` is a realistic component schema
+that goes down every validator and sanitiser path (`CustomSchemaTest`), so extend it
+when you teach the sanitiser something new. Every endpoint is open unless a test boots it with
 `default_access_roles`, which uses the bundle's defaults and two HTTP basic users,
 `admin` and `editor` (password `pw`). Pass `as: 'admin'` to `request()` to authenticate.
 Fixtures are in `tests/fixtures`. `extended-page.json` is a real

@@ -65,6 +65,33 @@ class TranslationApiTest extends FunctionalTestCase
         self::assertSame(422, $status, 'Importing into a page that already exists is refused');
     }
 
+    public function testImportIntoANewSlug(): void
+    {
+        $this->bootApp();
+        $this->createPage(self::fixture('page.json'));
+        $xliff = self::translate($this->exportXliff('fr'));
+
+        // Same state as the original, so this only works if the copy really gets the new slug
+        [$status, $body] = $this->request('PUT', '/api/translations/hello-world?state=live&destination=new&destinationSlug=' . rawurlencode('bonjour le/monde'), $xliff);
+        self::assertSame(201, $status, self::describe($body));
+        self::assertSame('bonjour-le-monde', $body['slug'], 'The slug is normalised the way it was checked');
+        self::assertSame('live', $body['state']);
+
+        [$status, $copy] = $this->request('GET', '/api/pages/bonjour-le-monde?state=live');
+        self::assertSame(200, $status);
+        self::assertSame('Traduit', $copy['pageData']['content']['langData']['fr']['blk1']['title']);
+
+        [, $original] = $this->request('GET', '/api/pages/hello-world?state=live');
+        self::assertSame(['en_GB'], $original['pageData']['availableLanguages'], 'The original page is untouched');
+
+        [$status, $body] = $this->request('PUT', '/api/translations/hello-world?state=live&destination=new&destinationSlug=bonjour-le-monde', $xliff);
+        self::assertSame(422, $status, 'Importing into a page that already exists is refused');
+        self::assertSame('New destination already exists', $body['title']);
+
+        [$status] = $this->request('PUT', '/api/translations/hello-world?state=live&destination=new&destinationSlug=%20%2F%20', $xliff);
+        self::assertSame(409, $status, 'A slug that normalises to nothing is refused');
+    }
+
     public function testImportRejectsAFileForADifferentPage(): void
     {
         $this->bootApp();
