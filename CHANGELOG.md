@@ -6,7 +6,7 @@ Read [UPGRADE-0.12.md](UPGRADE-0.12.md) before upgrading: there's a data convers
 
 ### BREAKING
 
-- Minimum PHP version is now 8.2. PHP 8.1 reached end of life on 31 December 2025.
+- Minimum PHP version is now 8.3. PHP 8.1 reached end of life on 31 December 2025, and 8.2 does on 31 December 2026.
 - Supports Symfony 6.4, 7.x and 8.x. Symfony 5.4 is no longer supported.
 - Supports Doctrine ORM 2.20+ and 3.x, DBAL 3.8+ and 4.x, and DoctrineBundle 2.12+ and 3.x. DBAL 2 is no longer supported.
 - `PageData::$availableLanguages` is now stored as JSON instead of with Doctrine's `array` type (removed in DBAL 4). Existing rows must be converted with `pages:convert-available-languages` before running the schema migration.
