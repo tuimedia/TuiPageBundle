@@ -13,7 +13,7 @@ return RectorConfig::configure()
         __DIR__ . '/src',
     ])
     ->withImportNames(importShortClasses: false)
-    ->withPhpSets(php81: true)
+    ->withPhpSets(php82: true)
     ->withAttributesSets(symfony: true, doctrine: true)
     ->withComposerBased(doctrine: true, symfony: true)
     ->withSkip([

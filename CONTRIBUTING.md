@@ -65,10 +65,7 @@ DATABASE_URL="postgresql://postgres:pw@127.0.0.1:5432/app?serverVersion=17&chars
 
 The suite fails on any deprecation the bundle causes, whether it's raised in `src/` or
 in a library the bundle called. Deprecations libraries raise among themselves are
-ignored. If a test fails with a deprecation, the report names the file and line. That needs
-PHPUnit 11.5 or later; on PHP 8.1, which only gets PHPUnit 10, run
-`vendor/bin/phpunit -c tests/phpunit-10.xml` instead, which runs the same tests without the
-deprecation check.
+ignored. If a test fails with a deprecation, the report names the file and line.
 
 The test app lives in `tests/App`: a small kernel, entities that extend the bundle's
 (with an extra `tagData` property, as real apps tend to have), a search transformer and
@@ -76,7 +73,7 @@ custom sanitisers. Fixtures are in `tests/fixtures`. `extended-page.json` is a r
 page with its text swapped for lorem ipsum, and `extended-page.response.json` is what
 0.11.5 returned for it, so the API output can be checked byte for byte.
 
-CI (`.github/workflows/tests.yml`) runs the suite across PHP 8.1 to 8.5, Symfony 6.4, 7.4
+CI (`.github/workflows/tests.yml`) runs the suite across PHP 8.2 to 8.5, Symfony 6.4, 7.4
 and 8, Doctrine ORM 2 and 3, DBAL 3 and 4, SQLite, PostgreSQL, MySQL and MariaDB, and with
 every direct dependency at its lowest allowed version.
 

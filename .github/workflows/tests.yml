@@ -43,9 +43,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # PHPUnit 10 is the only one for PHP 8.1, and it can't separate the bundle's
-          # deprecations from libraries', so this job runs without the deprecation gate
-          - { php: '8.1', symfony: '6.4.*', orm: '^2.20', dbal: '^3.8', db: sqlite, phpunit-config: tests/phpunit-10.xml }
           - { php: '8.2', symfony: '7.4.*', orm: '^3.3', dbal: '^3.8', db: sqlite }
           - { php: '8.3', symfony: '7.4.*', orm: '^3.3', dbal: '^4.0', db: sqlite }
           - { php: '8.4', symfony: '6.4.*', orm: '^2.20', dbal: '^3.8', db: sqlite, typesense: '0.25.2', typesense-php: '^4.7', label: 'Typesense 0.25 + SDK v4' }
@@ -154,4 +151,4 @@ jobs:
           echo "Typesense didn't come up"; exit 1
 
       - name: PHPUnit
-        run: vendor/bin/phpunit --configuration ${{ matrix.phpunit-config || 'phpunit.xml.dist' }} ${{ matrix.phpunit-args }}
+        run: vendor/bin/phpunit ${{ matrix.phpunit-args }}

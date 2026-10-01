@@ -2,7 +2,7 @@
 <!--
     PHPUnit 11.5 and 12. Fails on any deprecation raised by the bundle's own code, or by a
     library because the bundle called it in a deprecated way. Deprecations libraries raise
-    among themselves are ignored. PHPUnit 10 (the only one for PHP 8.1) uses tests/phpunit-10.xml.
+    among themselves are ignored.
 -->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
