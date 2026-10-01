@@ -11,6 +11,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Tui\PageBundle\InputFilter;
 use Tui\PageBundle\PageSchema;
 use Tui\PageBundle\Repository\PageRepository;
+use Tui\PageBundle\Sanitizer;
 use Tui\PageBundle\TranslationHandler;
 
 class TranslationController extends AbstractController
@@ -78,6 +79,7 @@ class TranslationController extends AbstractController
         PageRepository $pageRepository,
         TranslationHandler $translationHandler,
         PageSchema $pageSchema,
+        Sanitizer $sanitizer,
         string $slug
     ): Response {
         $state = InputFilter::string($request->query->get('state', 'live'));
@@ -159,10 +161,15 @@ class TranslationController extends AbstractController
         $groups = $this->getTuiPageSerializerGroups('import_response', ['pageGet']);
 
         // Validate input
-        $errors = $pageSchema->validate($this->generateTuiPageJson($page, $serializer, $groups));
+        $json = $this->generateTuiPageJson($page, $serializer, $groups);
+        $errors = $pageSchema->validate($json);
         if ($errors) {
             return $this->json($errors, 422);
         }
+
+        // Filter input. Importing only changes the content, so that's all that's copied back
+        $filtered = json_decode($sanitizer->cleanPage($json), true, 512, JSON_THROW_ON_ERROR);
+        $page->getPageData()->setContent($filtered['pageData']['content']);
         // Remove the temporary revision
         if ($page->getPageData()->getRevision() === 'ffffffff-ffff-ffff-ffff-ffffffffffff') {
             $page->getPageData()->setRevision(null);
