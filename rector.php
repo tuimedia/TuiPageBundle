@@ -2,28 +2,23 @@
 
 declare(strict_types=1);
 
-// use Rector\CodeQuality\Rector\Class_\InlineConstructorDefaultToPropertyRector;
 use Rector\Config\RectorConfig;
-use Rector\Core\Configuration\Option;
-use Rector\Doctrine\Set\DoctrineSetList;
-use Rector\Set\ValueObject\LevelSetList;
-use Rector\Symfony\Set\SymfonyLevelSetList;
+use Rector\Php80\Rector\Class_\ClassPropertyAssignToConstructorPromotionRector;
 
-return static function (RectorConfig $rectorConfig): void {
-    $rectorConfig->paths([
+// CI runs this as a dry run and fails if anything would change. The composer-based sets
+// follow whatever versions are installed, which may be newer than the lowest ones we support,
+// so check any new suggestion works on those before applying it.
+return RectorConfig::configure()
+    ->withPaths([
         __DIR__ . '/src',
+    ])
+    ->withImportNames(importShortClasses: false)
+    ->withPhpSets(php83: true)
+    ->withAttributesSets(symfony: true, doctrine: true)
+    ->withComposerBased(doctrine: true, symfony: true)
+    ->withSkip([
+        // Promoting would rename the $searchEnabled argument, which services.yaml binds by name
+        ClassPropertyAssignToConstructorPromotionRector::class => [
+            __DIR__ . '/src/Search/SearchSubscriber.php',
+        ],
     ]);
-
-    $rectorConfig->parameters()->set(Option::IMPORT_SHORT_CLASSES, false);
-    $rectorConfig->importNames();
-
-    // register a single rule
-    // $rectorConfig->rule(InlineConstructorDefaultToPropertyRector::class);
-
-    // define sets of rules
-    $rectorConfig->sets([
-        LevelSetList::UP_TO_PHP_81,
-        SymfonyLevelSetList::UP_TO_SYMFONY_54,
-        DoctrineSetList::ANNOTATIONS_TO_ATTRIBUTES,
-    ]);
-};

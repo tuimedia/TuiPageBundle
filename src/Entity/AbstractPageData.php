@@ -3,7 +3,7 @@
 namespace Tui\PageBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\MappedSuperclass]
@@ -35,7 +35,7 @@ abstract class AbstractPageData implements PageDataInterface
     /**
      * @var string[]
      */
-    #[ORM\Column(type: 'array')]
+    #[ORM\Column(type: 'json')]
     #[Groups(['pageCreate', 'pageGet', 'pageList'])]
     #[Assert\Type(type: 'array')]
     private array $availableLanguages = ['en_GB'];

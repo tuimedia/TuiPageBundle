@@ -3,14 +3,15 @@
 namespace Tui\PageBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use Tui\PageBundle\InputFilter;
 use Tui\PageBundle\PageSchema;
 use Tui\PageBundle\Repository\PageRepository;
+use Tui\PageBundle\Sanitizer;
 use Tui\PageBundle\TranslationHandler;
 
 class TranslationController extends AbstractController
@@ -28,8 +29,8 @@ class TranslationController extends AbstractController
         string $slug,
         string $lang
     ): Response {
-        $state = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
-        $lang = filter_var($lang, FILTER_SANITIZE_STRING);
+        $state = InputFilter::string($request->query->get('state', 'live'));
+        $lang = InputFilter::string($lang);
 
         $page = $pageRepository->findOneBy([
             'slug' => $slug,
@@ -78,9 +79,10 @@ class TranslationController extends AbstractController
         PageRepository $pageRepository,
         TranslationHandler $translationHandler,
         PageSchema $pageSchema,
+        Sanitizer $sanitizer,
         string $slug
     ): Response {
-        $state = filter_var($request->query->get('state', 'live'), FILTER_SANITIZE_STRING);
+        $state = InputFilter::string($request->query->get('state', 'live'));
 
         $page = $pageRepository->findOneBy([
             'slug' => $slug,
@@ -93,9 +95,10 @@ class TranslationController extends AbstractController
 
         $this->checkTuiPagePermissions('import', $page);
 
-        $destination = filter_var($request->query->get('destination', 'original'), FILTER_SANITIZE_STRING);
-        $destinationState = filter_var($request->query->get('destinationState', 'live'), FILTER_SANITIZE_STRING);
-        $destinationSlug = filter_var($request->query->get('destinationSlug', $page->getSlug()), FILTER_SANITIZE_STRING);
+        $destination = InputFilter::string($request->query->get('destination', 'original'));
+        // Normalised the way they'll be saved, so the existence check below tests the real destination
+        $destinationState = trim((string) preg_replace('/[^\w-]+/', '-', InputFilter::string($request->query->get('destinationState', 'live'))), '-');
+        $destinationSlug = trim((string) preg_replace('/[^\w-]+/', '-', InputFilter::string($request->query->get('destinationSlug', $page->getSlug()))), '-');
         if (!in_array($destination, ['new', 'original'])) {
             return $this->json([
                 'type' => 'https://tuimedia.com/page-bundle/validation',
@@ -104,11 +107,11 @@ class TranslationController extends AbstractController
             ], 422);
         }
 
-        if ($destination === 'new' && !($destinationSlug || $destinationState)) {
+        if ($destination === 'new' && !($destinationSlug && $destinationState)) {
             return $this->json([
                 'type' => 'https://tuimedia.com/page-bundle/validation',
                 'title' => 'Missing or invalid destination slug/state',
-                'detail' => 'When saving to a new page, you must provide a destinationSlug and/or a destinationState',
+                'detail' => 'When saving to a new page, destinationSlug and destinationState can\'t be empty. They default to the original page\'s slug and live',
             ], 409);
         }
 
@@ -129,13 +132,6 @@ class TranslationController extends AbstractController
             $page = clone $page;
             // Set a temporary revision so the page will validate
             $page->getPageData()->setRevision('ffffffff-ffff-ffff-ffff-ffffffffffff');
-            if ($destinationSlug) {
-                $page->setSlug((string) preg_replace('/[^\w]+/', '-', $slug));
-            }
-
-            if ($destinationState) {
-                $page->setState($destinationState);
-            }
         }
 
         if ($destination === 'original') {
@@ -156,14 +152,24 @@ class TranslationController extends AbstractController
                 'detail' => $e->getMessage(),
             ], 422);
         }
+
+        // Only after importing, which checks the file was exported from the original slug
+        if ($destination === 'new') {
+            $page->setSlug($destinationSlug);
+            $page->setState($destinationState);
+        }
         $groups = $this->getTuiPageSerializerGroups('import_response', ['pageGet']);
-        $pageJson = $this->generateTuiPageJson($page, $serializer, $groups);
 
         // Validate input
-        $errors = $pageSchema->validate($pageJson);
+        $json = $this->generateTuiPageJson($page, $serializer, $groups);
+        $errors = $pageSchema->validate($json);
         if ($errors) {
             return $this->json($errors, 422);
         }
+
+        // Filter input. Importing only changes the content, so that's all that's copied back
+        $filtered = json_decode($sanitizer->cleanPage($json), true, 512, JSON_THROW_ON_ERROR);
+        $page->getPageData()->setContent($filtered['pageData']['content']);
         // Remove the temporary revision
         if ($page->getPageData()->getRevision() === 'ffffffff-ffff-ffff-ffff-ffffffffffff') {
             $page->getPageData()->setRevision(null);
@@ -171,6 +177,6 @@ class TranslationController extends AbstractController
 
         $pageRepository->save($page);
 
-        return new JsonResponse($pageJson, 201, [], true);
+        return $this->generateTuiPageResponse($page, $serializer, $groups, 201);
     }
 }

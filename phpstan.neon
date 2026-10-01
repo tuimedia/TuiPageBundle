@@ -1,6 +1,19 @@
 parameters:
+    level: 6
+    paths:
+        - src
     inferPrivatePropertyTypeFromConstructor: true
-    checkMissingIterableValueType: false
-    checkGenericClassInNonGenericObjectType: false
+    ignoreErrors:
+        - identifier: missingType.iterableValue
+        - identifier: missingType.generics
+        # Migrators are called by name from execute()
+        -
+            identifier: method.unused
+            path: src/Command/UpgradeCommand.php
+        # The command only uses the trait's serialisation helper, not its controller helpers
+        -
+            identifier: method.notFound
+            path: src/Controller/TuiPageResponseTrait.php
     doctrine:
+        objectManagerLoader: phpstan-object-manager.php
         allowNullablePropertyForRequiredField: true

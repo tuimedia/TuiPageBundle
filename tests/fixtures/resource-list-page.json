@@ -1,0 +1,63 @@
+{
+  "id": null,
+  "slug": "annual-reports",
+  "state": "live",
+  "pageData": {
+    "defaultLanguage": "en_GB",
+    "availableLanguages": ["en_GB", "fr"],
+    "metadata": {"title": "Annual reports"},
+    "content": {
+      "schemaVersion": 2,
+      "layout": ["res1"],
+      "blocks": {
+        "res1": {
+          "id": "res1",
+          "component": "ResourceList",
+          "languages": ["en_GB", "fr"],
+          "variant": "grid",
+          "columns": 3,
+          "featured": true,
+          "rating": 4.5,
+          "trackingCode": "<b>untouched</b>"
+        }
+      },
+      "langData": {
+        "en_GB": {
+          "res1": {
+            "title": "Annual <b>reports</b>",
+            "intro": "<p>Read <a href=\"https://example.com/about\" onclick=\"steal()\">about us</a> first.</p><script>alert(1)</script>",
+            "strapline": "download <em>now</em>",
+            "subtitle": null,
+            "cta": {"label": "Get <b>them all</b>", "url": "https://example.com/all.zip", "newWindow": true},
+            "image": {"src": "/images/chart.png", "alt": "Bar <b>chart</b>"},
+            "tags": ["<b>finance</b>", "2025"],
+            "resources": [
+              {
+                "title": "Report <i>2025</i>",
+                "description": "<p>The full <strong>year</strong>.</p><img src=\"x\" onerror=\"alert(1)\">",
+                "fileSize": 1048576,
+                "link": {"label": "PDF <b>download</b>", "url": "https://example.com/2025.pdf"}
+              },
+              {
+                "title": "Report 2024",
+                "description": "<p>Last year.</p>",
+                "fileSize": 524288,
+                "link": {"url": "https://example.com/2024.pdf"}
+              }
+            ],
+            "labels": {
+              "downloadLabel": "Download <b>file</b>",
+              "sizeLabel": "Size <b>on disk</b>"
+            }
+          }
+        },
+        "fr": {
+          "res1": {
+            "title": "Rapports <b>annuels</b>",
+            "subtitle": "<i>Sous</i>-titre"
+          }
+        }
+      }
+    }
+  }
+}

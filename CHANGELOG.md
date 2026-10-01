@@ -1,5 +1,46 @@
 # Changes
 
+## 0.12.0
+
+Read [UPGRADE-0.12.md](UPGRADE-0.12.md) before upgrading: there's a data conversion to run before your migrations.
+
+### BREAKING
+
+- Minimum PHP version is now 8.3. PHP 8.1 reached end of life on 31 December 2025, and 8.2 does on 31 December 2026.
+- Supports Symfony 6.4, 7.x and 8.x. Symfony 5.4 is no longer supported.
+- Supports Doctrine ORM 2.20+ and 3.x, DBAL 3.8+ and 4.x, and DoctrineBundle 2.12+ and 3.x. DBAL 2 is no longer supported.
+- `PageData::$availableLanguages` is now stored as JSON instead of with Doctrine's `array` type (removed in DBAL 4). Existing rows must be converted with `pages:convert-available-languages` before running the schema migration.
+- `doctrine/doctrine-bundle`, `symfony/yaml`, `psr/http-client` and the Symfony components the bundle uses directly are now declared requirements.
+- Requires `opis/json-schema` ^2.6 (0.11 allowed 1.x), and `voku/anti-xss` ^4.1.43. If your app requires `opis/json-schema` ^1 itself, it needs to move to 2 as well.
+- `PageSchema::getSchemaObjectForBlock()` now returns the decoded schema as a plain `object`, as opis 2 has no `Schema::fromJsonString()`. `getSchemaForBlock()` is unchanged.
+- The `access_roles` defaults now apply when the block is left out of your config, and `history` defaults to `[ROLE_ADMIN]` as documented. Before, leaving the block out meant no role checks at all, and `history` was open unless you set it. Writes and history now need `ROLE_ADMIN` (and SecurityBundle) unless you configure otherwise. See the upgrade guide to keep the old behaviour.
+
+### ADDED
+
+- `pages:convert-available-languages` command, which rewrites stored `availableLanguages` values from PHP-serialised arrays to JSON. Supports `--dry-run` and is safe to run more than once.
+
+### FIXED
+
+- PHP 8.4 and 8.5 deprecations, including every use of the deprecated `FILTER_SANITIZE_STRING` filter.
+- Symfony 7 and 8 deprecations: uses the `Attribute` namespaces for `Route` and `Groups`, and `AutowireIterator` instead of `TaggedIterator`.
+- Saving a page failed when search was disabled (no `search_hosts`), because the Typesense client was built with no nodes. The client is now created on first use.
+- Leaving `valid_languages` unset rejected every language on translation export and import. An empty list now allows all languages, as documented.
+- Leaving `serializer_groups` or `search_api_key` out of the config raised "Undefined array key" warnings on every container build.
+- `PageDataRepository::getAllLanguages()` no longer uses `SELECT DISTINCT` on a JSON column, which PostgreSQL can't compare.
+- The translation import endpoint (`PUT /translations/{slug}`) returned the temporary placeholder revision `ffffffff-ffff-ffff-ffff-ffffffffffff` in its response. It now returns the saved page, with its real revision.
+- Importing a translation into a new page (`destination=new`) ignored `destinationSlug` and kept the original slug, while the duplicate-page check looked at the requested one. Asking for a new slug in the same state failed on the database's unique constraint. The new page now gets the requested slug, and the check tests it.
+- In a component schema with `patternProperties`, only the first matching property was sanitised. The sanitiser reused the schema variable as its loop variable, so every later property in that object was checked against the wrong schema and usually left as it was.
+- Properties with `"type": "number"` were saved as strings (`4.5` became `"4.5"`). They now stay numbers.
+- Validation errors for a component lost their 'Component … in language …' prefix, so a failure in a translation didn't say which language it was in.
+- Translation imports weren't sanitised. Imported text was validated against the schemas and saved as it was, and validation treats `text/html` as plain text, so a translator's `<script>` went straight into the page. Imports now go through the same sanitiser as page create and edit.
+- Removed the `doctrine.event_subscriber` tag on `SearchSubscriber`. Its `#[AsDoctrineListener]` attributes already register it.
+
+### CHANGED
+
+- Validation errors keep the same `path`, `keyword` and `keywordArgs` as before the opis 2 upgrade. The one addition: `additionalProperties` errors now list the offending properties in `keywordArgs.properties`.
+- Dev tooling updated to PHPStan 2 (now at level 6) and Rector 2.
+- Added a PHPUnit test suite and a GitHub Actions matrix covering PHP 8.3 to 8.5, Symfony 6.4 to 8, Doctrine ORM 2 and 3, DBAL 3 and 4, and SQLite, PostgreSQL, MySQL and MariaDB. It fails on any deprecation the bundle causes.
+
 ## 0.11.5
 
 ### FIXED

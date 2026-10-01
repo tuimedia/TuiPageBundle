@@ -9,7 +9,7 @@ use Typesense\Client;
 
 class TypesenseClient
 {
-    private readonly Client $typesense;
+    private ?Client $typesense = null;
 
     /** @var TransformerInterface[] */
     private array $transformers = [];
@@ -17,27 +17,29 @@ class TypesenseClient
     public function __construct(
         private readonly LoggerInterface $log,
         private readonly string $indexPrefix,
-        string $typesenseApiKey,
-        array $searchHosts,
+        private readonly ?string $typesenseApiKey,
+        private readonly array $searchHosts,
         ?array $componentTransformers = null,
     ) {
         if ($componentTransformers) {
             $this->transformers = $componentTransformers;
         }
-        $this->typesense = new Client([
-            'api_key' => $typesenseApiKey,
-            'nodes' => $this->formatHosts($searchHosts),
-            'client' => new HttplugClient(),
-        ]);
     }
 
     /**
      * Expose the client for those who want to use features in the Typesense SDK that are not
      * supported by this specific wrapper e.g. creating specific collections
+     *
+     * The client is built on first use, so an app with search disabled (no search hosts) never
+     * constructs one.
      */
     public function getClient(): Client
     {
-        return $this->typesense;
+        return $this->typesense ??= new Client([
+            'api_key' => (string) $this->typesenseApiKey,
+            'nodes' => $this->formatHosts($this->searchHosts),
+            'client' => new HttplugClient(),
+        ]);
     }
 
     private function formatHosts(array $searchHosts): array
@@ -80,7 +82,7 @@ class TypesenseClient
             return null;
         }
 
-        return $this->typesense->collections[$collection]->documents->search($queryMerged);
+        return $this->getClient()->collections[$collection]->documents->search($queryMerged);
     }
 
     public function setTransformers(array $componentTransformers): void
@@ -98,12 +100,12 @@ class TypesenseClient
 
     public function listCollections(): array
     {
-        return $this->typesense->collections->retrieve();
+        return $this->getClient()->collections->retrieve();
     }
 
     public function deleteCollection(string $name): array
     {
-        return $this->typesense->collections[$name]->delete();
+        return $this->getClient()->collections[$name]->delete();
     }
 
     public function createCollection(string $name): array
@@ -126,22 +128,22 @@ class TypesenseClient
         }
 
         // Send it
-        return $this->typesense->collections->create($config);
+        return $this->getClient()->collections->create($config);
     }
 
     public function upsertDocument(string $collection, array $doc): array
     {
-        return $this->typesense->collections[$collection]->documents->upsert($doc);
+        return $this->getClient()->collections[$collection]->documents->upsert($doc);
     }
 
     public function deleteDocument(string $collection, string $id): array
     {
-        return $this->typesense->collections[$collection]->documents[$id]->delete();
+        return $this->getClient()->collections[$collection]->documents[$id]->delete();
     }
 
     public function bulkImport(string $collection, array $docs): array
     {
-        $result = $this->typesense->collections[$collection]->documents->import($docs, [
+        $result = $this->getClient()->collections[$collection]->documents->import($docs, [
             'action' => 'upsert',
         ]);
 

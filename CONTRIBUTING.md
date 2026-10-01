@@ -39,14 +39,57 @@ straight off them. To cut one:
 The mirror workflow carries the tag over to Bitbucket, so consumers on either
 URL pick it up.
 
-## Before you push
-
-There are no automated checks yet, so run the tooling yourself:
+## Tests
 
 ```sh
 composer install
-vendor/bin/phpstan analyse src
-vendor/bin/rector process --dry-run
+composer test
+```
+
+That runs the whole suite on SQLite. The search tests skip themselves unless there's a
+Typesense server to talk to, so start one first if you're touching anything search-related:
+
+```sh
+docker run -d --name typesense -p 8108:8108 typesense/typesense:29.0 --data-dir /tmp --api-key=tui-page-test
+TYPESENSE_URL=http://127.0.0.1:8108 composer test
+```
+
+To run against a real database instead of SQLite, point `DATABASE_URL` at it. Anything
+Doctrine accepts works; the test database is dropped and recreated for every test, so
+don't point it at anything you care about:
+
+```sh
+docker run -d --name postgres -e POSTGRES_PASSWORD=pw -e POSTGRES_DB=app -p 5432:5432 postgres:17-alpine
+DATABASE_URL="postgresql://postgres:pw@127.0.0.1:5432/app?serverVersion=17&charset=utf8" composer test
+```
+
+The suite fails on any deprecation the bundle causes, whether it's raised in `src/` or
+in a library the bundle called. Deprecations libraries raise among themselves are
+ignored. If a test fails with a deprecation, the report names the file and line.
+
+The test app lives in `tests/App`: a small kernel, entities that extend the bundle's
+(with an extra `tagData` property, as real apps tend to have), a search transformer and
+custom sanitisers. `schemas/ResourceList.schema.json` is a realistic component schema
+that goes down every validator and sanitiser path (`CustomSchemaTest`), so extend it
+when you teach the sanitiser something new. `Quote.schema.json` deliberately reuses the `Text` schema's `$id`, the way a copied schema often does. Every endpoint is open unless a test boots it with
+`default_access_roles`, which uses the bundle's defaults and two HTTP basic users,
+`admin` and `editor` (password `pw`). Pass `as: 'admin'` to `request()` to authenticate.
+Fixtures are in `tests/fixtures`. `extended-page.json` is a real
+page with its text swapped for lorem ipsum, and `extended-page.response.json` is what
+0.11.5 returned for it, so the API output can be checked byte for byte.
+
+CI (`.github/workflows/tests.yml`) runs the suite across PHP 8.3 to 8.5, Symfony 6.4, 7.4
+and 8, Doctrine ORM 2 and 3, DBAL 3 and 4, SQLite, PostgreSQL, MySQL and MariaDB, and with
+every direct dependency at its lowest allowed version.
+
+## Before you push
+
+CI runs all of this, but it's quicker to catch things locally:
+
+```sh
+composer test
+composer phpstan
+composer rector
 ```
 
 `php-cs-fixer` isn't a dev dependency — the repo just ships the config. Run it
